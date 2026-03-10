@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@layer base {
+  :root {
+    --background: 240 33% 3%;
+    --foreground: 240 12% 92%;
+    --card: 240 24% 7%;
+    --card-foreground: 240 12% 92%;
+    --popover: 240 24% 7%;
+    --popover-foreground: 240 12% 92%;
+    --primary: 263 90% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 24% 10%;
+    --secondary-foreground: 240 12% 92%;
+    --muted: 240 21% 13%;
+    --muted-foreground: 240 13% 57%;
+    --accent: 240 17% 19%;
+    --accent-foreground: 240 12% 92%;
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 24% 15%;
+    --input: 240 24% 15%;
+    --ring: 263 90% 66%;
+    --radius: 0.75rem;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+}
+
+/* Scrollbar hiding for tab overflow */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Loading pulse */
+@keyframes aiPulse { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+.ai-loading { animation: aiPulse 1s ease-in-out infinite; }
+
+/* Writing mode for vertical labels */
+.writing-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
