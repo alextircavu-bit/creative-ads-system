@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import type { TopCreativesData, AdSection, DeliveryMode } from "@/types/creative";
 import {
-  calculateSectionTiming,
   calculateAdDuration,
   suggestDeliveryMode,
   DELIVERY_MODE_META,
@@ -15,7 +14,6 @@ interface TopCreativesTabProps {
   productName: string;
 }
 
-// Color maps for delivery mode badges
 const MODE_COLORS: Record<string, string> = {
   "text-overlay": "bg-amber-500/10 text-amber-400 border-amber-500/15",
   "voiceover": "bg-blue-500/10 text-blue-400 border-blue-500/15",
@@ -25,30 +23,11 @@ const MODE_COLORS: Record<string, string> = {
 
 function getDeliveryMode(section: AdSection, sectionType: "hook" | "body" | "cta"): DeliveryMode {
   if (section.deliveryMode) return section.deliveryMode;
-  // Fallback: auto-detect from word count
   const wordCount = section.text.trim().split(/\s+/).length;
   return suggestDeliveryMode(wordCount, sectionType);
 }
 
-function TimingBar({ timing }: { timing: SectionTiming }) {
-  const meta = DELIVERY_MODE_META[timing.deliveryMode];
-  return (
-    <div className="flex items-center gap-2 mt-2">
-      <div className="flex-1 h-1 rounded-full bg-white/[0.06] overflow-hidden">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-violet-500/60 to-purple-500/60 transition-all"
-          style={{ width: `${Math.min(100, (timing.recommendedSec / 20) * 100)}%` }}
-        />
-      </div>
-      <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">
-        {timing.recommendedSec}s
-      </span>
-    </div>
-  );
-}
-
 export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
-  // Pre-calculate all timings
   const creativesWithTiming = useMemo(() => {
     return data.creatives.map((creative) => {
       const hookMode = getDeliveryMode(creative.hook, "hook");
@@ -61,18 +40,13 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
         { text: creative.cta.text, deliveryMode: ctaMode },
       );
 
-      return {
-        creative,
-        hookMode,
-        bodyMode,
-        ctaMode,
-        duration,
-      };
+      return { creative, hookMode, bodyMode, ctaMode, duration };
     });
   }, [data.creatives]);
 
   return (
     <div className="mb-10">
+      {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/20 flex items-center justify-center text-lg shrink-0">
           🎬
@@ -80,7 +54,7 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
         <div>
           <div className="text-lg font-black tracking-tight">Top 5 Ad Creatives</div>
           <div className="text-xs text-muted-foreground mt-0.5">
-            Complete ad blueprints for <strong className="text-foreground">{productName}</strong> - ready for production
+            Ad blueprints for <strong className="text-foreground">{productName}</strong>
           </div>
         </div>
       </div>
@@ -89,142 +63,116 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
         {creativesWithTiming.map(({ creative, hookMode, bodyMode, ctaMode, duration }) => (
           <div key={creative.rank} className="relative">
             {/* Creative header */}
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-500/20 flex items-center justify-center text-sm font-black text-violet-300 shrink-0">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center text-xs font-black text-violet-300 shrink-0">
                 {creative.rank}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-1.5">
-                  <div className="text-base font-extrabold truncate">&quot;{creative.name}&quot;</div>
-                  {/* Total ad duration badge */}
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-white/[0.05] text-muted-foreground border border-white/[0.08] shrink-0">
-                    ~{duration.totalFormatted} total
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-extrabold truncate">&quot;{creative.name}&quot;</span>
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white/[0.05] text-muted-foreground/60 border border-white/[0.06] shrink-0">
+                    ~{duration.totalFormatted}
                   </span>
                 </div>
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="flex gap-1 flex-wrap">
                   {creative.templateName && (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
                       {creative.templateName}
                     </span>
                   )}
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-pink-500/10 text-pink-400 border border-pink-500/15">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-pink-500/10 text-pink-400 border border-pink-500/15">
                     {creative.platform}
                   </span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-amber-500/10 text-amber-400 border border-amber-500/15">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/15">
                     {creative.emotion}
                   </span>
-                  {creative.experienceType && (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-cyan-500/10 text-cyan-400 border border-cyan-500/15">
-                      {creative.experienceType}
-                    </span>
-                  )}
-                  {creative.targetSegment && (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-green-500/10 text-green-400 border border-green-500/15">
-                      {creative.targetSegment}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
 
-            {/* Template rationale */}
-            {creative.whyThisTemplate && (
-              <div className="text-[11px] text-muted-foreground/70 mb-4 px-3 py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
-                <span className="font-bold text-emerald-400/60">Template: </span>{creative.whyThisTemplate}
+            {/* Scenario - single line */}
+            {creative.scenario && (
+              <div className="text-[11px] text-muted-foreground/50 mb-3 pl-10">
+                {creative.scenario}
               </div>
             )}
 
-            {/* Scenario + Production */}
-            {(creative.scenario || creative.productionStyle) && (
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                {creative.scenario && (
-                  <div className="bg-rose-500/5 border border-rose-500/10 rounded-xl p-2.5">
-                    <div className="text-[9px] uppercase tracking-widest font-bold text-rose-400/60 mb-0.5">Scenario</div>
-                    <div className="text-[11px] text-muted-foreground leading-relaxed">{creative.scenario}</div>
-                  </div>
-                )}
-                {creative.productionStyle && (
-                  <div className="bg-violet-500/5 border border-violet-500/10 rounded-xl p-2.5">
-                    <div className="text-[9px] uppercase tracking-widest font-bold text-violet-400/60 mb-0.5">Production Style</div>
-                    <div className="text-[11px] text-muted-foreground leading-relaxed">{creative.productionStyle}</div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Glass panels - Hook / Body / CTA horizontal */}
-            <div className="grid grid-cols-3 gap-3">
-              {([
-                { label: "Hook", data: creative.hook, mode: hookMode, timing: duration.hookTiming, accent: "from-rose-500/40 to-pink-500/40", textColor: "text-rose-300", borderColor: "border-rose-500/20", showUpload: false },
-                { label: "Body", data: creative.body, mode: bodyMode, timing: duration.bodyTiming, accent: "from-amber-500/40 to-orange-500/40", textColor: "text-amber-300", borderColor: "border-amber-500/20", showUpload: true },
-                { label: "CTA", data: creative.cta, mode: ctaMode, timing: duration.ctaTiming, accent: "from-emerald-500/40 to-green-500/40", textColor: "text-emerald-300", borderColor: "border-emerald-500/20", showUpload: false },
-              ] as const).map((panel) => {
-                const modeMeta = DELIVERY_MODE_META[panel.mode];
-                const modeColorClass = MODE_COLORS[panel.mode] || MODE_COLORS["voiceover"];
-
+            {/* Hook + Body panels side by side */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* HOOK panel */}
+              {(() => {
+                const modeMeta = DELIVERY_MODE_META[hookMode];
+                const modeColor = MODE_COLORS[hookMode] || MODE_COLORS["voiceover"];
+                const t = duration.hookTiming;
                 return (
-                  <div
-                    key={panel.label}
-                    className={`relative group rounded-2xl border ${panel.borderColor} bg-white/[0.03] backdrop-blur-md overflow-hidden transition-all hover:bg-white/[0.06] hover:border-violet-500/25`}
-                  >
-                    {/* Top gradient edge */}
-                    <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${panel.accent}`} />
-
-                    {/* Panel content */}
+                  <div className="relative rounded-2xl border border-rose-500/15 bg-white/[0.03] backdrop-blur-md overflow-hidden transition-all hover:bg-white/[0.05]">
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-rose-500/40 to-pink-500/40" />
                     <div className="p-4 flex flex-col h-full">
-                      {/* Label + delivery mode + time */}
                       <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs font-black tracking-widest uppercase ${panel.textColor}`}>
-                          {panel.label}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground/40 font-mono">
-                          {panel.data.time}
-                        </span>
+                        <span className="text-xs font-black tracking-widest uppercase text-rose-300">Hook</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`px-1 py-0.5 rounded text-[8px] font-bold border ${modeColor}`}>{modeMeta.label}</span>
+                          <span className="text-[9px] font-mono text-muted-foreground/30">{t.recommendedSec}s</span>
+                        </div>
                       </div>
-
-                      {/* Delivery mode badge */}
-                      <div className="flex items-center gap-1.5 mb-3">
-                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide border ${modeColorClass}`}>
-                          {modeMeta.label}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground/30">
-                          {panel.timing.wordCount}w / {panel.timing.recommendedSec}s
-                        </span>
-                        {!panel.timing.isAdFriendly && (
-                          <span className="text-[9px] text-red-400/60 font-bold">Grade {panel.timing.gradeLevel}</span>
-                        )}
+                      <div className="text-sm text-foreground/90 leading-relaxed font-medium mt-2 flex-1">
+                        {creative.hook.text}
                       </div>
-
-                      {/* Script text */}
-                      <div className="text-sm text-foreground/90 leading-relaxed font-medium mb-3 flex-1">
-                        {panel.data.text}
+                      <div className="text-[10px] text-muted-foreground/40 leading-relaxed mt-3 pt-2 border-t border-white/[0.04]">
+                        {creative.hook.visual}
                       </div>
-
-                      {/* Visual direction */}
-                      <div className="text-[11px] text-muted-foreground/60 leading-relaxed p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.04]">
-                        <div className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/30 mb-1">Visual</div>
-                        {panel.data.visual}
-                      </div>
-
-                      {/* Timing bar */}
-                      <TimingBar timing={panel.timing} />
-
-                      {/* Upload indicator on Body panel */}
-                      {panel.showUpload && (
-                        <button
-                          type="button"
-                          className="mt-3 w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed border-amber-500/20 bg-amber-500/5 text-amber-400/60 hover:bg-amber-500/10 hover:text-amber-400 hover:border-amber-500/30 transition-all cursor-pointer"
-                        >
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 5v14M5 12h14" />
-                          </svg>
-                          <span className="text-[10px] font-bold tracking-wider uppercase">Upload Experience</span>
-                        </button>
-                      )}
                     </div>
                   </div>
                 );
-              })}
+              })()}
+
+              {/* BODY panel with CTA bar overlay */}
+              {(() => {
+                const modeMeta = DELIVERY_MODE_META[bodyMode];
+                const modeColor = MODE_COLORS[bodyMode] || MODE_COLORS["voiceover"];
+                const ctaModeMeta = DELIVERY_MODE_META[ctaMode];
+                const t = duration.bodyTiming;
+                return (
+                  <div className="relative rounded-2xl border border-amber-500/15 bg-white/[0.03] backdrop-blur-md overflow-hidden transition-all hover:bg-white/[0.05]">
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-500/40 to-orange-500/40" />
+                    <div className="p-4 flex flex-col h-full">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-black tracking-widest uppercase text-amber-300">Body</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`px-1 py-0.5 rounded text-[8px] font-bold border ${modeColor}`}>{modeMeta.label}</span>
+                          <span className="text-[9px] font-mono text-muted-foreground/30">{t.recommendedSec}s</span>
+                        </div>
+                      </div>
+                      <div className="text-sm text-foreground/90 leading-relaxed font-medium mt-2 flex-1">
+                        {creative.body.text}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground/40 leading-relaxed mt-3 pt-2 border-t border-white/[0.04]">
+                        {creative.body.visual}
+                      </div>
+
+                      {/* Upload experience */}
+                      <button
+                        type="button"
+                        className="mt-3 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-dashed border-amber-500/15 bg-amber-500/5 text-amber-400/50 hover:bg-amber-500/10 hover:text-amber-400 transition-all cursor-pointer"
+                      >
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        <span className="text-[9px] font-bold tracking-wider uppercase">Upload Experience</span>
+                      </button>
+
+                      {/* CTA overlay bar - like a Premiere Pro text layer */}
+                      <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/8 border border-emerald-500/15 relative">
+                        {/* Left accent strip */}
+                        <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg bg-emerald-500/50" />
+                        <span className="text-[8px] font-black tracking-[2px] uppercase text-emerald-400/50 shrink-0 pl-1">CTA</span>
+                        <span className="text-[11px] text-emerald-300/80 font-semibold flex-1 truncate">{creative.cta.text}</span>
+                        <span className="text-[8px] font-mono text-muted-foreground/25 shrink-0">{duration.ctaTiming.recommendedSec}s</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         ))}
