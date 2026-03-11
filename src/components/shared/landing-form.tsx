@@ -78,11 +78,6 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
   const loadFromHistory = (project: { product_name: string; product_description: string }) => {
     setProductName(project.product_name);
     setProductBenefit(project.product_description);
-    onSubmit({
-      scenario,
-      productName: project.product_name,
-      productDescription: project.product_description,
-    });
   };
 
   // Deduplicate history — only show unique name+description combos

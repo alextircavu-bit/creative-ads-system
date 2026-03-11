@@ -32,7 +32,7 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
               #{creative.rank}
             </div>
             <div className="text-base font-extrabold mb-1.5">&quot;{creative.name}&quot;</div>
-            <div className="flex gap-1.5 flex-wrap mb-4">
+            <div className="flex gap-1.5 flex-wrap mb-3">
               <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide bg-pink-500/10 text-pink-400 border border-pink-500/15">
                 {creative.platform}
               </span>
@@ -42,7 +42,35 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
               <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide bg-amber-500/10 text-amber-400 border border-amber-500/15">
                 {creative.emotion}
               </span>
+              {creative.experienceType && (
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide bg-cyan-500/10 text-cyan-400 border border-cyan-500/15">
+                  {creative.experienceType}
+                </span>
+              )}
+              {creative.targetSegment && (
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide bg-green-500/10 text-green-400 border border-green-500/15">
+                  {creative.targetSegment}
+                </span>
+              )}
             </div>
+
+            {/* Scenario + Production */}
+            {(creative.scenario || creative.productionStyle) && (
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {creative.scenario && (
+                  <div className="bg-rose-500/5 border border-rose-500/10 rounded-xl p-3">
+                    <div className="text-[9px] uppercase tracking-widest font-bold text-rose-400/60 mb-1">Scenario</div>
+                    <div className="text-xs text-muted-foreground leading-relaxed">{creative.scenario}</div>
+                  </div>
+                )}
+                {creative.productionStyle && (
+                  <div className="bg-violet-500/5 border border-violet-500/10 rounded-xl p-3">
+                    <div className="text-[9px] uppercase tracking-widest font-bold text-violet-400/60 mb-1">Production Style</div>
+                    <div className="text-xs text-muted-foreground leading-relaxed">{creative.productionStyle}</div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {[
               { label: "HOOK", data: creative.hook, color: "#f43f5e", gradient: "from-rose-500 to-red-500" },

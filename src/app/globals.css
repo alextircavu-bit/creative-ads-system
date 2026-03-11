@@ -5,7 +5,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
-  :root {
+  /* Dark (default) */
+  :root, [data-theme="dark"] {
     --background: 240 33% 3%;
     --foreground: 240 12% 92%;
     --card: 240 24% 7%;
@@ -26,6 +27,55 @@
     --input: 240 24% 15%;
     --ring: 263 90% 66%;
     --radius: 0.75rem;
+    --sidebar: 240 24% 5%;
+  }
+
+  /* Medium (dark gray, less contrast) */
+  [data-theme="medium"] {
+    --background: 225 15% 12%;
+    --foreground: 220 15% 90%;
+    --card: 225 15% 15%;
+    --card-foreground: 220 15% 90%;
+    --popover: 225 15% 15%;
+    --popover-foreground: 220 15% 90%;
+    --primary: 263 90% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 225 15% 18%;
+    --secondary-foreground: 220 15% 90%;
+    --muted: 225 12% 22%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 225 12% 24%;
+    --accent-foreground: 220 15% 90%;
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 225 12% 22%;
+    --input: 225 12% 22%;
+    --ring: 263 90% 66%;
+    --sidebar: 225 15% 10%;
+  }
+
+  /* Light */
+  [data-theme="light"] {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+    --primary: 263 90% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 10% 10%;
+    --muted: 240 5% 92%;
+    --muted-foreground: 240 5% 45%;
+    --accent: 240 5% 90%;
+    --accent-foreground: 240 10% 10%;
+    --destructive: 350 89% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 6% 87%;
+    --input: 240 6% 87%;
+    --ring: 263 90% 55%;
+    --sidebar: 0 0% 96%;
   }
 }
 

@@ -269,11 +269,26 @@ export interface AvatarTrait {
   value: string;
 }
 
+export interface AudienceSegment {
+  name: string;
+  description: string;
+  demographics: string;
+  psychographics: string;
+  predictedROI: "high" | "medium" | "low";
+  acquisitionCost: "low" | "medium" | "high";
+  lifetimeValue: "high" | "medium" | "low";
+  conversionLikelihood: number; // 0-100
+  bestAngle: string;
+  adStrategy: string;
+  color: string;
+}
+
 export interface ResearchData {
   shadowAvatarSteps: ShadowAvatarStep[];
   searchQueries: SearchQuery[];
   researchTechniques: ResearchTechnique[];
   avatarTraits: AvatarTrait[];
+  audienceSegments: AudienceSegment[];
   preCreativeChecklist: string[];
 }
 
@@ -300,9 +315,13 @@ export interface AdCreativeBlueprint {
   emotion: string;
   platform: string;
   format: string;
+  scenario: string; // The real-life situation that makes someone NEED this product
+  experienceType: string; // How the user experiences the benefit (in-app, physical, outcome, consumable, utility, etc.)
+  productionStyle: string; // Specific production approach (screen recording, real-world footage, before/after, lifestyle, etc.)
   hook: { time: string; text: string; visual: string };
   body: { time: string; text: string; visual: string };
   cta: { time: string; text: string; visual: string };
+  targetSegment?: string; // Which audience segment this creative targets
 }
 
 export interface TopCreativesData {

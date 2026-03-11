@@ -108,6 +108,72 @@ export function ResearchTab({ data, productName }: ResearchTabProps) {
         </div>
       </div>
 
+      {/* Audience Segments */}
+      {data.audienceSegments && data.audienceSegments.length > 0 && (
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-lg shrink-0">🎯</div>
+            <div>
+              <div className="text-base font-extrabold">Predicted Audience Segments</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Ranked by predicted ROI — test all, double down on winners</div>
+            </div>
+          </div>
+          <div className="text-xs text-muted-foreground/50 leading-relaxed mb-4 px-4 py-2.5 bg-background/50 border border-border/30 rounded-xl">
+            These are <strong className="text-foreground/70">recommendations to validate through ad testing</strong>. Run campaigns against multiple segments, measure conversion/subscription rates, then shift budget toward the highest-performing groups.
+          </div>
+          <div className="space-y-3">
+            {data.audienceSegments.map((seg, i) => {
+              const roiColors = { high: "#22c55e", medium: "#f59e0b", low: "#64748b" };
+              const roiColor = roiColors[seg.predictedROI] || "#64748b";
+              return (
+                <div key={i} className="bg-background/50 border border-border/30 rounded-xl p-4 hover:border-pink-500/20 transition-all" style={{ borderLeft: `3px solid ${seg.color}` }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-extrabold text-white shrink-0" style={{ background: seg.color }}>
+                        {i + 1}
+                      </span>
+                      <span className="text-sm font-bold">{seg.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold border" style={{ color: roiColor, borderColor: roiColor + "30", background: roiColor + "10" }}>
+                        {seg.predictedROI.toUpperCase()} ROI
+                      </span>
+                      <span className="text-xs font-black tabular-nums" style={{ color: seg.color }}>
+                        {seg.conversionLikelihood}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-relaxed mb-3">{seg.description}</div>
+
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="bg-secondary/30 border border-border/20 rounded-lg p-2.5">
+                      <div className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground/30 mb-1">Demographics</div>
+                      <div className="text-[11px] text-muted-foreground leading-relaxed">{seg.demographics}</div>
+                    </div>
+                    <div className="bg-secondary/30 border border-border/20 rounded-lg p-2.5">
+                      <div className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground/30 mb-1">Psychographics</div>
+                      <div className="text-[11px] text-muted-foreground leading-relaxed">{seg.psychographics}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3 mb-2.5 text-[10px] text-muted-foreground/50">
+                    <span>Acquisition: <strong className="text-foreground/60">{seg.acquisitionCost}</strong></span>
+                    <span>Lifetime Value: <strong className="text-foreground/60">{seg.lifetimeValue}</strong></span>
+                  </div>
+
+                  <div className="flex items-start gap-2 bg-secondary/20 border border-border/15 rounded-lg p-2.5">
+                    <span className="text-[10px] shrink-0 mt-0.5">💡</span>
+                    <div className="text-[11px] text-muted-foreground leading-relaxed">
+                      <strong className="text-foreground/70">Best angle:</strong> {seg.bestAngle} — <span className="text-muted-foreground/60">{seg.adStrategy}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Pre-Creative Checklist */}
       <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-4">

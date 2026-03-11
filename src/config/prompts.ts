@@ -386,7 +386,24 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
   "avatarTraits": [
     For EACH trait label (${AVATAR_TRAIT_LABELS.join(", ")}), generate:
     - "label": the trait label
-    - "value": "PERSONALIZE: specific value for ${input.productName}'s ideal customer"
+    - "value": "PERSONALIZE: specific value for ${input.productName}'s broadest ideal customer base"
+  ],
+
+  "audienceSegments": [
+    Generate 4-6 distinct audience segments ranked by PREDICTED ROI for ${input.productName}. These are NOT fixed — they're recommendations to test. The business owner runs ads against multiple segments, measures which convert/subscribe/buy, then doubles down on winners. Each segment:
+    - "name": short segment name (e.g. "Guilt-Driven Scrollers", "Aspirational Parents", "Productivity Seekers")
+    - "description": 1-2 sentences on who they are and WHY they'd convert
+    - "demographics": age, gender, location patterns
+    - "psychographics": values, fears, desires, habits
+    - "predictedROI": "high" | "medium" | "low" — based on buying power × conversion likelihood × lifetime value
+    - "acquisitionCost": "low" | "medium" | "high" — how expensive to reach them
+    - "lifetimeValue": "high" | "medium" | "low" — how much revenue over time
+    - "conversionLikelihood": 0-100 — probability they convert on first exposure
+    - "bestAngle": which emotional angle or hook will hit this segment hardest
+    - "adStrategy": specific ad approach for THIS segment
+    - "color": hex color for UI display
+
+    RANK them: highest predicted ROI first. Include at least one high-volume/low-cost segment and one high-value/premium segment. These are PREDICTIONS to be validated through ad testing.
   ],
 
   "preCreativeChecklist": ["10 checklist items specific to ${input.productName} that must be verified before creating ads"]
@@ -437,8 +454,11 @@ Closing Techniques: ${salesData.closingTechniques.map((t) => t.name).join(", ")}
   }
 
   if (researchData) {
+    const segmentContext = researchData.audienceSegments?.length
+      ? `\nAudience Segments (ranked by predicted ROI):\n${researchData.audienceSegments.map((s, i) => `${i + 1}. ${s.name} (${s.demographics}) — ${s.predictedROI} ROI, ${s.conversionLikelihood}% conversion, best angle: ${s.bestAngle}`).join("\n")}`
+      : "";
     contextParts.push(`=== RESEARCH DATA ===
-Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}
+Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}${segmentContext}
 Key Insights: ${researchData.shadowAvatarSteps.map((s) => s.description).join(" → ")}
 Pre-Creative Checklist: ${researchData.preCreativeChecklist.slice(0, 5).join("; ")}`);
   }
@@ -541,14 +561,32 @@ export function topCreativesPrompt(
     contextParts.push(`Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}`);
   }
 
-  return `You are a senior creative director at a top performance marketing agency. Create 5 complete ad blueprints that are the BEST possible ads based on the full analysis below.
+  const segmentContext = researchData?.audienceSegments?.length
+    ? `\nTarget Audience Segments (ranked by predicted ROI):\n${researchData.audienceSegments.slice(0, 4).map((s, i) => `${i + 1}. ${s.name} — ${s.demographics} | ${s.predictedROI} ROI | Best angle: ${s.bestAngle}`).join("\n")}`
+    : "";
+
+  return `You are a senior creative director. Create 5 complete ad blueprints for ${input.productName}.
 
 ${buildContext(input)}
 
-${contextParts.length > 0 ? `=== FULL ANALYSIS CONTEXT ===\n${contextParts.join("\n")}\n` : ""}
+${contextParts.length > 0 ? `=== FULL ANALYSIS CONTEXT ===\n${contextParts.join("\n")}\n` : ""}${segmentContext}
 
 Available Platforms & Formats:
 ${JSON.stringify(PLATFORM_FORMATS, null, 2)}
+
+=== CORE CREATIVE PHILOSOPHY ===
+
+Every product exists because it either GIVES something people want (benefit) or REMOVES something they don't want (problem solver). Your job is to create the SCENARIO — the real-life moment where someone feels that need — and show the product as the bridge to resolution.
+
+STEP 1: Determine how the user EXPERIENCES the benefit of ${input.productName}:
+- If the experience is IN-APP (apps, software, digital tools) → the ad body should be a screen recording or demo of the actual experience. The product IS the ad.
+- If the experience is PHYSICAL/TANGIBLE (products you hold, wear, consume) → show it in a real-world scenario. Dramatic visual of the function/benefit in action.
+- If the experience is an OUTCOME/TRANSFORMATION (courses, coaching, services) → NEVER show the product directly. Sell the result. Imply the value. Hormozi formula.
+- If the experience is CONSUMABLE (food, drinks, supplements) → show current bad reality → product moment → desired reality. Taste/design are ornaments, not the sell.
+- If the experience is UTILITY/PROTECTION (tools, security, insurance) → fear/pain hook → showcase functionality → emphasize peace of mind and clear benefits.
+- If none of these fit exactly, think: what scenario makes someone NEED this? The ad recreates THAT moment.
+
+STEP 2: For each creative, imagine a SPECIFIC SCENARIO where someone desperately needs ${input.productName}. The ad puts the viewer INTO that situation. The hook makes them feel the problem/desire. The body shows resolution through the product (in the format that matches its experience type). The CTA makes not acting feel like a loss.
 
 Generate a JSON object:
 {
@@ -556,23 +594,28 @@ Generate a JSON object:
     {
       "rank": 1-5,
       "name": "creative concept name",
-      "emotion": "primary emotional angle from the framework",
+      "emotion": "primary emotional angle",
       "platform": "TikTok|Meta/IG|YouTube|Snapchat",
       "format": "specific format from the platform list above",
-      "hook": { "time": "0-3s", "text": "exact spoken/text copy", "visual": "detailed visual direction" },
-      "body": { "time": "3-15s", "text": "exact spoken/text copy", "visual": "detailed visual direction" },
-      "cta": { "time": "15-20s", "text": "exact CTA copy", "visual": "detailed visual direction" }
+      "scenario": "The specific real-life situation this ad recreates — the moment where the need for ${input.productName} is undeniable (1-2 sentences)",
+      "experienceType": "How the user experiences the benefit (e.g. 'in-app', 'physical', 'outcome', 'consumable', 'utility')",
+      "productionStyle": "Exact production approach (e.g. 'Screen recording of app + voiceover', 'Real-world POV footage', 'Before/after split screen', 'UGC talking head + B-roll', 'Lifestyle montage with product close-ups')",
+      "hook": { "time": "0-3s", "text": "exact spoken/text copy that recreates the problem or desire", "visual": "detailed visual — what the viewer SEES that puts them in the scenario" },
+      "body": { "time": "3-15s", "text": "exact spoken/text copy showing the resolution through the product", "visual": "detailed visual — must match the experience type (screen recording for apps, real footage for physical, etc.)" },
+      "cta": { "time": "15-20s", "text": "exact CTA that makes NOT acting feel like a loss", "visual": "detailed visual direction" },
+      "targetSegment": "Which audience segment this is designed for (from the analysis above, if available)"
     }
   ]
 }
 
 CRITICAL:
-1. Each creative uses a DIFFERENT emotional angle and platform
-2. Copy must stack the strongest biases and Cialdini weapons from the analysis
-3. Copy is word-for-word ready for a video editor
-4. Visual directions are detailed enough for someone who has never seen the product
-5. Each creative feels native to its platform
-6. Return ONLY valid JSON. No markdown, no code fences.`;
+1. Each creative recreates a DIFFERENT scenario/situation where someone needs ${input.productName}
+2. The body visuals MUST match the experience type — screen recording for apps, real-world footage for physical products, implied outcomes for courses, etc.
+3. Production style must be specific enough that a video editor knows exactly what to film/record
+4. Stack the strongest biases and Cialdini weapons from the analysis into the copy
+5. Each creative should target a different audience segment where possible
+6. Copy is word-for-word ready for production. Visual directions assume the editor has never seen the product.
+7. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================

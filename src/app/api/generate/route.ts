@@ -20,6 +20,15 @@ const SECTION_TOKENS: Record<Exclude<Section, "all">, number> = {
   topCreatives: 5000,
 };
 
+function repairJSON(raw: string): string {
+  let s = raw.trim();
+  // Strip markdown code fences if present
+  s = s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  // Remove trailing commas before } or ]
+  s = s.replace(/,\s*([}\]])/g, "$1");
+  return s;
+}
+
 async function callClaude(prompt: string, maxTokens: number): Promise<unknown> {
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
@@ -28,7 +37,7 @@ async function callClaude(prompt: string, maxTokens: number): Promise<unknown> {
       { role: "user", content: prompt },
     ],
     system: "You are an expert ad creative strategist and behavioral psychologist. You return ONLY valid JSON with no markdown formatting, no code fences, no explanation. Just raw JSON.",
-    temperature: 0.7,
+    temperature: 0.4,
   });
 
   const block = message.content[0];
@@ -36,7 +45,8 @@ async function callClaude(prompt: string, maxTokens: number): Promise<unknown> {
   const text = block.text;
   if (!text) throw new Error("Empty response from Claude");
 
-  return JSON.parse(text);
+  const repaired = repairJSON(text);
+  return JSON.parse(repaired);
 }
 
 export async function POST(request: NextRequest) {
