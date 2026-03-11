@@ -404,26 +404,33 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
   ],
 
   "audienceSegments": [
-    Generate 4-6 distinct audience segments. These are a HIERARCHY of predicted impact - ranked from most likely to convert to least. They are HYPOTHESES to test, not facts.
+    Generate 5 audience segments as a HIERARCHY from broadest/most obvious to narrowest/most niche.
 
-    IMPORTANT: Each segment must come from a DIFFERENT expanded benefit thread. Don't just split demographics - split by WHY they want the product and what daily scenario triggers that want.
+    START WITH THE OBVIOUS. Ask yourself: what is the #1 most common reason a normal person downloads/buys this product? That's segment 1. It should be the largest, most universal audience. Do NOT skip the obvious to sound clever.
 
-    For ${input.productName}, think: what are the completely different life situations where someone would need this? Each situation = a segment. Each segment has a different hook that stops THEIR scroll.
+    HIERARCHY ORDER (you MUST follow this structure):
+    1. THE OBVIOUS ONE - the biggest, most common reason anyone would want this. The segment that makes you say "duh, obviously." Highest volume, easiest to target. (e.g., for a calorie app = people trying to lose weight)
+    2. THE SECOND BIGGEST - the next most common use case. Still large, slightly more specific. (e.g., gym/fitness people tracking macros)
+    3. THE LIFESTYLE SEGMENT - a medium-sized group defined by a life situation, not just interest. (e.g., busy parents trying to feed their family better)
+    4. THE HIGH-VALUE NICHE - smaller audience but high intent and willingness to pay. (e.g., athletes, competitors, people with medical dietary needs)
+    5. THE UNEXPECTED ANGLE - a segment most advertisers miss. Smaller but could be a goldmine if it hits. This is where creativity matters. (e.g., people with social anxiety about eating out)
+
+    For ${input.productName}, ground each segment in REAL daily moments. When in their day does the need arise? What are they doing right before they'd want this?
 
     Each segment:
-    - "name": short, descriptive name reflecting their motivation (NOT demographics)
-    - "description": 1-2 sentences: who they are, what moment in their day triggers the need, and why they'd convert
+    - "name": short name reflecting their MOTIVATION, not demographics. Keep it simple and real - not overly creative names.
+    - "description": 1-2 sentences: who they are and the daily moment that triggers need. Start with "Recommended #[rank] -"
     - "demographics": age, gender, location patterns
     - "psychographics": values, fears, desires, daily habits
     - "predictedROI": "high" | "medium" | "low"
     - "acquisitionCost": "low" | "medium" | "high"
     - "lifetimeValue": "high" | "medium" | "low"
     - "conversionLikelihood": 0-100
-    - "bestAngle": the specific hook angle that would stop THIS person's scroll. Not a category - an actual hook direction.
-    - "adStrategy": how to reach and convert THIS segment specifically
+    - "bestAngle": the specific hook angle for THIS segment. Not a category - a real hook direction.
+    - "adStrategy": how to reach and convert THIS segment
     - "color": hex color for UI
 
-    Label as "Recommended #1", "Recommended #2" etc. in the description - NOT "best". These are predictions to validate through testing.
+    These are HYPOTHESES to validate through ad testing. Rank 1 gets tested first because it has the highest predicted volume and conversion.
   ],
 
   "preCreativeChecklist": ["10 checklist items specific to ${input.productName} that must be verified before creating ads"]
