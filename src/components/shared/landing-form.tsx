@@ -90,24 +90,11 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
       setProductName(p.appName);
       setFeatureName(p.featureName);
       setProductBenefit(p.benefit);
-      onSubmit({
-        scenario,
-        productName: p.appName,
-        featureName: p.featureName,
-        appId: toSlug(p.appName),
-        featureId: toSlug(p.featureName),
-        productDescription: p.benefit,
-      });
     } else {
       const p = V4_PRESETS[key];
       if (!p) return;
       setProductName(p.name);
       setProductBenefit(p.benefit);
-      onSubmit({
-        scenario,
-        productName: p.name,
-        productDescription: p.benefit,
-      });
     }
   };
 
