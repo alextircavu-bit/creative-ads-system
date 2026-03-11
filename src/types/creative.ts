@@ -12,6 +12,9 @@ export interface ProjectInput {
   productName: string;
   productDescription: string;
   // V3-specific
+  featureName?: string;
+  appId?: string;
+  featureId?: string;
   appFeatures?: string;
   appBenefits?: string;
   appPurpose?: string;

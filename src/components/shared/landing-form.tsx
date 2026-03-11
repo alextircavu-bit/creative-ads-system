@@ -23,21 +23,25 @@ const V4_PRESETS: Record<string, { name: string; benefit: string }> = {
   },
 };
 
-const V3_PRESETS: Record<string, { name: string; benefit: string }> = {
+const V3_PRESETS: Record<string, { appName: string; featureName: string; benefit: string }> = {
   bcReels: {
-    name: "BibleChat Reels",
+    appName: "BibleChat",
+    featureName: "Reels",
     benefit: "Replace doomscrolling with Bible verse reels. Same scroll, same swipe — but every piece of content feeds your soul instead of draining it. Community comments, reactions, and shared faith.",
   },
   bcLock: {
-    name: "Lock Screen Verses",
+    appName: "BibleChat",
+    featureName: "Lock Screen Verses",
     benefit: "A new Bible verse on your lock screen every time you pick up your phone. No app to open, no habit to build — it's just there. Passive spiritual nourishment 50-96 times a day.",
   },
   bcChat: {
-    name: "BibleChat AI",
+    appName: "BibleChat",
+    featureName: "AI Chat",
     benefit: "Ask any question and get answers grounded in Scripture. Like having a pastor in your pocket — available 24/7, no judgment, always biblical.",
   },
   bcQuiz: {
-    name: "Sin Quiz",
+    appName: "BibleChat",
+    featureName: "Sin Quiz",
     benefit: "Discover which deadly sin is secretly running your life. A 60-second quiz that reveals hidden behavioral patterns with Scripture-based insights and a personalized growth plan.",
   },
 };
@@ -48,31 +52,63 @@ interface LandingFormProps {
   isLoading?: boolean;
 }
 
+function toSlug(str: string): string {
+  return str.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
 export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps) {
   const [productName, setProductName] = useState("");
+  const [featureName, setFeatureName] = useState("");
   const [productBenefit, setProductBenefit] = useState("");
   const { projects } = useProjectsByScenario(scenario);
-  const presets = scenario === "v3" ? V3_PRESETS : V4_PRESETS;
+  const isV3 = scenario === "v3";
 
   const handleSubmit = () => {
     if (!productName.trim()) return;
-    onSubmit({
+    if (isV3 && !featureName.trim()) return;
+    const base = {
       scenario,
       productName: productName.trim(),
       productDescription: productBenefit.trim(),
-    });
+    };
+    if (isV3) {
+      onSubmit({
+        ...base,
+        featureName: featureName.trim(),
+        appId: toSlug(productName),
+        featureId: toSlug(featureName),
+      });
+    } else {
+      onSubmit(base);
+    }
   };
 
   const loadPreset = (key: string) => {
-    const p = presets[key];
-    if (!p) return;
-    setProductName(p.name);
-    setProductBenefit(p.benefit);
-    onSubmit({
-      scenario,
-      productName: p.name,
-      productDescription: p.benefit,
-    });
+    if (isV3) {
+      const p = V3_PRESETS[key];
+      if (!p) return;
+      setProductName(p.appName);
+      setFeatureName(p.featureName);
+      setProductBenefit(p.benefit);
+      onSubmit({
+        scenario,
+        productName: p.appName,
+        featureName: p.featureName,
+        appId: toSlug(p.appName),
+        featureId: toSlug(p.featureName),
+        productDescription: p.benefit,
+      });
+    } else {
+      const p = V4_PRESETS[key];
+      if (!p) return;
+      setProductName(p.name);
+      setProductBenefit(p.benefit);
+      onSubmit({
+        scenario,
+        productName: p.name,
+        productDescription: p.benefit,
+      });
+    }
   };
 
   const loadFromHistory = (project: { product_name: string; product_description: string }) => {
@@ -106,43 +142,78 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
 
       {/* Form Card */}
       <div className="w-full max-w-xl bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-xl shadow-black/20">
+        {/* App Name / Product Name */}
         <div className="mb-4">
           <label className="block text-xs font-semibold text-foreground mb-1.5 tracking-wide">
-            Product Name
+            {isV3 ? "App Name" : "Product Name"}
           </label>
           <input
             type="text"
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all"
             placeholder={
-              scenario === "v3"
-                ? "Feature name (e.g. Bible Reels, Lock Screen Verses)"
-                : "Product name (e.g. Nike Air Max, Shopify, Duolingo)"
+              isV3
+                ? "Your app's name (e.g. BibleChat, Duolingo, Notion)"
+                : "Product name (e.g. Nike Air Max, Shopify, HelloFresh)"
             }
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           />
+          {isV3 && productName.trim() && (
+            <p className="mt-1 text-[10px] text-muted-foreground/60">
+              app_id: <span className="font-mono text-violet-400">{toSlug(productName)}</span>
+            </p>
+          )}
         </div>
 
+        {/* Feature Name — V3 only */}
+        {isV3 && (
+          <div className="mb-4">
+            <label className="block text-xs font-semibold text-foreground mb-1.5 tracking-wide">
+              Feature Name
+            </label>
+            <input
+              type="text"
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all"
+              placeholder="The specific feature you're advertising (e.g. Reels, Lock Screen Verses, AI Chat)"
+              value={featureName}
+              onChange={(e) => setFeatureName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            />
+            {featureName.trim() && (
+              <p className="mt-1 text-[10px] text-muted-foreground/60">
+                feature_id: <span className="font-mono text-violet-400">{toSlug(featureName)}</span>
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Context / Core Benefit */}
         <div className="mb-5">
           <label className="block text-xs font-semibold text-foreground mb-1.5 tracking-wide">
-            Core Benefit
+            {isV3 ? "Feature Context" : "Core Benefit"}
           </label>
           <textarea
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all resize-y min-h-[100px]"
-            placeholder="What does this product do for the user? Why would someone buy it?"
+            placeholder={
+              isV3
+                ? "What does this feature do? How does it change the user's experience? What problem does it solve?"
+                : "What does this product do for the user? Why would someone buy it?"
+            }
             value={productBenefit}
             onChange={(e) => setProductBenefit(e.target.value)}
           />
           <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-            This is the most important field. The more specific you are about the benefit, the better your ads will be. Describe what makes it valuable, who it helps, and how it changes their life. This directly shapes every ad, hook, and script that gets generated.
+            {isV3
+              ? "Describe what makes this feature valuable. The more specific you are, the better — this shapes every ad, hook, and script that gets generated."
+              : "This is the most important field. The more specific you are about the benefit, the better your ads will be. Describe what makes it valuable, who it helps, and how it changes their life. This directly shapes every ad, hook, and script that gets generated."}
           </p>
         </div>
 
         <button
           className="w-full rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-bold py-3.5 px-6 text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30"
           onClick={handleSubmit}
-          disabled={isLoading || !productName.trim()}
+          disabled={isLoading || !productName.trim() || (isV3 && !featureName.trim())}
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
@@ -158,13 +229,13 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
       {/* Presets */}
       <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
         <span className="text-[11px] text-muted-foreground font-medium mr-1">Try:</span>
-        {Object.entries(presets).map(([key, preset]) => (
+        {Object.entries(isV3 ? V3_PRESETS : V4_PRESETS).map(([key, preset]) => (
           <button
             key={key}
             className="rounded-lg border border-border bg-card/50 px-3.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-violet-500/30 hover:bg-violet-500/5 transition-all"
             onClick={() => loadPreset(key)}
           >
-            {preset.name}
+            {"appName" in preset ? `${preset.appName} — ${preset.featureName}` : preset.name}
           </button>
         ))}
       </div>
