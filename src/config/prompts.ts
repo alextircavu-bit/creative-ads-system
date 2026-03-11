@@ -615,16 +615,25 @@ Primary: ${EXPERIENCE_TYPE_LABELS[primaryExp].name} (${EXPERIENCE_TYPE_LABELS[pr
 ${templateContext}
 
 === TEXT OVERLAY RULES ===
-- Hook text: 3-8 words MAX. Bold, punchy, scroll-stopping. One idea per hook.
-- Body text: 1-2 short sentences that CONTINUE the hook's promise. Show the user experience with the product that RESOLVES or DELIVERS on what the hook set up. Must make sense as a natural follow-up to any hook variation.
-- CTA: 2-5 words. Action text for a button/overlay.
+
+HOOK = the ATTENTION GRABBER. This is the first thing people see. It must STOP the scroll.
+  - 5-15 words. Can be a question, bold claim, relatable scenario, POV statement, or shocking fact.
+  - Examples of good hooks: "Nobody talks about this side effect of meditation" / "POV: you finally found an app that actually works" / "I was mass unfollowing when I saw this" / "Why is nobody talking about this?"
+  - NOT a headline. NOT a tagline. It's what someone would SAY or THINK that makes you stop scrolling.
+
+BODY = what's HAPPENING ON SCREEN while the product is being shown. Short, descriptive.
+  - 1-2 sentences MAX. Describes the user experience moment with the product.
+  - Examples: "She opens the app, taps the feature, watches her results update in real time." / "Quick scroll through the dashboard, each metric lighting up green."
+  - This is a VISUAL DESCRIPTION of product experience, not a sales pitch.
+
+CTA = button/overlay text. 2-5 words.
 
 === YOUR TASK ===
 
 For each creative, generate:
-- 5-6 HOOK VARIATIONS: each one targets a DIFFERENT emotional angle, bias, pain point, or audience segment from the angle bank above. Vary the psychological lever (fear, desire, curiosity, social proof, urgency, identity).
-- 2-3 BODY VARIATIONS: each describes the product experience from a slightly different angle or user scenario. Keep it short - what's happening on screen visually.
-- 1 CTA: simple call to action text.
+- 5-6 HOOK VARIATIONS: each grabs attention using a DIFFERENT psychological angle from the angle bank. These are the scroll-stopping text overlays people read first. Write them like real social media hooks - conversational, relatable, curiosity-inducing.
+- 2-3 BODY VARIATIONS: each describes a different moment of the user experience with the product. What is visually happening on screen. Short and descriptive, not persuasive.
+- 1 CTA: button text.
 
 JSON format:
 {
@@ -641,12 +650,12 @@ JSON format:
       "experienceType": "${primaryExp}",
       "productionStyle": "production approach",
       "hooks": [
-        { "text": "3-8 word hook", "angle": "what psychological angle this hits (e.g. loss aversion, social proof, curiosity gap)" },
-        { "text": "different hook", "angle": "different angle" }
+        { "text": "scroll-stopping hook (5-15 words)", "angle": "psychological angle (e.g. loss aversion, curiosity gap, identity)" },
+        { "text": "different hook, different angle", "angle": "different angle" }
       ],
       "bodies": [
-        { "text": "short experience description", "visual": "what viewer sees on screen" },
-        { "text": "alternative experience angle", "visual": "alternative visual" }
+        { "text": "short visual description of product experience moment", "visual": "what viewer sees on screen" },
+        { "text": "alternative experience moment", "visual": "alternative visual" }
       ],
       "cta": { "text": "Download Now" },
       "whyThisTemplate": "1 sentence"
@@ -656,10 +665,10 @@ JSON format:
 
 CRITICAL:
 1. Each creative: 5-6 hook variations, 2-3 body variations, 1 CTA
-2. Hook variations MUST hit DIFFERENT angles - not rephrasing the same idea
-3. Body text is SHORT: describe the product experience moment, not a sales script
-4. Hooks are 3-8 words. Bold on-screen text. No filler words.
-5. Write like the target audience talks - no marketing jargon, no AI speak
+2. HOOKS are attention grabbers - questions, POVs, bold claims, relatable moments. NOT taglines or headlines.
+3. BODY is visual description of the product experience - NOT a hook, NOT a sales pitch
+4. Hook variations MUST use DIFFERENT psychological angles - not rephrasing the same idea
+5. Write like the target audience talks - casual, real, no corporate or AI speak
 6. Use 5 different templates across creatives
 7. Return ONLY valid JSON. No markdown, no code fences.`;
 }
