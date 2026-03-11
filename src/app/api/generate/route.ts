@@ -58,7 +58,7 @@ function repairJSON(raw: string): string {
 
 async function callClaude(prompt: string, maxTokens: number): Promise<unknown> {
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-opus-4-20250514",
     max_tokens: maxTokens,
     messages: [
       { role: "user", content: prompt },
