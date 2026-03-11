@@ -315,6 +315,8 @@ export interface CopyCheckResult {
 export interface AdCreativeBlueprint {
   rank: number;
   name: string;
+  templateId?: string; // Matched template id (e.g. "direct-demo", "before-after")
+  templateName?: string; // Template title for display
   emotion: string;
   platform: string;
   format: string;
@@ -325,6 +327,7 @@ export interface AdCreativeBlueprint {
   body: { time: string; text: string; visual: string };
   cta: { time: string; text: string; visual: string };
   targetSegment?: string; // Which audience segment this creative targets
+  whyThisTemplate?: string; // Why this template was chosen
 }
 
 export interface TopCreativesData {

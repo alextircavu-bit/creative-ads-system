@@ -33,11 +33,13 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
             </div>
             <div className="text-base font-extrabold mb-1.5">&quot;{creative.name}&quot;</div>
             <div className="flex gap-1.5 flex-wrap mb-3">
+              {creative.templateName && (
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
+                  {creative.templateName}
+                </span>
+              )}
               <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide bg-pink-500/10 text-pink-400 border border-pink-500/15">
                 {creative.platform}
-              </span>
-              <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide bg-violet-500/10 text-violet-400 border border-violet-500/15">
-                {creative.format}
               </span>
               <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide bg-amber-500/10 text-amber-400 border border-amber-500/15">
                 {creative.emotion}
@@ -53,6 +55,13 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
                 </span>
               )}
             </div>
+
+            {/* Template rationale */}
+            {creative.whyThisTemplate && (
+              <div className="text-[11px] text-muted-foreground/70 mb-3 px-3 py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
+                <span className="font-bold text-emerald-400/60">Template: </span>{creative.whyThisTemplate}
+              </div>
+            )}
 
             {/* Scenario + Production */}
             {(creative.scenario || creative.productionStyle) && (

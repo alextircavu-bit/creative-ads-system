@@ -30,6 +30,7 @@ import {
   NLP_STACK_STRATEGY,
   NLP_KEY_PRINCIPLE,
 } from "@/config/framework-data";
+import { detectExperienceTypes, matchTemplates, EXPERIENCE_TYPE_LABELS } from "@/config/ad-templates";
 
 function buildContext(input: ProjectInput): string {
   const base = `Product: ${input.productName}\nDescription: ${input.productDescription}`;
@@ -549,6 +550,7 @@ export function topCreativesPrompt(
   salesData?: SalesPlaybookData,
   researchData?: ResearchData,
 ): string {
+  const productText = getProductText(input);
   const contextParts: string[] = [];
 
   if (psycheMapData) {
@@ -565,28 +567,44 @@ export function topCreativesPrompt(
     ? `\nTarget Audience Segments (ranked by predicted ROI):\n${researchData.audienceSegments.slice(0, 4).map((s, i) => `${i + 1}. ${s.name} — ${s.demographics} | ${s.predictedROI} ROI | Best angle: ${s.bestAngle}`).join("\n")}`
     : "";
 
+  // === TEMPLATE MATCHING ===
+  // Detect experience type from product text, match best templates
+  const experienceTypes = detectExperienceTypes(productText);
+  const primaryExp = experienceTypes[0];
+  const matchedTemplates = matchTemplates(experienceTypes);
+  const top5Templates = matchedTemplates.slice(0, 7); // give Claude 7 to pick from
+
+  const templateContext = top5Templates.map((t, i) => (
+    `${i + 1}. [${t.id}] "${t.title}" (${t.timing})
+   Category: ${t.category} | Experience: ${t.experienceTypes.join(", ")}${t.proven ? " | ★ PROVEN" : ""}
+   Structure: ${t.frames.map((f) => `${f.label} (${f.time})`).join(" → ")}
+   Best for: ${t.bestFor.join(", ")}
+   Why it works: ${t.whyItWorks}`
+  )).join("\n\n");
+
   return `You are a senior creative director. Create 5 complete ad blueprints for ${input.productName}.
 
 ${buildContext(input)}
 
 ${contextParts.length > 0 ? `=== FULL ANALYSIS CONTEXT ===\n${contextParts.join("\n")}\n` : ""}${segmentContext}
 
-Available Platforms & Formats:
-${JSON.stringify(PLATFORM_FORMATS, null, 2)}
+=== DETECTED EXPERIENCE TYPE ===
+Primary: ${EXPERIENCE_TYPE_LABELS[primaryExp].name} (${EXPERIENCE_TYPE_LABELS[primaryExp].example})
+${experienceTypes.length > 1 ? `Secondary: ${experienceTypes.slice(1).map((e) => EXPERIENCE_TYPE_LABELS[e].name).join(", ")}` : ""}
 
-=== CORE CREATIVE PHILOSOPHY ===
+=== MATCHED AD TEMPLATES (ranked by fit) ===
+These templates are pre-matched to ${input.productName} based on how users experience the benefit. You MUST use one of these templates for each creative. Follow the template's structure (frames, timing, production style).
 
-Every product exists because it either GIVES something people want (benefit) or REMOVES something they don't want (problem solver). Your job is to create the SCENARIO — the real-life moment where someone feels that need — and show the product as the bridge to resolution.
+${templateContext}
 
-STEP 1: Determine how the user EXPERIENCES the benefit of ${input.productName}:
-- If the experience is IN-APP (apps, software, digital tools) → the ad body should be a screen recording or demo of the actual experience. The product IS the ad.
-- If the experience is PHYSICAL/TANGIBLE (products you hold, wear, consume) → show it in a real-world scenario. Dramatic visual of the function/benefit in action.
-- If the experience is an OUTCOME/TRANSFORMATION (courses, coaching, services) → NEVER show the product directly. Sell the result. Imply the value. Hormozi formula.
-- If the experience is CONSUMABLE (food, drinks, supplements) → show current bad reality → product moment → desired reality. Taste/design are ornaments, not the sell.
-- If the experience is UTILITY/PROTECTION (tools, security, insurance) → fear/pain hook → showcase functionality → emphasize peace of mind and clear benefits.
-- If none of these fit exactly, think: what scenario makes someone NEED this? The ad recreates THAT moment.
+=== YOUR TASK ===
 
-STEP 2: For each creative, imagine a SPECIFIC SCENARIO where someone desperately needs ${input.productName}. The ad puts the viewer INTO that situation. The hook makes them feel the problem/desire. The body shows resolution through the product (in the format that matches its experience type). The CTA makes not acting feel like a loss.
+For each of the 5 creatives:
+1. Pick the best template from the matched list above
+2. Follow that template's frame structure and timing
+3. Write copy that stacks the psychological data (biases, Cialdini, dopamine triggers) into the template
+4. Each creative should use a DIFFERENT template (variety in ad formats = better testing)
+5. Write in the language/lingo of the target audience — not marketing speak, not ChatGPT speak
 
 Generate a JSON object:
 {
@@ -594,27 +612,30 @@ Generate a JSON object:
     {
       "rank": 1-5,
       "name": "creative concept name",
+      "templateId": "the template id from the matched list (e.g. 'direct-demo', 'before-after')",
+      "templateName": "the template title",
       "emotion": "primary emotional angle",
       "platform": "TikTok|Meta/IG|YouTube|Snapchat",
-      "format": "specific format from the platform list above",
-      "scenario": "The specific real-life situation this ad recreates — the moment where the need for ${input.productName} is undeniable (1-2 sentences)",
-      "experienceType": "How the user experiences the benefit (e.g. 'in-app', 'physical', 'outcome', 'consumable', 'utility')",
-      "productionStyle": "Exact production approach (e.g. 'Screen recording of app + voiceover', 'Real-world POV footage', 'Before/after split screen', 'UGC talking head + B-roll', 'Lifestyle montage with product close-ups')",
-      "hook": { "time": "0-3s", "text": "exact spoken/text copy that recreates the problem or desire", "visual": "detailed visual — what the viewer SEES that puts them in the scenario" },
-      "body": { "time": "3-15s", "text": "exact spoken/text copy showing the resolution through the product", "visual": "detailed visual — must match the experience type (screen recording for apps, real footage for physical, etc.)" },
-      "cta": { "time": "15-20s", "text": "exact CTA that makes NOT acting feel like a loss", "visual": "detailed visual direction" },
-      "targetSegment": "Which audience segment this is designed for (from the analysis above, if available)"
+      "format": "9:16 vertical short-form",
+      "scenario": "The specific real-life situation this ad recreates (1-2 sentences)",
+      "experienceType": "${primaryExp}",
+      "productionStyle": "Exact production approach matching the template (e.g. 'Hook text overlay + screen recording of ${input.productName} + text CTA')",
+      "hook": { "time": "from template", "text": "exact spoken/text copy", "visual": "what the viewer SEES" },
+      "body": { "time": "from template", "text": "exact copy showing resolution through the product", "visual": "must match template structure" },
+      "cta": { "time": "from template", "text": "exact CTA", "visual": "visual direction" },
+      "targetSegment": "which audience segment this targets",
+      "whyThisTemplate": "1 sentence — why this template is the best fit for this creative concept"
     }
   ]
 }
 
 CRITICAL:
-1. Each creative recreates a DIFFERENT scenario/situation where someone needs ${input.productName}
-2. The body visuals MUST match the experience type — screen recording for apps, real-world footage for physical products, implied outcomes for courses, etc.
-3. Production style must be specific enough that a video editor knows exactly what to film/record
-4. Stack the strongest biases and Cialdini weapons from the analysis into the copy
-5. Each creative should target a different audience segment where possible
-6. Copy is word-for-word ready for production. Visual directions assume the editor has never seen the product.
+1. Each creative MUST use a template from the matched list — include templateId and templateName
+2. Use 5 DIFFERENT templates across the 5 creatives for testing variety
+3. Follow the template's frame structure and timing exactly
+4. Stack biases and Cialdini weapons from the analysis into the copy
+5. Copy is word-for-word ready for production — write like the target audience speaks
+6. If the primary experience is "in-app", body visuals MUST be screen recording / app demo
 7. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
