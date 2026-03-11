@@ -4,7 +4,7 @@
 // content within that framework for the specific product.
 // ============================================================
 
-import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData, DeliveryMode } from "@/types/creative";
+import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData } from "@/types/creative";
 import {
   filterRelevantAngles,
   FRAMEWORKS,

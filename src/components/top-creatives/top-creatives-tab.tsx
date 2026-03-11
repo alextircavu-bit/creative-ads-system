@@ -4,6 +4,9 @@ import { useState, useCallback } from "react";
 import type { TopCreativesData, AdCreativeBlueprint, HookVariation, BodyVariation } from "@/types/creative";
 import { calculateSectionTiming } from "@/lib/readability";
 
+// Currently locked to Hook + Body (text overlay) template only.
+// Voiceover, VO+Caption, VO+Caption+Subs templates coming soon.
+
 interface TopCreativesTabProps {
   data: TopCreativesData;
   productName: string;
@@ -151,7 +154,7 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
   return (
     <div className="mb-10">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-5">
         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/20 flex items-center justify-center text-lg shrink-0">
           🎬
         </div>
@@ -161,6 +164,22 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
             Swipe through variations for <strong className="text-foreground">{productName}</strong>
           </div>
         </div>
+      </div>
+
+      {/* Template mode selector - locked to text overlay for now */}
+      <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <span className="text-[10px] font-black tracking-wider uppercase text-amber-400">Text Overlay</span>
+          <span className="text-[9px] text-amber-400/50">Active</span>
+        </div>
+        {["Voiceover", "VO + Caption", "VO + Caption + Subs"].map((mode) => (
+          <div key={mode} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06] opacity-40 cursor-not-allowed">
+            <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground/50">{mode}</span>
+            <svg className="w-3 h-3 text-muted-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </div>
+        ))}
       </div>
 
       <div className="flex flex-col gap-12">
