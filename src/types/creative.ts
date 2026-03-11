@@ -326,9 +326,9 @@ export interface AdSection {
 }
 
 export interface HookVariation {
-  text: string;           // The hook text (3-8 words for text overlay)
-  angle: string;          // What angle this targets (e.g. "fear of missing out", "social proof", "pain point")
-  targetSegment?: string; // Which audience segment this hook speaks to
+  text: string;           // The hook text overlay (5-15 words)
+  angle: string;          // What psychological angle this pulls
+  visualSuggestions?: string[]; // 2-3 ambiguous video scene ideas behind the text
 }
 
 export interface BodyVariation {

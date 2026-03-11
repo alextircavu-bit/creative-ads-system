@@ -271,9 +271,11 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
                 <div className="text-[10px] font-bold text-foreground/60 truncate mb-0.5">
                   #{creative.rank} {creative.name}
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 flex-wrap">
+                  {creative.targetSegment && (
+                    <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-violet-500/10 text-violet-400/60">{creative.targetSegment}</span>
+                  )}
                   <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-pink-500/10 text-pink-400/60">{creative.platform}</span>
-                  <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-violet-500/10 text-violet-400/60">{creative.format}</span>
                 </div>
                 <div className="absolute inset-0 rounded-xl bg-background/20 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="text-center">

@@ -540,14 +540,16 @@ Generate a JSON object:
 
   "scripts": {
     "<angle.id>": [
-      For the TOP 6 most relevant angles, generate one script per framework (6 angles x 5 frameworks = 30 scripts):
+      For the TOP 6 most relevant angles, generate one script per framework (6 angles x 5 frameworks = 30 scripts).
+      IMPORTANT: Scripts must match the ACTIVE TEMPLATE FORMAT: Hook + Body (text overlay, 10-20 seconds total). Do NOT write long-form ad copy. Each script is a SHORT-FORM ad concept.
       {
         "frameworkId": "the framework id",
         "steps": [
-          For each step in the framework, generate:
-          { "label": "step label from framework", "type": "problem|agitate|solution|cta|before|after|attention|interest|desire|situation|task|action|result", "text": "ACTUAL AD COPY that stacks the biases, triggers dopamine architecture, exploits the correct Cialdini weapons, and targets the awareness level - all personalized for ${input.productName}" }
+          Adapt the framework steps to SHORT-FORM format. Each step = 1-2 sentences MAX.
+          The framework is the STRUCTURE, but the output is a 10-20 second text overlay ad, not a long-form sales letter.
+          { "label": "step label from framework", "type": "problem|agitate|solution|cta|before|after|attention|interest|desire|situation|task|action|result", "text": "SHORT text overlay copy for this step - 1-2 sentences max. This appears on screen for 2-5 seconds." }
         ],
-        "hooks": ["5 hook lines that combine the emotional angle with the strongest biases and triggers from the psyche map"]
+        "hooks": ["5 hook lines (5-15 words each) that combine the emotional angle with the strongest biases and triggers from the psyche map. These are scroll-stopping text overlays, not headlines."]
       }
     ]
   },
@@ -677,14 +679,29 @@ BODY = simple description of the product experience. 1 short sentence.
 
 CTA = button text. 2-5 words.
 
+=== SANITY CHECK YOUR CREATIVES ===
+
+Before generating each creative, ask yourself:
+- Would a REAL person in this segment actually see this ad and think "that's me"?
+- Is the scenario something that happens in REAL LIFE, not a contrived marketing situation?
+- Would someone actually say this hook out loud or type it in a comment?
+- Does the creative make sense as a 10-20 second video ad?
+
+If the answer to any of these is "no", throw it out and try again. Do NOT generate creatives just to fill 5 slots. Every creative must pass the "would this actually work as an ad?" test.
+
+BAD creative example: "Parent Modelling Faith" - who is this targeting? Parents who want their kids to see Bible verses on THEIR lockscreen? That's not a real scenario. Nobody thinks "I should get a lockscreen verse app so my children see me reading scripture."
+
+GOOD creative example: "Morning Verse Reminder" - targets anyone who picks up their phone first thing in the morning. The verse is there before they open Instagram. Real moment, real scenario.
+
 === YOUR TASK ===
 
-Create 5 creatives. Each creative targets a DIFFERENT audience segment from the hierarchy above.
+Create 5 creatives. Each targets a DIFFERENT audience segment. Template: Hook + Body (text overlay, 10-20 sec total).
 
 For each creative:
-- Pick the segment it targets (creative 1 = segment 1, creative 2 = segment 2, etc.)
-- The hooks should stop THAT segment's scroll, using their specific angle
-- 5-6 HOOK VARIATIONS per creative, each pulling a different psychological lever but all speaking to the SAME segment
+- Pick the segment it targets (creative 1 = segment 1, etc.)
+- Hooks should stop THAT segment's scroll using their specific daily moment
+- 5-6 HOOK VARIATIONS per creative, each pulling a different psychological lever
+- Each hook MUST include 2-3 VIDEO SCENE SUGGESTIONS: ambiguous, varied visual scenarios for what's happening behind the text overlay (e.g., "girl sitting in her car", "someone scrolling in bed at night", "hand picking up phone from nightstand"). These are shooting ideas, not storyboards. Keep them short and open to interpretation.
 - 2-3 BODY VARIATIONS: simple product experience descriptions. What the feature does in plain words.
 - 1 CTA
 
@@ -693,23 +710,25 @@ JSON:
   "creatives": [
     {
       "rank": 1-5,
-      "name": "concept name",
+      "name": "simple, descriptive concept name - not clever, not abstract",
       "templateId": "from matched list",
       "templateName": "template title",
-      "emotion": "primary emotion for this segment",
+      "emotion": "primary emotion",
       "platform": "TikTok|Meta/IG|YouTube|Snapchat",
       "format": "9:16 vertical",
-      "scenario": "the specific daily moment that triggers need for this segment (1 sentence)",
+      "scenario": "the specific real daily moment for this segment (1 sentence)",
       "experienceType": "${primaryExp}",
       "productionStyle": "production approach",
       "targetSegment": "segment name from hierarchy",
       "hooks": [
-        { "text": "scroll-stopping hook for this segment", "angle": "which psychological lever this pulls", "targetSegment": "segment name" },
-        { "text": "different hook, different lever, same segment", "angle": "different lever" }
+        {
+          "text": "scroll-stopping hook text",
+          "angle": "which psychological lever",
+          "visualSuggestions": ["person in specific relatable setting", "alternative scene idea", "third option"]
+        }
       ],
       "bodies": [
-        { "text": "simple product feature description", "visual": "what viewer sees on screen" },
-        { "text": "alternative simple description", "visual": "alternative visual" }
+        { "text": "simple feature description", "visual": "what viewer sees on screen" }
       ],
       "cta": { "text": "Download Free" },
       "whyThisTemplate": "1 sentence"
@@ -718,13 +737,14 @@ JSON:
 }
 
 CRITICAL:
-1. Creative 1 targets Segment 1, Creative 2 targets Segment 2, etc. Each creative = a different audience bet.
-2. HOOKS must use the product's LEXICAL FIELD - words that signal the category instantly
-3. HOOKS can be incomplete thoughts that the body resolves (hook: "but..." body: "...this app changed that")
-4. BODY is SIMPLE. Describe the feature plainly. Great copy is simple copy.
-5. Each hook variation pulls a DIFFERENT psychological lever from the deep dive
-6. Write like the target segment talks - match their vocabulary, not marketing speak
-7. Return ONLY valid JSON. No markdown, no code fences.`;
+1. Each creative = a different audience segment. Each must pass the "would this actually work?" test.
+2. HOOKS must use the product's LEXICAL FIELD - words that signal the category
+3. Each hook has 2-3 visualSuggestions - short, ambiguous video scene ideas for the background
+4. BODY is SIMPLE. Describe the feature plainly. 1 sentence. Great copy is simple.
+5. Creative names should be simple and descriptive, not abstract marketing concepts
+6. Write like the target segment talks - match their vocabulary
+7. If a segment doesn't produce a good creative, skip it and double up on a better segment
+8. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================

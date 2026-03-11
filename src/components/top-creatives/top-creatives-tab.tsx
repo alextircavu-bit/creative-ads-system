@@ -36,9 +36,9 @@ function PhoneMockup({
   accentTo,
 }: {
   section: "hook" | "body";
-  items: { text: string; sub?: string }[];
+  items: { text: string; sub?: string; visuals?: string[] }[];
   ctaText?: string;
-  renderOverlay: (item: { text: string; sub?: string }, index: number) => React.ReactNode;
+  renderOverlay: (item: { text: string; sub?: string; visuals?: string[] }, index: number) => React.ReactNode;
   accentFrom: string;
   accentTo: string;
 }) {
@@ -187,7 +187,7 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
           const hooks = getHooks(creative);
           const bodies = getBodies(creative);
 
-          const hookItems = hooks.map((h) => ({ text: h.text, sub: h.angle }));
+          const hookItems = hooks.map((h) => ({ text: h.text, sub: h.angle, visuals: h.visualSuggestions || [] }));
           const bodyItems = bodies.map((b) => ({ text: b.text, sub: b.visual }));
 
           return (
@@ -200,6 +200,11 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-extrabold truncate mb-1">&quot;{creative.name}&quot;</div>
                   <div className="flex gap-1 flex-wrap">
+                    {creative.targetSegment && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-500/10 text-violet-400 border border-violet-500/15">
+                        {creative.targetSegment}
+                      </span>
+                    )}
                     {creative.templateName && (
                       <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
                         {creative.templateName}
@@ -227,13 +232,24 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
                   accentFrom="from-black"
                   accentTo="to-neutral-900"
                   renderOverlay={(item) => (
-                    <div className="text-center px-3">
+                    <div className="text-center px-3 flex flex-col gap-3">
                       {/* Glassmorphism text card */}
                       <div className="bg-white/[0.08] backdrop-blur-xl rounded-2xl border border-white/[0.12] px-4 py-5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                         <p className="text-white font-black text-lg leading-tight tracking-tight">
                           {item.text}
                         </p>
                       </div>
+                      {/* Video scene suggestions */}
+                      {item.visuals && item.visuals.length > 0 && (
+                        <div className="flex flex-col gap-1 px-1">
+                          {item.visuals.map((v, i) => (
+                            <div key={i} className="flex items-center gap-1.5">
+                              <span className="w-1 h-1 rounded-full bg-white/15 shrink-0" />
+                              <span className="text-[9px] text-white/20 text-left leading-tight">{v}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 />
