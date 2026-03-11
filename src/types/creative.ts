@@ -322,25 +322,41 @@ export interface AdSection {
   time: string;
   text: string;
   visual: string;
-  deliveryMode?: DeliveryMode; // How the text is delivered in the ad
+  deliveryMode?: DeliveryMode;
+}
+
+export interface HookVariation {
+  text: string;           // The hook text (3-8 words for text overlay)
+  angle: string;          // What angle this targets (e.g. "fear of missing out", "social proof", "pain point")
+  targetSegment?: string; // Which audience segment this hook speaks to
+}
+
+export interface BodyVariation {
+  text: string;           // Short description of product experience moment
+  visual: string;         // What the viewer sees during this part
 }
 
 export interface AdCreativeBlueprint {
   rank: number;
   name: string;
-  templateId?: string; // Matched template id (e.g. "direct-demo", "before-after")
-  templateName?: string; // Template title for display
+  templateId?: string;
+  templateName?: string;
   emotion: string;
   platform: string;
   format: string;
-  scenario: string; // The real-life situation that makes someone NEED this product
-  experienceType: string; // How the user experiences the benefit (in-app, physical, outcome, consumable, utility, etc.)
-  productionStyle: string; // Specific production approach (screen recording, real-world footage, before/after, lifestyle, etc.)
-  hook: AdSection;
-  body: AdSection;
-  cta: AdSection;
-  targetSegment?: string; // Which audience segment this creative targets
-  whyThisTemplate?: string; // Why this template was chosen
+  scenario: string;
+  experienceType: string;
+  productionStyle: string;
+  // Text overlay: multiple variations for swipeable cards
+  hooks: HookVariation[];
+  bodies: BodyVariation[];
+  // Single CTA (overlay bar, not a video section)
+  cta: { text: string; deliveryMode?: DeliveryMode };
+  // Legacy single hook/body for backward compat with existing data
+  hook?: AdSection;
+  body?: AdSection;
+  targetSegment?: string;
+  whyThisTemplate?: string;
 }
 
 export interface TopCreativesData {

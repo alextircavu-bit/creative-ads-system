@@ -582,88 +582,86 @@ export function topCreativesPrompt(
    Why it works: ${t.whyItWorks}`
   )).join("\n\n");
 
-  return `You are a senior creative director. Create 5 complete ad blueprints for ${input.productName}.
+  // Build rich angle/bias/pain context for hook variation generation
+  const hookAngleContext: string[] = [];
+  if (psycheMapData) {
+    psycheMapData.biases.forEach((b) => hookAngleContext.push(`Bias: ${b.name} - ${b.description}`));
+    psycheMapData.painPleasure.pains.forEach((p) => hookAngleContext.push(`Pain: ${p}`));
+    psycheMapData.painPleasure.pleasures.forEach((p) => hookAngleContext.push(`Desire: ${p}`));
+  }
+  if (salesData) {
+    salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 4).forEach((w) => hookAngleContext.push(`Cialdini: ${w.name} - ${w.application}`));
+    if (salesData.hso) salesData.hso.hooks.forEach((h) => hookAngleContext.push(`HSO Hook: ${h}`));
+  }
+  if (researchData?.audienceSegments) {
+    researchData.audienceSegments.slice(0, 4).forEach((s) => hookAngleContext.push(`Segment: ${s.name} - ${s.bestAngle}`));
+  }
+
+  return `You are a senior creative director. Create 5 ad blueprints for ${input.productName}.
+DELIVERY MODE FOR THIS BATCH: text-overlay (bold text on screen, no voiceover).
 
 ${buildContext(input)}
 
-${contextParts.length > 0 ? `=== FULL ANALYSIS CONTEXT ===\n${contextParts.join("\n")}\n` : ""}${segmentContext}
+${contextParts.length > 0 ? `=== ANALYSIS CONTEXT ===\n${contextParts.join("\n")}\n` : ""}${segmentContext}
 
-=== DETECTED EXPERIENCE TYPE ===
+=== HOOK ANGLE BANK ===
+Use these angles from the deep dive to create VARIED hooks. Each hook variation should target a DIFFERENT angle:
+${hookAngleContext.join("\n")}
+
+=== EXPERIENCE TYPE ===
 Primary: ${EXPERIENCE_TYPE_LABELS[primaryExp].name} (${EXPERIENCE_TYPE_LABELS[primaryExp].example})
-${experienceTypes.length > 1 ? `Secondary: ${experienceTypes.slice(1).map((e) => EXPERIENCE_TYPE_LABELS[e].name).join(", ")}` : ""}
 
-=== MATCHED AD TEMPLATES (ranked by fit) ===
-These templates are pre-matched to ${input.productName} based on how users experience the benefit. You MUST use one of these templates for each creative. Follow the template's structure (frames, timing, production style).
-
+=== MATCHED TEMPLATES ===
 ${templateContext}
 
-=== DELIVERY MODES ===
-Each section (hook/body/cta) MUST have a deliveryMode. This controls HOW the text appears in the ad:
-
-1. "text-overlay" - Bold text on screen, NO voiceover. Must be SHORT and punchy.
-   Word limits: Hook 3-8 words | Body 5-15 words | CTA 2-6 words
-2. "voiceover" - Voice narration only, no text on screen. Conversational tone.
-   Word limits: Hook 5-15 words | Body 10-45 words | CTA 3-10 words
-3. "voiceover-caption" - Voice narration + a short summary caption on screen.
-   Word limits: Hook 5-12 words | Body 8-35 words | CTA 3-8 words
-4. "vo-caption-subs" - Voice + topic caption at top + word-for-word subtitles.
-   Word limits: Hook 5-15 words | Body 10-45 words | CTA 3-10 words
-
-TIMING RULES (the engine calculates exact duration from word count):
-- Text overlay reads at ~200 WPM (3.3 words/sec on screen)
-- Voiceover speaks at ~150 WPM (2.5 words/sec conversational)
-- Hook: 2-5 seconds max. Body: 3-20 seconds. CTA: 2-4 seconds.
-- CRITICAL: Count your words. A 5-word text overlay hook = ~2s. A 15-word voiceover hook = ~4s.
-
-MIX DELIVERY MODES across creatives for testing variety:
-- At least 1 creative should use "text-overlay" hook (punchy, scroll-stopping)
-- At least 1 should use "voiceover" or "voiceover-caption" for storytelling
-- The CTA can differ from hook/body delivery mode
+=== TEXT OVERLAY RULES ===
+- Hook text: 3-8 words MAX. Bold, punchy, scroll-stopping. One idea per hook.
+- Body text: 1-2 short sentences that CONTINUE the hook's promise. Show the user experience with the product that RESOLVES or DELIVERS on what the hook set up. Must make sense as a natural follow-up to any hook variation.
+- CTA: 2-5 words. Action text for a button/overlay.
 
 === YOUR TASK ===
 
-For each of the 5 creatives:
-1. Pick the best template from the matched list above
-2. Follow that template's frame structure and timing
-3. Write copy that stacks the psychological data (biases, Cialdini, dopamine triggers) into the template
-4. Each creative should use a DIFFERENT template (variety in ad formats = better testing)
-5. Write in the language/lingo of the target audience - not marketing speak, not ChatGPT speak
-6. Assign a deliveryMode to each section (hook/body/cta) and write copy length appropriate for that mode
-7. Count words per section - stay within the word limits for the chosen delivery mode
+For each creative, generate:
+- 5-6 HOOK VARIATIONS: each one targets a DIFFERENT emotional angle, bias, pain point, or audience segment from the angle bank above. Vary the psychological lever (fear, desire, curiosity, social proof, urgency, identity).
+- 2-3 BODY VARIATIONS: each describes the product experience from a slightly different angle or user scenario. Keep it short - what's happening on screen visually.
+- 1 CTA: simple call to action text.
 
-Generate a JSON object:
+JSON format:
 {
   "creatives": [
     {
       "rank": 1-5,
-      "name": "creative concept name",
-      "templateId": "the template id from the matched list (e.g. 'direct-demo', 'before-after')",
-      "templateName": "the template title",
-      "emotion": "primary emotional angle",
+      "name": "concept name",
+      "templateId": "from matched list",
+      "templateName": "template title",
+      "emotion": "primary emotion",
       "platform": "TikTok|Meta/IG|YouTube|Snapchat",
-      "format": "9:16 vertical short-form",
-      "scenario": "The specific real-life situation this ad recreates (1-2 sentences)",
+      "format": "9:16 vertical",
+      "scenario": "real-life situation (1 sentence)",
       "experienceType": "${primaryExp}",
-      "productionStyle": "Exact production approach matching the template",
-      "hook": { "time": "from template", "text": "exact copy", "visual": "what viewer sees", "deliveryMode": "text-overlay|voiceover|voiceover-caption|vo-caption-subs" },
-      "body": { "time": "from template", "text": "exact copy", "visual": "must match template", "deliveryMode": "text-overlay|voiceover|voiceover-caption|vo-caption-subs" },
-      "cta": { "time": "from template", "text": "exact CTA", "visual": "visual direction", "deliveryMode": "text-overlay|voiceover|voiceover-caption|vo-caption-subs" },
-      "targetSegment": "which audience segment this targets",
-      "whyThisTemplate": "1 sentence - why this template fits this concept"
+      "productionStyle": "production approach",
+      "hooks": [
+        { "text": "3-8 word hook", "angle": "what psychological angle this hits (e.g. loss aversion, social proof, curiosity gap)" },
+        { "text": "different hook", "angle": "different angle" }
+      ],
+      "bodies": [
+        { "text": "short experience description", "visual": "what viewer sees on screen" },
+        { "text": "alternative experience angle", "visual": "alternative visual" }
+      ],
+      "cta": { "text": "Download Now" },
+      "whyThisTemplate": "1 sentence"
     }
   ]
 }
 
 CRITICAL:
-1. Each creative MUST use a template from the matched list - include templateId and templateName
-2. Use 5 DIFFERENT templates across the 5 creatives for testing variety
-3. Follow the template's frame structure and timing exactly
-4. Stack biases and Cialdini weapons from the analysis into the copy
-5. Copy is word-for-word ready for production - write like the target audience speaks
-6. If the primary experience is "in-app", body visuals MUST be screen recording / app demo
-7. EVERY section MUST have a deliveryMode field. Mix modes across creatives.
-8. Text overlay copy must be SHORT (3-8 words for hooks). Voiceover copy can be longer.
-9. Return ONLY valid JSON. No markdown, no code fences.`;
+1. Each creative: 5-6 hook variations, 2-3 body variations, 1 CTA
+2. Hook variations MUST hit DIFFERENT angles - not rephrasing the same idea
+3. Body text is SHORT: describe the product experience moment, not a sales script
+4. Hooks are 3-8 words. Bold on-screen text. No filler words.
+5. Write like the target audience talks - no marketing jargon, no AI speak
+6. Use 5 different templates across creatives
+7. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================

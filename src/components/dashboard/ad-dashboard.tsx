@@ -263,7 +263,7 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
                   <div className="absolute bottom-2 left-2 right-2">
                     <div className="bg-black/40 backdrop-blur-sm rounded-lg px-2 py-1.5">
                       <div className="text-[9px] text-white/70 font-semibold leading-tight truncate">
-                        {creative.hook.text.slice(0, 60)}...
+                        {(creative.hooks?.[0]?.text || creative.hook?.text || "").slice(0, 60)}...
                       </div>
                     </div>
                   </div>
