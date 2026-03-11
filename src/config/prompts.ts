@@ -353,6 +353,8 @@ ${previousContext.length > 0 ? `=== PREVIOUS ANALYSIS CONTEXT ===\n${previousCon
 
 This is the user's personal research methodology: "I become the person that needs the product in my imagination, then the needs and emotions come to me after becoming it and I go through multiple scenarios in which the desire of the product may arise and translate them into a hook or an actual ad that might stimulate me emotionally and trigger me."
 
+CRITICAL CHANGE: Do NOT lock into a single avatar. The shadow avatar technique must be applied MULTIPLE TIMES - once for each distinct type of person who might want this product. Each person has different daily scenarios, different pain points, different scroll-stopping moments.
+
 Shadow Avatar Steps (FIXED structure - personalize descriptions):
 ${JSON.stringify(SHADOW_AVATAR_STEPS.map((s) => ({ num: s.num, title: s.title, color: s.color })), null, 2)}
 
@@ -361,6 +363,17 @@ ${JSON.stringify(RESEARCH_TECHNIQUES.map((t) => ({ name: t.name, color: t.color,
 
 Avatar Trait Labels (FIXED): ${JSON.stringify(AVATAR_TRAIT_LABELS)}
 
+=== BENEFIT EXPANSION ===
+The product owner provides a surface-level benefit. Your job is to EXPAND it by reasoning about what the benefit IMPLIES about the person's life:
+- What does using this product say about who they are or want to become?
+- What daily situations make this benefit urgent or relevant?
+- What adjacent benefits does the person gain that they didn't even think about?
+- What identity shift happens when someone starts using this?
+
+Example: "Track calories instantly" implies -> freedom to eat anywhere without guessing, taking control of health, becoming someone who's intentional about their body, not being the person who has no idea what they just ate, confidence at restaurants, meal prep efficiency.
+
+Each expanded benefit thread opens up a different audience segment with different hooks.
+
 === YOUR TASK ===
 
 Generate a JSON object. Keep all framework structure intact. ONLY personalize content for ${input.productName}:
@@ -368,7 +381,7 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
 {
   "shadowAvatarSteps": [
     For EACH step, keep num/title/color exactly, and ADD:
-    - "description": "PERSONALIZE: How to do this step specifically for ${input.productName}'s audience. Imagine you ARE the person who needs ${input.productName}. What do you feel? What triggers you?"
+    - "description": "PERSONALIZE: How to do this step specifically for ${input.productName}'s audience. Do NOT describe one person - describe the PROCESS of becoming multiple types of people who need this product. What scenarios arise for each?"
   ],
 
   "searchQueries": [
@@ -387,24 +400,30 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
   "avatarTraits": [
     For EACH trait label (${AVATAR_TRAIT_LABELS.join(", ")}), generate:
     - "label": the trait label
-    - "value": "PERSONALIZE: specific value for ${input.productName}'s broadest ideal customer base"
+    - "value": "PERSONALIZE: describe the RANGE across segments, not one person. E.g. Age: '18-24 gym culture / 30-45 health-conscious parents / 50+ doctor-recommended'"
   ],
 
   "audienceSegments": [
-    Generate 4-6 distinct audience segments ranked by PREDICTED ROI for ${input.productName}. These are NOT fixed - they're recommendations to test. The business owner runs ads against multiple segments, measures which convert/subscribe/buy, then doubles down on winners. Each segment:
-    - "name": short segment name (e.g. "Guilt-Driven Scrollers", "Aspirational Parents", "Productivity Seekers")
-    - "description": 1-2 sentences on who they are and WHY they'd convert
-    - "demographics": age, gender, location patterns
-    - "psychographics": values, fears, desires, habits
-    - "predictedROI": "high" | "medium" | "low" - based on buying power × conversion likelihood × lifetime value
-    - "acquisitionCost": "low" | "medium" | "high" - how expensive to reach them
-    - "lifetimeValue": "high" | "medium" | "low" - how much revenue over time
-    - "conversionLikelihood": 0-100 - probability they convert on first exposure
-    - "bestAngle": which emotional angle or hook will hit this segment hardest
-    - "adStrategy": specific ad approach for THIS segment
-    - "color": hex color for UI display
+    Generate 4-6 distinct audience segments. These are a HIERARCHY of predicted impact - ranked from most likely to convert to least. They are HYPOTHESES to test, not facts.
 
-    RANK them: highest predicted ROI first. Include at least one high-volume/low-cost segment and one high-value/premium segment. These are PREDICTIONS to be validated through ad testing.
+    IMPORTANT: Each segment must come from a DIFFERENT expanded benefit thread. Don't just split demographics - split by WHY they want the product and what daily scenario triggers that want.
+
+    For ${input.productName}, think: what are the completely different life situations where someone would need this? Each situation = a segment. Each segment has a different hook that stops THEIR scroll.
+
+    Each segment:
+    - "name": short, descriptive name reflecting their motivation (NOT demographics)
+    - "description": 1-2 sentences: who they are, what moment in their day triggers the need, and why they'd convert
+    - "demographics": age, gender, location patterns
+    - "psychographics": values, fears, desires, daily habits
+    - "predictedROI": "high" | "medium" | "low"
+    - "acquisitionCost": "low" | "medium" | "high"
+    - "lifetimeValue": "high" | "medium" | "low"
+    - "conversionLikelihood": 0-100
+    - "bestAngle": the specific hook angle that would stop THIS person's scroll. Not a category - an actual hook direction.
+    - "adStrategy": how to reach and convert THIS segment specifically
+    - "color": hex color for UI
+
+    Label as "Recommended #1", "Recommended #2" etc. in the description - NOT "best". These are predictions to validate through testing.
   ],
 
   "preCreativeChecklist": ["10 checklist items specific to ${input.productName} that must be verified before creating ads"]
@@ -563,38 +582,46 @@ export function topCreativesPrompt(
     contextParts.push(`Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}`);
   }
 
+  // Build segment context with full detail for creative mapping
   const segmentContext = researchData?.audienceSegments?.length
-    ? `\nTarget Audience Segments (ranked by predicted ROI):\n${researchData.audienceSegments.slice(0, 4).map((s, i) => `${i + 1}. ${s.name} - ${s.demographics} | ${s.predictedROI} ROI | Best angle: ${s.bestAngle}`).join("\n")}`
+    ? researchData.audienceSegments.slice(0, 5).map((s, i) => (
+      `Segment ${i + 1}: "${s.name}"
+  Who: ${s.description}
+  Demographics: ${s.demographics}
+  Psychographics: ${s.psychographics}
+  Recommended angle: ${s.bestAngle}
+  Ad strategy: ${s.adStrategy}
+  Predicted ROI: ${s.predictedROI} | Conversion: ${s.conversionLikelihood}%`
+    )).join("\n\n")
     : "";
 
   // === TEMPLATE MATCHING ===
-  // Detect experience type from product text, match best templates
   const experienceTypes = detectExperienceTypes(productText);
   const primaryExp = experienceTypes[0];
   const matchedTemplates = matchTemplates(experienceTypes);
-  const top5Templates = matchedTemplates.slice(0, 7); // give Claude 7 to pick from
+  const top5Templates = matchedTemplates.slice(0, 7);
 
   const templateContext = top5Templates.map((t, i) => (
     `${i + 1}. [${t.id}] "${t.title}" (${t.timing})
-   Category: ${t.category} | Experience: ${t.experienceTypes.join(", ")}${t.proven ? " | ★ PROVEN" : ""}
-   Structure: ${t.frames.map((f) => `${f.label} (${f.time})`).join(" → ")}
+   Category: ${t.category} | Experience: ${t.experienceTypes.join(", ")}${t.proven ? " | PROVEN" : ""}
+   Structure: ${t.frames.map((f) => `${f.label} (${f.time})`).join(" > ")}
    Best for: ${t.bestFor.join(", ")}
    Why it works: ${t.whyItWorks}`
   )).join("\n\n");
 
-  // Build rich angle/bias/pain context for hook variation generation
-  const hookAngleContext: string[] = [];
+  // Deep dive psychological tools for hook generation
+  const psycheTools: string[] = [];
   if (psycheMapData) {
-    psycheMapData.biases.forEach((b) => hookAngleContext.push(`Bias: ${b.name} - ${b.description}`));
-    psycheMapData.painPleasure.pains.forEach((p) => hookAngleContext.push(`Pain: ${p}`));
-    psycheMapData.painPleasure.pleasures.forEach((p) => hookAngleContext.push(`Desire: ${p}`));
+    psycheMapData.biases.slice(0, 6).forEach((b) => psycheTools.push(`Bias: ${b.name} - ${b.description}`));
+    psycheMapData.painPleasure.pains.forEach((p) => psycheTools.push(`Pain: ${p}`));
+    psycheMapData.painPleasure.pleasures.forEach((p) => psycheTools.push(`Desire: ${p}`));
+    if (psycheMapData.dopamine) psycheTools.push(`Dopamine trigger: ${psycheMapData.dopamine.trigger}`);
+    if (psycheMapData.habitLoop) psycheTools.push(`Habit loop: ${psycheMapData.habitLoop.cue} > ${psycheMapData.habitLoop.routine} > ${psycheMapData.habitLoop.reward}`);
   }
   if (salesData) {
-    salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 4).forEach((w) => hookAngleContext.push(`Cialdini: ${w.name} - ${w.application}`));
-    if (salesData.hso) salesData.hso.hooks.forEach((h) => hookAngleContext.push(`HSO Hook: ${h}`));
-  }
-  if (researchData?.audienceSegments) {
-    researchData.audienceSegments.slice(0, 4).forEach((s) => hookAngleContext.push(`Segment: ${s.name} - ${s.bestAngle}`));
+    salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 4).forEach((w) => psycheTools.push(`Cialdini: ${w.name} - ${w.application}`));
+    salesData.awarenessLevels.sort((a, b) => b.relevance - a.relevance).slice(0, 3).forEach((l) => psycheTools.push(`Awareness: ${l.name} - strategy: ${l.adStrategy}`));
+    if (salesData.hso) salesData.hso.hooks.forEach((h) => psycheTools.push(`HSO Hook: ${h}`));
   }
 
   return `You are a senior creative director. Create 5 ad blueprints for ${input.productName}.
@@ -602,11 +629,16 @@ DELIVERY MODE FOR THIS BATCH: text-overlay (bold text on screen, no voiceover).
 
 ${buildContext(input)}
 
-${contextParts.length > 0 ? `=== ANALYSIS CONTEXT ===\n${contextParts.join("\n")}\n` : ""}${segmentContext}
+${contextParts.length > 0 ? `=== DEEP DIVE ANALYSIS ===\n${contextParts.join("\n")}\n` : ""}
 
-=== HOOK ANGLE BANK ===
-Use these angles from the deep dive to create VARIED hooks. Each hook variation should target a DIFFERENT angle:
-${hookAngleContext.join("\n")}
+=== AUDIENCE SEGMENT HIERARCHY ===
+These segments are ranked by predicted impact. Each creative should target a DIFFERENT segment. The 5 creatives = 5 testable hypotheses across the audience hierarchy.
+
+${segmentContext || "No segments available - generate creatives for broad audience."}
+
+=== PSYCHOLOGICAL TOOLS (from deep dive) ===
+Use these to craft hooks. Each tool is a lever - pull a DIFFERENT one for each hook variation:
+${psycheTools.join("\n")}
 
 === EXPERIENCE TYPE ===
 Primary: ${EXPERIENCE_TYPE_LABELS[primaryExp].name} (${EXPERIENCE_TYPE_LABELS[primaryExp].example})
@@ -614,28 +646,42 @@ Primary: ${EXPERIENCE_TYPE_LABELS[primaryExp].name} (${EXPERIENCE_TYPE_LABELS[pr
 === MATCHED TEMPLATES ===
 ${templateContext}
 
-=== TEXT OVERLAY RULES ===
+=== HOW TO THINK ABOUT HOOKS ===
 
-HOOK = the ATTENTION GRABBER. This is the first thing people see. It must STOP the scroll.
-  - 5-15 words. Can be a question, bold claim, relatable scenario, POV statement, or shocking fact.
-  - Examples of good hooks: "Nobody talks about this side effect of meditation" / "POV: you finally found an app that actually works" / "I was mass unfollowing when I saw this" / "Why is nobody talking about this?"
-  - NOT a headline. NOT a tagline. It's what someone would SAY or THINK that makes you stop scrolling.
+The product owner wrote a surface-level benefit. Your job is to reason DEEPER:
+- What does this benefit IMPLY about the person's life?
+- What daily situation makes this benefit urgent?
+- What would this person be doing RIGHT BEFORE they need this product?
 
-BODY = what's HAPPENING ON SCREEN while the product is being shown. Short, descriptive.
-  - 1-2 sentences MAX. Describes the user experience moment with the product.
-  - Examples: "She opens the app, taps the feature, watches her results update in real time." / "Quick scroll through the dashboard, each metric lighting up green."
-  - This is a VISUAL DESCRIPTION of product experience, not a sales pitch.
+The hook should reference that MOMENT or SITUATION - using the product's lexical field (words associated with the category). The viewer should instantly know what world this ad lives in.
 
-CTA = button/overlay text. 2-5 words.
+HOOK = scroll-stopping attention text. 5-15 words.
+  - Can be: a relatable scenario, a question, a POV, a bold claim, an incomplete thought that the body resolves
+  - Must use words from the product's world (for a calorie app: "macros", "food", "eating"; for a bible app: "verse", "faith", "scripture")
+  - NOT a headline. NOT a tagline. It's what someone would THINK or SAY.
+  - Good: "my work food doesn't have macro details but..." / "Nobody tells you this about tracking calories"
+  - Bad: "Track Your Macros Easily" / "The Ultimate Food Scanner"
+
+BODY = simple description of the product experience. 1 short sentence.
+  - Describe what the feature IS and what it does. Simple. Clear. Not clever.
+  - Good: "an hourly bible verse widget. tap below to download." / "point your phone at any plate. instant macros."
+  - Bad: "Watch as Sarah discovers her hidden calorie intake through our revolutionary AI scanning technology"
+  - The body can complete an incomplete hook ("but... my macro tracker saved me")
+
+CTA = button text. 2-5 words.
 
 === YOUR TASK ===
 
-For each creative, generate:
-- 5-6 HOOK VARIATIONS: each grabs attention using a DIFFERENT psychological angle from the angle bank. These are the scroll-stopping text overlays people read first. Write them like real social media hooks - conversational, relatable, curiosity-inducing.
-- 2-3 BODY VARIATIONS: each describes a different moment of the user experience with the product. What is visually happening on screen. Short and descriptive, not persuasive.
-- 1 CTA: button text.
+Create 5 creatives. Each creative targets a DIFFERENT audience segment from the hierarchy above.
 
-JSON format:
+For each creative:
+- Pick the segment it targets (creative 1 = segment 1, creative 2 = segment 2, etc.)
+- The hooks should stop THAT segment's scroll, using their specific angle
+- 5-6 HOOK VARIATIONS per creative, each pulling a different psychological lever but all speaking to the SAME segment
+- 2-3 BODY VARIATIONS: simple product experience descriptions. What the feature does in plain words.
+- 1 CTA
+
+JSON:
 {
   "creatives": [
     {
@@ -643,33 +689,34 @@ JSON format:
       "name": "concept name",
       "templateId": "from matched list",
       "templateName": "template title",
-      "emotion": "primary emotion",
+      "emotion": "primary emotion for this segment",
       "platform": "TikTok|Meta/IG|YouTube|Snapchat",
       "format": "9:16 vertical",
-      "scenario": "real-life situation (1 sentence)",
+      "scenario": "the specific daily moment that triggers need for this segment (1 sentence)",
       "experienceType": "${primaryExp}",
       "productionStyle": "production approach",
+      "targetSegment": "segment name from hierarchy",
       "hooks": [
-        { "text": "scroll-stopping hook (5-15 words)", "angle": "psychological angle (e.g. loss aversion, curiosity gap, identity)" },
-        { "text": "different hook, different angle", "angle": "different angle" }
+        { "text": "scroll-stopping hook for this segment", "angle": "which psychological lever this pulls", "targetSegment": "segment name" },
+        { "text": "different hook, different lever, same segment", "angle": "different lever" }
       ],
       "bodies": [
-        { "text": "short visual description of product experience moment", "visual": "what viewer sees on screen" },
-        { "text": "alternative experience moment", "visual": "alternative visual" }
+        { "text": "simple product feature description", "visual": "what viewer sees on screen" },
+        { "text": "alternative simple description", "visual": "alternative visual" }
       ],
-      "cta": { "text": "Download Now" },
+      "cta": { "text": "Download Free" },
       "whyThisTemplate": "1 sentence"
     }
   ]
 }
 
 CRITICAL:
-1. Each creative: 5-6 hook variations, 2-3 body variations, 1 CTA
-2. HOOKS are attention grabbers - questions, POVs, bold claims, relatable moments. NOT taglines or headlines.
-3. BODY is visual description of the product experience - NOT a hook, NOT a sales pitch
-4. Hook variations MUST use DIFFERENT psychological angles - not rephrasing the same idea
-5. Write like the target audience talks - casual, real, no corporate or AI speak
-6. Use 5 different templates across creatives
+1. Creative 1 targets Segment 1, Creative 2 targets Segment 2, etc. Each creative = a different audience bet.
+2. HOOKS must use the product's LEXICAL FIELD - words that signal the category instantly
+3. HOOKS can be incomplete thoughts that the body resolves (hook: "but..." body: "...this app changed that")
+4. BODY is SIMPLE. Describe the feature plainly. Great copy is simple copy.
+5. Each hook variation pulls a DIFFERENT psychological lever from the deep dive
+6. Write like the target segment talks - match their vocabulary, not marketing speak
 7. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 

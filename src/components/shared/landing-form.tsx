@@ -44,6 +44,11 @@ const V3_PRESETS: Record<string, { appName: string; featureName: string; benefit
     featureName: "Sin Quiz",
     benefit: "Discover which deadly sin is secretly running your life. A 60-second quiz that reveals hidden behavioral patterns with Scripture-based insights and a personalized growth plan.",
   },
+  calSnap: {
+    appName: "CalSnap",
+    featureName: "AI Food Scanner",
+    benefit: "Point your phone at any food and instantly see the full macro breakdown. No manual logging, no searching databases. Just snap and know what you're eating.",
+  },
 };
 
 interface LandingFormProps {
