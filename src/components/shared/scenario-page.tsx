@@ -429,7 +429,7 @@ function GenerationProgress({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2.5">
             <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse shadow-sm shadow-violet-500/50" />
-            <span className="text-xs font-bold text-foreground">Generating with Claude</span>
+            <span className="text-xs font-bold text-foreground">Generating ad creative strategy</span>
             <span className="text-[11px] text-muted-foreground/70 bg-violet-500/10 px-2 py-0.5 rounded-full">
               {Math.round(progress)}%
             </span>

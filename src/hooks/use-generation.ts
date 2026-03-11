@@ -162,10 +162,10 @@ export interface SectionStep {
 
 const SECTION_DEFS = [
   { key: "psycheMap", label: "Psyche Map", description: "Mapping brain regions, cognitive biases, dopamine architecture, and habit loops" },
-  { key: "salesPlaybook", label: "Sales Playbook", description: "Building value equation, awareness levels, Cialdini weapons, NLP techniques, and closing techniques — parallel with Research" },
-  { key: "research", label: "Research", description: "Creating shadow avatar, search queries, research techniques, and pre-creative checklist — parallel with Sales Playbook" },
-  { key: "creativeTree", label: "Creative Tree", description: "Generating emotional angles, frameworks, ad scripts, hooks, and platform formats — informed by ALL previous analysis" },
-  { key: "topCreatives", label: "Top Creatives", description: "Crafting 5 complete ad blueprints — parallel with Creative Tree" },
+  { key: "salesPlaybook", label: "Persuasion Engine", description: "Building value equation, awareness levels, Cialdini weapons, NLP techniques, and closing techniques" },
+  { key: "research", label: "Audience DNA", description: "Creating shadow avatar, audience segments, search queries, and pre-creative checklist" },
+  { key: "creativeTree", label: "Script Lab", description: "Generating emotional angles, frameworks, ad scripts, hooks, and platform formats" },
+  { key: "topCreatives", label: "Top Creatives", description: "Crafting 5 template-matched ad blueprints" },
 ] as const;
 
 export function useProgressiveGeneration() {
