@@ -188,25 +188,23 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
           </div>
         )}
 
-        {/* Context / Core Benefit */}
+        {/* Core Benefit */}
         <div className="mb-5">
           <label className="block text-xs font-semibold text-foreground mb-1.5 tracking-wide">
-            {isV3 ? "Feature Context" : "Core Benefit"}
+            Core Benefit
           </label>
           <textarea
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all resize-y min-h-[100px]"
             placeholder={
               isV3
-                ? "What does this feature do? How does it change the user's experience? What problem does it solve?"
+                ? "What does this feature do for the user? What's the real benefit — not the feature itself, but how it changes their life, routine, or emotions?"
                 : "What does this product do for the user? Why would someone buy it?"
             }
             value={productBenefit}
             onChange={(e) => setProductBenefit(e.target.value)}
           />
           <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-            {isV3
-              ? "Describe what makes this feature valuable. The more specific you are, the better — this shapes every ad, hook, and script that gets generated."
-              : "This is the most important field. The more specific you are about the benefit, the better your ads will be. Describe what makes it valuable, who it helps, and how it changes their life. This directly shapes every ad, hook, and script that gets generated."}
+            This is the most important field. Describe the real benefit — not what it does, but why someone would care. The AI uses this to extract related sub-benefits, emotional tangents, and ad scenarios you might overlook. The more specific you are, the better every ad, hook, and script will be.
           </p>
         </div>
 
