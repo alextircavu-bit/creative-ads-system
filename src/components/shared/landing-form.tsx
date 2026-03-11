@@ -31,8 +31,8 @@ const V3_PRESETS: Record<string, { appName: string; featureName: string; benefit
   },
   bcLock: {
     appName: "BibleChat",
-    featureName: "Lock Screen Verses",
-    benefit: "A new Bible verse on your lock screen every time you pick up your phone. No app to open, no habit to build - it's just there. Passive spiritual nourishment 50-96 times a day.",
+    featureName: "Hourly Lockscreen Widget Verse",
+    benefit: "You get God's Word, Scripture, Bible verses on your lockscreen, every hour.",
   },
   bcChat: {
     appName: "BibleChat",
