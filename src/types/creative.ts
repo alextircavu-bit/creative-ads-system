@@ -351,6 +351,9 @@ export interface ProjectRow {
   scenario: ScenarioType;
   product_name: string;
   product_description: string;
+  app_id: string | null;
+  feature_name: string | null;
+  feature_id: string | null;
   input_data: ProjectInput;
   generation_result: GenerationResult | null;
   status: "pending" | "generating" | "completed" | "failed";

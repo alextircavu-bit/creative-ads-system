@@ -41,6 +41,9 @@ export const projectRepository = {
         scenario: input.scenario,
         product_name: input.productName,
         product_description: input.productDescription,
+        app_id: input.appId || null,
+        feature_name: input.featureName || null,
+        feature_id: input.featureId || null,
         input_data: input,
         status: "pending",
       })
