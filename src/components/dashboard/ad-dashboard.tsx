@@ -32,7 +32,7 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
           <div className="text-lg font-black tracking-tight">Ad Predictions</div>
           <div className="text-xs text-muted-foreground">
             Based on our framework analysis of <strong className="text-foreground">{productName}</strong>
-            {isGenerating && <span className="ml-1.5 text-violet-400 animate-pulse">— analyzing...</span>}
+            {isGenerating && <span className="ml-1.5 text-violet-400 animate-pulse">- analyzing...</span>}
           </div>
         </div>
       </div>
@@ -52,21 +52,21 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
           {r.psycheMap && (
             <>
               <Insight color="#8b5cf6">
-                Predicted cognitive profile: <strong>{r.psycheMap.cognitiveProfile.name}</strong> — {r.psycheMap.cognitiveProfile.mechanism.split("(")[0].trim().toLowerCase()}
+                Predicted cognitive profile: <strong>{r.psycheMap.cognitiveProfile.name}</strong> - {r.psycheMap.cognitiveProfile.mechanism.split("(")[0].trim().toLowerCase()}
               </Insight>
               <Insight color="#22c55e">
                 Primary dopamine trigger: <strong>{r.psycheMap.dopamine.trigger}</strong> ({r.psycheMap.dopamine.triggerPct}% power)
               </Insight>
               <Insight color="#f59e0b">
-                Reward schedule: <strong>{r.psycheMap.dopamine.schedule}</strong> — {r.psycheMap.dopamine.schedulePct >= 70 ? "high addiction potential" : "moderate engagement"}
+                Reward schedule: <strong>{r.psycheMap.dopamine.schedule}</strong> - {r.psycheMap.dopamine.schedulePct >= 70 ? "high addiction potential" : "moderate engagement"}
               </Insight>
               {r.psycheMap.biases.length > 0 && (
                 <Insight color="#f43f5e">
-                  Strongest bias: <strong>{r.psycheMap.biases.sort((a, b) => b.strength - a.strength)[0].name}</strong> at {r.psycheMap.biases.sort((a, b) => b.strength - a.strength)[0].strength}% — likely your most exploitable angle
+                  Strongest bias: <strong>{r.psycheMap.biases.sort((a, b) => b.strength - a.strength)[0].name}</strong> at {r.psycheMap.biases.sort((a, b) => b.strength - a.strength)[0].strength}% - likely your most exploitable angle
                 </Insight>
               )}
               <Insight color="#06b6d4">
-                {r.psycheMap.brainRegions.filter((b) => b.active).length} brain regions predicted to activate — habit loop: <strong>{r.psycheMap.habitLoop.cue}</strong> → {r.psycheMap.habitLoop.routine} → reward
+                {r.psycheMap.brainRegions.filter((b) => b.active).length} brain regions predicted to activate - habit loop: <strong>{r.psycheMap.habitLoop.cue}</strong> → {r.psycheMap.habitLoop.routine} → reward
               </Insight>
             </>
           )}
@@ -99,21 +99,21 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
             return (
               <>
                 <Insight color="#f97316">
-                  Value equation: Dream Outcome <strong>{ve.dreamOutcome.score}%</strong>, Likelihood <strong>{ve.perceivedLikelihood.score}%</strong> — {ve.dreamOutcome.score >= 75 ? "strong aspirational pull" : "needs clearer outcome framing"}
+                  Value equation: Dream Outcome <strong>{ve.dreamOutcome.score}%</strong>, Likelihood <strong>{ve.perceivedLikelihood.score}%</strong> - {ve.dreamOutcome.score >= 75 ? "strong aspirational pull" : "needs clearer outcome framing"}
                 </Insight>
                 <Insight color="#3b82f6">
-                  Top influence weapon: <strong>{topCialdini.icon} {topCialdini.name}</strong> at {topCialdini.power}% — predicted to be your strongest persuasion lever
+                  Top influence weapon: <strong>{topCialdini.icon} {topCialdini.name}</strong> at {topCialdini.power}% - predicted to be your strongest persuasion lever
                 </Insight>
                 {topNLP && (
                   <Insight color="#a855f7">
-                    Recommended NLP technique: <strong>{topNLP.name}</strong> ({topNLP.power}% power) — most likely to shift beliefs
+                    Recommended NLP technique: <strong>{topNLP.name}</strong> ({topNLP.power}% power) - most likely to shift beliefs
                   </Insight>
                 )}
                 <Insight color="#22c55e">
-                  Best audience entry point: <strong>Level {topAwareness.level} — {topAwareness.name}</strong> ({topAwareness.relevance}% relevant)
+                  Best audience entry point: <strong>Level {topAwareness.level} - {topAwareness.name}</strong> ({topAwareness.relevance}% relevant)
                 </Insight>
                 <Insight color="#f43f5e">
-                  Weakest link: <strong>{weakest.name}</strong> at {weakest.score}% — your ad should address this first
+                  Weakest link: <strong>{weakest.name}</strong> at {weakest.score}% - your ad should address this first
                 </Insight>
               </>
             );
@@ -141,22 +141,22 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
                 {topSegments.length > 0 ? (
                   <>
                     <Insight color="#ec4899">
-                      <strong>{segments.length} audience segments</strong> predicted — test all, then double down on converters
+                      <strong>{segments.length} audience segments</strong> predicted - test all, then double down on converters
                     </Insight>
                     {topSegments.map((seg, i) => (
                       <Insight key={i} color={seg.color}>
-                        <strong>{seg.name}</strong> ({seg.demographics}) — {seg.predictedROI} ROI, {seg.conversionLikelihood}% conversion likelihood. Best angle: {seg.bestAngle}
+                        <strong>{seg.name}</strong> ({seg.demographics}) - {seg.predictedROI} ROI, {seg.conversionLikelihood}% conversion likelihood. Best angle: {seg.bestAngle}
                       </Insight>
                     ))}
                     {highROI.length > 0 && (
                       <Insight color="#22c55e">
-                        Start with: <strong>{highROI.map((s) => s.name).join(", ")}</strong> — predicted highest return on ad spend
+                        Start with: <strong>{highROI.map((s) => s.name).join(", ")}</strong> - predicted highest return on ad spend
                       </Insight>
                     )}
                   </>
                 ) : (
                   <Insight color="#ec4899">
-                    {r.research.avatarTraits.length} avatar traits mapped — {r.research.avatarTraits.slice(0, 2).map((t) => `${t.label}: ${t.value}`).join(", ")}
+                    {r.research.avatarTraits.length} avatar traits mapped - {r.research.avatarTraits.slice(0, 2).map((t) => `${t.label}: ${t.value}`).join(", ")}
                   </Insight>
                 )}
                 <Insight color="#8b5cf6">
@@ -202,7 +202,7 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
                 </Insight>
                 {totalHooks > 0 && (
                   <Insight color="#8b5cf6">
-                    {totalHooks} hook variations ready — test these as your first 3 seconds
+                    {totalHooks} hook variations ready - test these as your first 3 seconds
                   </Insight>
                 )}
                 <Insight color="#06b6d4">
@@ -210,7 +210,7 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
                 </Insight>
                 {topCreative && (
                   <Insight color="#22c55e">
-                    Top predicted creative: <strong>&quot;{topCreative.name}&quot;</strong> — {topCreative.platform}, {topCreative.emotion.toLowerCase()} angle
+                    Top predicted creative: <strong>&quot;{topCreative.name}&quot;</strong> - {topCreative.platform}, {topCreative.emotion.toLowerCase()} angle
                     {topCreative.productionStyle && `. Production: ${topCreative.productionStyle}`}
                   </Insight>
                 )}
@@ -220,7 +220,7 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
         </SummaryPanel>
       </div>
 
-      {/* Canvas — AI Video Creator (Coming Soon) */}
+      {/* Canvas - AI Video Creator (Coming Soon) */}
       <div className="bg-card/30 backdrop-blur-sm border border-border/30 border-dashed rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] via-transparent to-fuchsia-500/[0.03]" />
         <div className="absolute top-4 right-4">
@@ -236,7 +236,7 @@ export function AdDashboard({ result, productName, isGenerating, onNavigate }: A
             </div>
             <div>
               <div className="text-base font-black tracking-tight">Creative Canvas</div>
-              <div className="text-xs text-muted-foreground">AI Video Creator — preview and export your ads</div>
+              <div className="text-xs text-muted-foreground">AI Video Creator - preview and export your ads</div>
             </div>
           </div>
 

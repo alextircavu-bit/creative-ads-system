@@ -219,7 +219,7 @@ export function useProgressiveGeneration() {
 
     try {
       // === STEP 1: Psyche Map + Sales Playbook + Research ALL IN PARALLEL ===
-      // Sales/Research barely use Psyche context — fire everything at once
+      // Sales/Research barely use Psyche context - fire everything at once
       setCurrentSection("Psyche Map + Sales + Research");
       setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: "generating" } : s)));
 
@@ -281,7 +281,7 @@ export function useProgressiveGeneration() {
       return null;
     }
 
-    // Success — build full result
+    // Success - build full result
     const fullResult: GenerationResult = {
       id: projectId || crypto.randomUUID(),
       input,

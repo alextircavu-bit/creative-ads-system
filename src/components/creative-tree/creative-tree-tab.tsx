@@ -43,7 +43,7 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
         <div>
           <div className="text-lg font-black tracking-tight">Emotional Angles & Copy</div>
           <div className="text-xs text-muted-foreground mt-0.5">
-            {data.emotionalAngles.length} angles × {data.frameworks.length} frameworks — tap to explore scripts
+            {data.emotionalAngles.length} angles × {data.frameworks.length} frameworks - tap to explore scripts
           </div>
         </div>
       </div>

@@ -11,11 +11,11 @@ const V4_PRESETS: Record<string, { name: string; benefit: string }> = {
   },
   notion: {
     name: "Notion",
-    benefit: "All-in-one workspace that replaces your docs, spreadsheets, and project management tools. Organize everything in one place — notes, tasks, wikis, databases — so your team stays aligned and moves faster.",
+    benefit: "All-in-one workspace that replaces your docs, spreadsheets, and project management tools. Organize everything in one place - notes, tasks, wikis, databases - so your team stays aligned and moves faster.",
   },
   duolingo: {
     name: "Duolingo",
-    benefit: "Learn a new language in just 5 minutes a day with bite-sized lessons that feel like a game. Streak system and cute reminders keep you coming back — 40+ languages, completely free.",
+    benefit: "Learn a new language in just 5 minutes a day with bite-sized lessons that feel like a game. Streak system and cute reminders keep you coming back - 40+ languages, completely free.",
   },
   hellofresh: {
     name: "HelloFresh",
@@ -27,17 +27,17 @@ const V3_PRESETS: Record<string, { appName: string; featureName: string; benefit
   bcReels: {
     appName: "BibleChat",
     featureName: "Reels",
-    benefit: "Replace doomscrolling with Bible verse reels. Same scroll, same swipe — but every piece of content feeds your soul instead of draining it. Community comments, reactions, and shared faith.",
+    benefit: "Replace doomscrolling with Bible verse reels. Same scroll, same swipe - but every piece of content feeds your soul instead of draining it. Community comments, reactions, and shared faith.",
   },
   bcLock: {
     appName: "BibleChat",
     featureName: "Lock Screen Verses",
-    benefit: "A new Bible verse on your lock screen every time you pick up your phone. No app to open, no habit to build — it's just there. Passive spiritual nourishment 50-96 times a day.",
+    benefit: "A new Bible verse on your lock screen every time you pick up your phone. No app to open, no habit to build - it's just there. Passive spiritual nourishment 50-96 times a day.",
   },
   bcChat: {
     appName: "BibleChat",
     featureName: "AI Chat",
-    benefit: "Ask any question and get answers grounded in Scripture. Like having a pastor in your pocket — available 24/7, no judgment, always biblical.",
+    benefit: "Ask any question and get answers grounded in Scripture. Like having a pastor in your pocket - available 24/7, no judgment, always biblical.",
   },
   bcQuiz: {
     appName: "BibleChat",
@@ -103,7 +103,7 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
     setProductBenefit(project.product_description);
   };
 
-  // Deduplicate history — only show unique name+description combos
+  // Deduplicate history - only show unique name+description combos
   const seen = new Set<string>();
   const uniqueProjects = projects.filter((p) => {
     const key = `${p.product_name}::${p.product_description}`;
@@ -123,7 +123,7 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
       </h1>
       <p className="text-muted-foreground text-center max-w-lg mb-10 text-sm leading-relaxed">
         {scenario === "v3"
-          ? "Enter any mobile app feature. Get a full creative workbench — ad blueprints, emotional angles, psychology analysis, and sales mechanics."
+          ? "Enter any mobile app feature. Get a full creative workbench - ad blueprints, emotional angles, psychology analysis, and sales mechanics."
           : "Enter any product. Get ready-to-run ad creatives backed by psychology, sales frameworks, and audience research."}
       </p>
 
@@ -153,7 +153,7 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
           )}
         </div>
 
-        {/* Feature Name — V3 only */}
+        {/* Feature Name - V3 only */}
         {isV3 && (
           <div className="mb-4">
             <label className="block text-xs font-semibold text-foreground mb-1.5 tracking-wide">
@@ -184,14 +184,14 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all resize-y min-h-[100px]"
             placeholder={
               isV3
-                ? "What does this feature do for the user? What's the real benefit — not the feature itself, but how it changes their life, routine, or emotions?"
+                ? "What does this feature do for the user? What's the real benefit - not the feature itself, but how it changes their life, routine, or emotions?"
                 : "What does this product do for the user? Why would someone buy it?"
             }
             value={productBenefit}
             onChange={(e) => setProductBenefit(e.target.value)}
           />
           <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-            This is the most important field. Describe the real benefit — not what it does, but why someone would care. The AI uses this to extract related sub-benefits, emotional tangents, and ad scenarios you might overlook. The more specific you are, the better every ad, hook, and script will be.
+            This is the most important field. Describe the real benefit - not what it does, but why someone would care. The AI uses this to extract related sub-benefits, emotional tangents, and ad scenarios you might overlook. The more specific you are, the better every ad, hook, and script will be.
           </p>
         </div>
 
@@ -220,12 +220,12 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
             className="rounded-lg border border-border bg-card/50 px-3.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-violet-500/30 hover:bg-violet-500/5 transition-all"
             onClick={() => loadPreset(key)}
           >
-            {"appName" in preset ? `${preset.appName} — ${preset.featureName}` : preset.name}
+            {"appName" in preset ? `${preset.appName} - ${preset.featureName}` : preset.name}
           </button>
         ))}
       </div>
 
-      {/* History — deduplicated */}
+      {/* History - deduplicated */}
       {uniqueProjects.length > 0 && (
         <div className="mt-8 w-full max-w-xl">
           <div className="flex items-center gap-2 mb-3">

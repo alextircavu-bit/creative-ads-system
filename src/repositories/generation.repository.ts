@@ -34,37 +34,37 @@ interface GenerationContext {
 }
 
 export const generationRepository = {
-  // 1. Psyche Map — generated FIRST (no context needed)
+  // 1. Psyche Map - generated FIRST (no context needed)
   async generatePsycheMap(input: ProjectInput): Promise<PsycheMapData> {
     return postJSON(`${API_BASE}/generate`, { input, section: "psycheMap" });
   },
 
-  // 2. Sales Playbook — receives Psyche Map
+  // 2. Sales Playbook - receives Psyche Map
   async generateSalesPlaybook(input: ProjectInput, context?: GenerationContext): Promise<SalesPlaybookData> {
     return postJSON(`${API_BASE}/generate`, { input, section: "salesPlaybook", context });
   },
 
-  // 3. Research — receives Psyche Map + Sales Playbook
+  // 3. Research - receives Psyche Map + Sales Playbook
   async generateResearch(input: ProjectInput, context?: GenerationContext): Promise<ResearchData> {
     return postJSON(`${API_BASE}/generate`, { input, section: "research", context });
   },
 
-  // 4. Creative Tree — receives ALL (generated LAST)
+  // 4. Creative Tree - receives ALL (generated LAST)
   async generateCreativeTree(input: ProjectInput, context?: GenerationContext): Promise<CreativeTreeData> {
     return postJSON(`${API_BASE}/generate`, { input, section: "creativeTree", context });
   },
 
-  // 5. Top Creatives — receives ALL
+  // 5. Top Creatives - receives ALL
   async generateTopCreatives(input: ProjectInput, context?: GenerationContext): Promise<TopCreativesData> {
     return postJSON(`${API_BASE}/generate`, { input, section: "topCreatives", context });
   },
 
-  // Full generation (all at once — server handles ordering)
+  // Full generation (all at once - server handles ordering)
   async generateAll(input: ProjectInput): Promise<GenerationResult> {
     return postJSON(`${API_BASE}/generate`, { input, section: "all" });
   },
 
-  // Copy Check — AI deep review (local scoring is separate in lib/copy-check.ts)
+  // Copy Check - AI deep review (local scoring is separate in lib/copy-check.ts)
   async analyzeCopy(input: ProjectInput, copyText: string): Promise<CopyCheckResult> {
     return postJSON(`${API_BASE}/analyze-copy`, { input, copyText });
   },

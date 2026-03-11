@@ -115,7 +115,7 @@ export function ResearchTab({ data, productName }: ResearchTabProps) {
             <div className="w-10 h-10 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-lg shrink-0">🎯</div>
             <div>
               <div className="text-base font-extrabold">Predicted Audience Segments</div>
-              <div className="text-xs text-muted-foreground mt-0.5">Ranked by predicted ROI — test all, double down on winners</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Ranked by predicted ROI - test all, double down on winners</div>
             </div>
           </div>
           <div className="text-xs text-muted-foreground/50 leading-relaxed mb-4 px-4 py-2.5 bg-background/50 border border-border/30 rounded-xl">
@@ -164,7 +164,7 @@ export function ResearchTab({ data, productName }: ResearchTabProps) {
                   <div className="flex items-start gap-2 bg-secondary/20 border border-border/15 rounded-lg p-2.5">
                     <span className="text-[10px] shrink-0 mt-0.5">💡</span>
                     <div className="text-[11px] text-muted-foreground leading-relaxed">
-                      <strong className="text-foreground/70">Best angle:</strong> {seg.bestAngle} — <span className="text-muted-foreground/60">{seg.adStrategy}</span>
+                      <strong className="text-foreground/70">Best angle:</strong> {seg.bestAngle} - <span className="text-muted-foreground/60">{seg.adStrategy}</span>
                     </div>
                   </div>
                 </div>

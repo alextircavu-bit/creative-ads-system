@@ -171,13 +171,13 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
             <h1 className="text-base font-bold text-foreground">
               {activeView === "dashboard" && "Your Ad Creatives"}
               {activeView === "templates" && "Template Library"}
-              {activeView === "research" && "Audience DNA — TAG Shadow Technique"}
+              {activeView === "research" && "Audience DNA - TAG Shadow Technique"}
               {activeView === "psyche" && "Psyche Map"}
               {activeView === "sales" && "Persuasion Engine"}
               {activeView === "creative" && "Script Lab"}
               {activeView === "copycheck" && "Copy Check"}
             </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">{input.productName} — {input.productDescription.slice(0, 80)}{input.productDescription.length > 80 ? "..." : ""}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{input.productName} - {input.productDescription.slice(0, 80)}{input.productDescription.length > 80 ? "..." : ""}</p>
           </div>
 
           <button
@@ -237,7 +237,7 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-5xl mx-auto px-6 py-8">
 
-            {/* DASHBOARD — Ads front and center */}
+            {/* DASHBOARD - Ads front and center */}
             {activeView === "dashboard" && (
               <div className="space-y-10">
                 {/* Top 5 Creatives */}
@@ -290,7 +290,7 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
                 <div className="flex items-center justify-center py-10 rounded-2xl border border-dashed border-border/30 bg-card/10">
                   <div className="text-center">
                     <div className="text-sm font-semibold text-muted-foreground/50 mb-0.5">Creative Canvas</div>
-                    <div className="text-xs text-muted-foreground/30">AI Video Creator — Coming Soon</div>
+                    <div className="text-xs text-muted-foreground/30">AI Video Creator - Coming Soon</div>
                   </div>
                 </div>
               </div>

@@ -75,7 +75,7 @@ export function PsycheMapTab({ data, productName }: PsycheMapTabProps) {
           {[
             { icon: "💥", title: `Trigger Type: ${data.dopamine.trigger}`, desc: `What initiates the dopamine response when users first encounter ${productName}.`, label: "Power", pct: data.dopamine.triggerPct, color: "#22c55e" },
             { icon: "🎰", title: `Reward Schedule: ${data.dopamine.schedule}`, desc: "Variable ratio schedules create the strongest dopamine loops. Fixed schedules are predictable and less addictive.", label: "Addictiveness", pct: data.dopamine.schedulePct, color: "#f59e0b" },
-            { icon: "🔮", title: "Anticipation Loop", desc: `${data.dopamine.anticipation} — Dopamine is released during ANTICIPATION, not reward delivery.`, label: null, pct: null, color: null },
+            { icon: "🔮", title: "Anticipation Loop", desc: `${data.dopamine.anticipation} - Dopamine is released during ANTICIPATION, not reward delivery.`, label: null, pct: null, color: null },
             { icon: "🔗", title: `Retention Hook: ${data.dopamine.retention}`, desc: `What keeps users coming back after the initial dopamine spike fades.`, label: "Stickiness", pct: data.dopamine.retentionPct, color: "#8b5cf6" },
           ].map((item, i) => (
             <div key={i} className="bg-background/50 border border-border/30 rounded-xl p-4 hover:border-green-500/20 transition-all">

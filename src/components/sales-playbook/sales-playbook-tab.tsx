@@ -18,7 +18,7 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
           <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-lg shrink-0">📖</div>
           <div>
             <div className="text-base font-extrabold">The Value Equation</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Alex Hormozi — <em>$100M Offers</em></div>
+            <div className="text-xs text-muted-foreground mt-0.5">Alex Hormozi - <em>$100M Offers</em></div>
           </div>
         </div>
         <div className="text-xs text-muted-foreground leading-relaxed mb-4 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">
@@ -53,7 +53,7 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
           <div className="w-10 h-10 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-lg shrink-0">🧠</div>
           <div>
             <div className="text-base font-extrabold">5 Levels of Awareness</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Eugene Schwartz — <em>Breakthrough Advertising</em></div>
+            <div className="text-xs text-muted-foreground mt-0.5">Eugene Schwartz - <em>Breakthrough Advertising</em></div>
           </div>
         </div>
         <div className="text-xs text-muted-foreground leading-relaxed mb-4 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">Every user sits at a different awareness level. Match your message to where they are:</div>
@@ -109,7 +109,7 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
           <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-lg shrink-0">⚔️</div>
           <div>
             <div className="text-base font-extrabold">The 6 Weapons of Influence</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Robert Cialdini — <em>Influence: The Psychology of Persuasion</em></div>
+            <div className="text-xs text-muted-foreground mt-0.5">Robert Cialdini - <em>Influence: The Psychology of Persuasion</em></div>
           </div>
         </div>
         <div className="text-xs text-muted-foreground leading-relaxed mb-4 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">Cialdini identified 6 universal principles that drive human compliance. Ranked by relevance to {productName}:</div>
@@ -138,13 +138,13 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
           <div className="w-10 h-10 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-lg shrink-0">⚡</div>
           <div>
             <div className="text-base font-extrabold">System 1 vs System 2 Targeting</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Daniel Kahneman — <em>Thinking, Fast and Slow</em></div>
+            <div className="text-xs text-muted-foreground mt-0.5">Daniel Kahneman - <em>Thinking, Fast and Slow</em></div>
           </div>
         </div>
         <div className="text-xs text-muted-foreground leading-relaxed mb-4 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">System 1 is fast, emotional, automatic. System 2 is slow, rational, deliberate. Hook System 1 FIRST, then give System 2 permission to agree.</div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <div className="text-xs font-extrabold mb-1 text-rose-400">SYSTEM 1 — Fast Brain</div>
+            <div className="text-xs font-extrabold mb-1 text-rose-400">SYSTEM 1 - Fast Brain</div>
             <div className="text-[10px] text-muted-foreground/40 mb-2">Amygdala, Nucleus Accumbens, Visual Cortex</div>
             <div className="space-y-2">
               {data.system1Triggers.map((t) => (
@@ -157,7 +157,7 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
             </div>
           </div>
           <div>
-            <div className="text-xs font-extrabold mb-1 text-blue-400">SYSTEM 2 — Slow Brain</div>
+            <div className="text-xs font-extrabold mb-1 text-blue-400">SYSTEM 2 - Slow Brain</div>
             <div className="text-[10px] text-muted-foreground/40 mb-2">Prefrontal Cortex, Ventromedial PFC</div>
             <div className="space-y-2">
               {data.system2Triggers.map((t) => (
@@ -178,7 +178,7 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
           <div className="w-10 h-10 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-lg shrink-0">🎯</div>
           <div>
             <div className="text-base font-extrabold">Hook → Story → Offer</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Russell Brunson — <em>DotCom Secrets</em></div>
+            <div className="text-xs text-muted-foreground mt-0.5">Russell Brunson - <em>DotCom Secrets</em></div>
           </div>
         </div>
         <div className="text-xs text-muted-foreground leading-relaxed mb-4 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">Every converting ad follows a 3-part structure.</div>
@@ -210,7 +210,7 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
           <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-lg shrink-0">📐</div>
           <div>
             <div className="text-base font-extrabold">The Straight Line</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Jordan Belfort — <em>Way of the Wolf</em></div>
+            <div className="text-xs text-muted-foreground mt-0.5">Jordan Belfort - <em>Way of the Wolf</em></div>
           </div>
         </div>
         <div className="text-xs text-muted-foreground leading-relaxed mb-4 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">Every sale requires 3 certainties to reach 10/10. If ANY is low, the sale dies:</div>
@@ -244,13 +244,13 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
             <div className="text-xs text-muted-foreground mt-0.5">Zig Ziglar, Dale Carnegie, Jordan Belfort</div>
           </div>
         </div>
-        <div className="text-xs text-muted-foreground leading-relaxed mb-4 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">The close isn&apos;t a moment — it&apos;s the inevitable conclusion of a well-built narrative:</div>
+        <div className="text-xs text-muted-foreground leading-relaxed mb-4 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">The close isn&apos;t a moment - it&apos;s the inevitable conclusion of a well-built narrative:</div>
         <div className="space-y-2">
           {data.closingTechniques.map((c) => (
             <div key={c.name} className="bg-background/50 border border-border/30 rounded-xl p-4 hover:border-teal-500/20 transition-all">
               <div className="flex items-center gap-2.5 mb-2 flex-wrap">
                 <span className="text-sm font-bold">{c.name}</span>
-                <span className="text-[10px] text-muted-foreground/50">{c.source} — <em>{c.book}</em></span>
+                <span className="text-[10px] text-muted-foreground/50">{c.source} - <em>{c.book}</em></span>
               </div>
               <div className="text-xs text-muted-foreground leading-relaxed mb-2">{c.description}</div>
               <div className="bg-secondary/30 rounded-xl px-4 py-3 text-xs text-muted-foreground leading-relaxed italic border-l-2 border-l-amber-500">{c.scriptExample}</div>
@@ -259,14 +259,14 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
         </div>
       </div>
 
-      {/* NLP — Neuro-Linguistic Programming */}
+      {/* NLP - Neuro-Linguistic Programming */}
       {data.nlp && (
         <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-lg shrink-0">🧬</div>
             <div>
               <div className="text-base font-extrabold">Neuro-Linguistic Programming</div>
-              <div className="text-xs text-muted-foreground mt-0.5">Allen Carr, Richard Bandler — <em>Belief System Dismantling</em></div>
+              <div className="text-xs text-muted-foreground mt-0.5">Allen Carr, Richard Bandler - <em>Belief System Dismantling</em></div>
             </div>
           </div>
           <div className="text-xs text-muted-foreground leading-relaxed mb-5 px-4 py-3 bg-background/50 border border-border/30 rounded-xl">{data.nlp.keyPrinciple}</div>
@@ -315,7 +315,7 @@ export function SalesPlaybookTab({ data, productName }: SalesPlaybookTabProps) {
               <span className="text-sm">🎯</span>
               <span className="text-sm font-extrabold">NLP Stack Strategy for {productName}</span>
             </div>
-            <div className="text-xs text-muted-foreground leading-relaxed mb-3">Maximum impact sequence — layer these in order:</div>
+            <div className="text-xs text-muted-foreground leading-relaxed mb-3">Maximum impact sequence - layer these in order:</div>
             <div className="space-y-1.5">
               {data.nlp.stackStrategy.map((s) => {
                 const techniqueColors: Record<string, string> = {

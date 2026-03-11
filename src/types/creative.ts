@@ -1,5 +1,5 @@
 // ============================================================
-// Core Types — All data is AI-generated, these are the shapes
+// Core Types - All data is AI-generated, these are the shapes
 // ============================================================
 
 export type ScenarioType = "v3" | "v4";
@@ -297,7 +297,7 @@ export interface ResearchData {
 
 // --- Copy Check ---
 
-// AI Deep Review result (qualitative — local scoring is in lib/copy-check.ts)
+// AI Deep Review result (qualitative - local scoring is in lib/copy-check.ts)
 export interface CopyCheckResult {
   qualitativeReview?: {
     overallImpression: string;

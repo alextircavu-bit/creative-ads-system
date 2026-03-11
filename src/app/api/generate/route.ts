@@ -11,7 +11,7 @@ import type { ProjectInput, GenerationResult, PsycheMapData, SalesPlaybookData, 
 
 type Section = "psycheMap" | "salesPlaybook" | "research" | "creativeTree" | "topCreatives" | "all";
 
-// Per-section token limits — trimmed for speed
+// Per-section token limits - trimmed for speed
 const SECTION_TOKENS: Record<Exclude<Section, "all">, number> = {
   psycheMap: 6000,
   salesPlaybook: 8000,
@@ -27,7 +27,7 @@ function repairJSON(raw: string): string {
   // Remove trailing commas before } or ]
   s = s.replace(/,\s*([}\]])/g, "$1");
 
-  // Fix truncated JSON — close unterminated strings and brackets
+  // Fix truncated JSON - close unterminated strings and brackets
   // Count open brackets/braces to detect truncation
   let inString = false;
   let escape = false;
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     // --- Generate ALL sections (2 wall-clock steps) ---
     if (section === "all") {
       // Step 1: Psyche Map + Sales Playbook + Research ALL in parallel
-      // Sales/Research barely use Psyche context — fire them all at once
+      // Sales/Research barely use Psyche context - fire them all at once
       const [psycheMap, salesPlaybook, research] = await Promise.all([
         callClaude(psycheMapPrompt(input), SECTION_TOKENS.psycheMap) as Promise<PsycheMapData>,
         callClaude(salesPlaybookPrompt(input), SECTION_TOKENS.salesPlaybook) as Promise<SalesPlaybookData>,

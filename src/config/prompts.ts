@@ -1,5 +1,5 @@
 // ============================================================
-// PROMPTS — Hybrid Architecture
+// PROMPTS - Hybrid Architecture
 // The FRAMEWORK is hardcoded (user's IP). Claude ONLY personalizes
 // content within that framework for the specific product.
 // ============================================================
@@ -47,7 +47,7 @@ function getProductText(input: ProjectInput): string {
 }
 
 // ============================================================
-// 1. PSYCHE MAP — Generated FIRST
+// 1. PSYCHE MAP - Generated FIRST
 // ============================================================
 
 export function psycheMapPrompt(input: ProjectInput): string {
@@ -82,7 +82,7 @@ export function psycheMapPrompt(input: ProjectInput): string {
     detected: b.pattern.test(productText),
   }));
 
-  return `You are a neuromarketing expert. I'm giving you a HARDCODED framework and pre-computed data. Your ONLY job is to write personalized descriptions, ad tips, and insights for THIS specific product. Do NOT change the structure, scores, regions, or framework — only fill in the personalized text fields.
+  return `You are a neuromarketing expert. I'm giving you a HARDCODED framework and pre-computed data. Your ONLY job is to write personalized descriptions, ad tips, and insights for THIS specific product. Do NOT change the structure, scores, regions, or framework - only fill in the personalized text fields.
 
 ${buildContext(input)}
 
@@ -165,8 +165,8 @@ Generate a JSON object using the EXACT structure below. Keep all pre-computed va
   ],
 
   "painPleasure": {
-    "pains": ${JSON.stringify(pains)} (refine these for ${input.productName} specifically — keep the core meaning),
-    "pleasures": ${JSON.stringify(pleasures)} (refine these for ${input.productName} specifically — keep the core meaning)
+    "pains": ${JSON.stringify(pains)} (refine these for ${input.productName} specifically - keep the core meaning),
+    "pleasures": ${JSON.stringify(pleasures)} (refine these for ${input.productName} specifically - keep the core meaning)
   },
 
   "audiencePosition": {
@@ -179,7 +179,7 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code fences. Keep ALL pre-comp
 }
 
 // ============================================================
-// 2. SALES PLAYBOOK — Generated SECOND (receives Psyche Map)
+// 2. SALES PLAYBOOK - Generated SECOND (receives Psyche Map)
 // ============================================================
 
 export function salesPlaybookPrompt(input: ProjectInput, psycheMapData?: PsycheMapData): string {
@@ -198,7 +198,7 @@ Dopamine Trigger: ${psycheMapData.dopamine.trigger}
 `
     : "";
 
-  return `You are a world-class sales strategist. I'm giving you a HARDCODED framework with pre-computed scores. Your ONLY job is to write personalized descriptions, strategies, and ad copy for THIS specific product. Do NOT change the structure or scores — only fill in the personalized text fields.
+  return `You are a world-class sales strategist. I'm giving you a HARDCODED framework with pre-computed scores. Your ONLY job is to write personalized descriptions, strategies, and ad copy for THIS specific product. Do NOT change the structure or scores - only fill in the personalized text fields.
 
 ${buildContext(input)}
 ${psycheContext}
@@ -224,7 +224,7 @@ Belfort Straight Line (FIXED scores):
 Retargeting Funnel (FIXED):
 ${JSON.stringify(RETARGETING_FUNNEL, null, 2)}
 
-NLP Techniques (FIXED — 5 techniques with power ratings):
+NLP Techniques (FIXED - 5 techniques with power ratings):
 ${JSON.stringify(NLP_TECHNIQUES.map((t) => ({ id: t.id, name: t.name, color: t.color, power: t.power, definition: t.definition, copyExamples: t.copyExamples, adApplication: t.adApplication })), null, 2)}
 
 NLP Stack Strategy (FIXED sequence):
@@ -322,7 +322,7 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code fences. Keep ALL pre-comp
 }
 
 // ============================================================
-// 3. RESEARCH — Generated THIRD (receives Psyche Map + Sales)
+// 3. RESEARCH - Generated THIRD (receives Psyche Map + Sales)
 // User's personal methodology: "I become the person that needs
 // the product in my imagination"
 // ============================================================
@@ -343,7 +343,7 @@ export function researchPrompt(input: ProjectInput, psycheMapData?: PsycheMapDat
     previousContext.push(`Best Awareness Level: ${salesData.awarenessLevels.sort((a, b) => b.relevance - a.relevance)[0]?.name}`);
   }
 
-  return `You are an elite ad researcher. I'm giving you a HARDCODED research methodology framework. Your job is to personalize every step for this specific product. Do NOT change the methodology — only personalize the content.
+  return `You are an elite ad researcher. I'm giving you a HARDCODED research methodology framework. Your job is to personalize every step for this specific product. Do NOT change the methodology - only personalize the content.
 
 ${buildContext(input)}
 
@@ -353,10 +353,10 @@ ${previousContext.length > 0 ? `=== PREVIOUS ANALYSIS CONTEXT ===\n${previousCon
 
 This is the user's personal research methodology: "I become the person that needs the product in my imagination, then the needs and emotions come to me after becoming it and I go through multiple scenarios in which the desire of the product may arise and translate them into a hook or an actual ad that might stimulate me emotionally and trigger me."
 
-Shadow Avatar Steps (FIXED structure — personalize descriptions):
+Shadow Avatar Steps (FIXED structure - personalize descriptions):
 ${JSON.stringify(SHADOW_AVATAR_STEPS.map((s) => ({ num: s.num, title: s.title, color: s.color })), null, 2)}
 
-Research Techniques (FIXED names — personalize for this product):
+Research Techniques (FIXED names - personalize for this product):
 ${JSON.stringify(RESEARCH_TECHNIQUES.map((t) => ({ name: t.name, color: t.color, baseDescription: t.description })), null, 2)}
 
 Avatar Trait Labels (FIXED): ${JSON.stringify(AVATAR_TRAIT_LABELS)}
@@ -391,15 +391,15 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
   ],
 
   "audienceSegments": [
-    Generate 4-6 distinct audience segments ranked by PREDICTED ROI for ${input.productName}. These are NOT fixed — they're recommendations to test. The business owner runs ads against multiple segments, measures which convert/subscribe/buy, then doubles down on winners. Each segment:
+    Generate 4-6 distinct audience segments ranked by PREDICTED ROI for ${input.productName}. These are NOT fixed - they're recommendations to test. The business owner runs ads against multiple segments, measures which convert/subscribe/buy, then doubles down on winners. Each segment:
     - "name": short segment name (e.g. "Guilt-Driven Scrollers", "Aspirational Parents", "Productivity Seekers")
     - "description": 1-2 sentences on who they are and WHY they'd convert
     - "demographics": age, gender, location patterns
     - "psychographics": values, fears, desires, habits
-    - "predictedROI": "high" | "medium" | "low" — based on buying power × conversion likelihood × lifetime value
-    - "acquisitionCost": "low" | "medium" | "high" — how expensive to reach them
-    - "lifetimeValue": "high" | "medium" | "low" — how much revenue over time
-    - "conversionLikelihood": 0-100 — probability they convert on first exposure
+    - "predictedROI": "high" | "medium" | "low" - based on buying power × conversion likelihood × lifetime value
+    - "acquisitionCost": "low" | "medium" | "high" - how expensive to reach them
+    - "lifetimeValue": "high" | "medium" | "low" - how much revenue over time
+    - "conversionLikelihood": 0-100 - probability they convert on first exposure
     - "bestAngle": which emotional angle or hook will hit this segment hardest
     - "adStrategy": specific ad approach for THIS segment
     - "color": hex color for UI display
@@ -410,12 +410,12 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
   "preCreativeChecklist": ["10 checklist items specific to ${input.productName} that must be verified before creating ads"]
 }
 
-CRITICAL: Return ONLY valid JSON. No markdown, no code fences. The shadow avatar steps and research techniques represent a real creative methodology — respect its structure.`;
+CRITICAL: Return ONLY valid JSON. No markdown, no code fences. The shadow avatar steps and research techniques represent a real creative methodology - respect its structure.`;
 }
 
 // ============================================================
-// 4. CREATIVE TREE — Generated LAST (receives ALL previous data)
-// This is the OUTPUT — the amalgamation of all psychology,
+// 4. CREATIVE TREE - Generated LAST (receives ALL previous data)
+// This is the OUTPUT - the amalgamation of all psychology,
 // sales, and research insights for maximum ad performance.
 // ============================================================
 
@@ -433,10 +433,10 @@ export function creativeTreePrompt(
 
   if (psycheMapData) {
     contextParts.push(`=== PSYCHE MAP DATA ===
-Cognitive Profile: ${psycheMapData.cognitiveProfile.name} — ${psycheMapData.cognitiveProfile.description}
+Cognitive Profile: ${psycheMapData.cognitiveProfile.name} - ${psycheMapData.cognitiveProfile.description}
 Mechanism: ${psycheMapData.cognitiveProfile.mechanism}
 Active Brain Regions: ${psycheMapData.brainRegions.filter((r) => r.active).map((r) => `${r.name} (${r.role})`).join(", ")}
-Top Biases: ${psycheMapData.biases.slice(0, 7).map((b) => `${b.name} [${b.strength}] — ${b.description}`).join("\n")}
+Top Biases: ${psycheMapData.biases.slice(0, 7).map((b) => `${b.name} [${b.strength}] - ${b.description}`).join("\n")}
 Dopamine: ${psycheMapData.dopamine.trigger} (${psycheMapData.dopamine.triggerPct}%) | Schedule: ${psycheMapData.dopamine.schedule} (${psycheMapData.dopamine.schedulePct}%)
 Pain Points: ${psycheMapData.painPleasure.pains.join(" | ")}
 Pleasure Points: ${psycheMapData.painPleasure.pleasures.join(" | ")}
@@ -456,7 +456,7 @@ Closing Techniques: ${salesData.closingTechniques.map((t) => t.name).join(", ")}
 
   if (researchData) {
     const segmentContext = researchData.audienceSegments?.length
-      ? `\nAudience Segments (ranked by predicted ROI):\n${researchData.audienceSegments.map((s, i) => `${i + 1}. ${s.name} (${s.demographics}) — ${s.predictedROI} ROI, ${s.conversionLikelihood}% conversion, best angle: ${s.bestAngle}`).join("\n")}`
+      ? `\nAudience Segments (ranked by predicted ROI):\n${researchData.audienceSegments.map((s, i) => `${i + 1}. ${s.name} (${s.demographics}) - ${s.predictedROI} ROI, ${s.conversionLikelihood}% conversion, best angle: ${s.bestAngle}`).join("\n")}`
       : "";
     contextParts.push(`=== RESEARCH DATA ===
 Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}${segmentContext}
@@ -479,7 +479,7 @@ Pre-Creative Checklist: ${researchData.preCreativeChecklist.slice(0, 5).join("; 
     steps: f.steps,
   }));
 
-  return `You are an elite ad creative strategist. You have access to COMPLETE psychological, sales, and research analysis from previous sections. Your job is to create the ULTIMATE Creative Tree — ad copy that is mathematically optimized based on all preceding analysis.
+  return `You are an elite ad creative strategist. You have access to COMPLETE psychological, sales, and research analysis from previous sections. Your job is to create the ULTIMATE Creative Tree - ad copy that is mathematically optimized based on all preceding analysis.
 
 ${buildContext(input)}
 
@@ -487,7 +487,7 @@ ${contextParts.join("\n\n")}
 
 === HARDCODED FRAMEWORK (DO NOT CHANGE) ===
 
-Emotional Angles (FIXED — these are the angles, ranked by relevance to this product):
+Emotional Angles (FIXED - these are the angles, ranked by relevance to this product):
 ${JSON.stringify(anglesJSON, null, 2)}
 
 Copywriting Frameworks (FIXED):
@@ -519,7 +519,7 @@ Generate a JSON object:
         "frameworkId": "the framework id",
         "steps": [
           For each step in the framework, generate:
-          { "label": "step label from framework", "type": "problem|agitate|solution|cta|before|after|attention|interest|desire|situation|task|action|result", "text": "ACTUAL AD COPY that stacks the biases, triggers dopamine architecture, exploits the correct Cialdini weapons, and targets the awareness level — all personalized for ${input.productName}" }
+          { "label": "step label from framework", "type": "problem|agitate|solution|cta|before|after|attention|interest|desire|situation|task|action|result", "text": "ACTUAL AD COPY that stacks the biases, triggers dopamine architecture, exploits the correct Cialdini weapons, and targets the awareness level - all personalized for ${input.productName}" }
         ],
         "hooks": ["5 hook lines that combine the emotional angle with the strongest biases and triggers from the psyche map"]
       }
@@ -541,7 +541,7 @@ CRITICAL RULES:
 }
 
 // ============================================================
-// 5. TOP 5 CREATIVES — Generated alongside Creative Tree
+// 5. TOP 5 CREATIVES - Generated alongside Creative Tree
 // ============================================================
 
 export function topCreativesPrompt(
@@ -564,7 +564,7 @@ export function topCreativesPrompt(
   }
 
   const segmentContext = researchData?.audienceSegments?.length
-    ? `\nTarget Audience Segments (ranked by predicted ROI):\n${researchData.audienceSegments.slice(0, 4).map((s, i) => `${i + 1}. ${s.name} — ${s.demographics} | ${s.predictedROI} ROI | Best angle: ${s.bestAngle}`).join("\n")}`
+    ? `\nTarget Audience Segments (ranked by predicted ROI):\n${researchData.audienceSegments.slice(0, 4).map((s, i) => `${i + 1}. ${s.name} - ${s.demographics} | ${s.predictedROI} ROI | Best angle: ${s.bestAngle}`).join("\n")}`
     : "";
 
   // === TEMPLATE MATCHING ===
@@ -604,7 +604,7 @@ For each of the 5 creatives:
 2. Follow that template's frame structure and timing
 3. Write copy that stacks the psychological data (biases, Cialdini, dopamine triggers) into the template
 4. Each creative should use a DIFFERENT template (variety in ad formats = better testing)
-5. Write in the language/lingo of the target audience — not marketing speak, not ChatGPT speak
+5. Write in the language/lingo of the target audience - not marketing speak, not ChatGPT speak
 
 Generate a JSON object:
 {
@@ -624,28 +624,28 @@ Generate a JSON object:
       "body": { "time": "from template", "text": "exact copy showing resolution through the product", "visual": "must match template structure" },
       "cta": { "time": "from template", "text": "exact CTA", "visual": "visual direction" },
       "targetSegment": "which audience segment this targets",
-      "whyThisTemplate": "1 sentence — why this template is the best fit for this creative concept"
+      "whyThisTemplate": "1 sentence - why this template is the best fit for this creative concept"
     }
   ]
 }
 
 CRITICAL:
-1. Each creative MUST use a template from the matched list — include templateId and templateName
+1. Each creative MUST use a template from the matched list - include templateId and templateName
 2. Use 5 DIFFERENT templates across the 5 creatives for testing variety
 3. Follow the template's frame structure and timing exactly
 4. Stack biases and Cialdini weapons from the analysis into the copy
-5. Copy is word-for-word ready for production — write like the target audience speaks
+5. Copy is word-for-word ready for production - write like the target audience speaks
 6. If the primary experience is "in-app", body visuals MUST be screen recording / app demo
 7. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================
-// 6. COPY CHECK — AI Deep Review (optional enhancement)
+// 6. COPY CHECK - AI Deep Review (optional enhancement)
 // Local algorithmic scoring handles the main analysis.
 // ============================================================
 
 export function copyCheckPrompt(input: ProjectInput, copyText: string): string {
-  return `You are a senior copywriter and conversion optimization expert. Provide a DEEP qualitative review of this ad copy. Note: quantitative scoring (Flesch, grammar, bias detection, trend checks) is handled algorithmically — focus on QUALITATIVE insights only.
+  return `You are a senior copywriter and conversion optimization expert. Provide a DEEP qualitative review of this ad copy. Note: quantitative scoring (Flesch, grammar, bias detection, trend checks) is handled algorithmically - focus on QUALITATIVE insights only.
 
 COPY TO ANALYZE:
 """
@@ -667,7 +667,7 @@ Generate a JSON object:
     { "title": "issue name", "description": "what's wrong", "fix": "specific rewrite suggestion", "severity": "high|medium|low" }
   ],
   "frameworksMatched": ["frameworks this copy follows (PAS, AIDA, BAB, 4Ps, STAR)"],
-  "rewriteSuggestion": "a complete rewritten version that scores higher on all metrics — must be genuinely better, not just different"
+  "rewriteSuggestion": "a complete rewritten version that scores higher on all metrics - must be genuinely better, not just different"
 }
 
 Return ONLY valid JSON. No markdown, no code fences.`;

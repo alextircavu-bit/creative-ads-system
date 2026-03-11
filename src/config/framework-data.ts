@@ -1,5 +1,5 @@
 // ============================================================
-// HARDCODED FRAMEWORK DATA — User's IP from the HTML originals
+// HARDCODED FRAMEWORK DATA - User's IP from the HTML originals
 // Claude NEVER decides what frameworks exist or what angles to use.
 // Claude ONLY personalizes descriptions/copy within this structure.
 // ============================================================
@@ -18,19 +18,19 @@ export const EMOTIONAL_ANGLES: EmotionalAngleDef[] = [
   { id: "guilt_screen", name: "Screen Time Guilt", mechanism: "Cognitive dissonance between time wasted and values", color: "#f43f5e", condition: /scroll|reel|feed|watch|time|doom|phone|screen/i },
   { id: "fomo_community", name: "Community FOMO", mechanism: "Others are connecting and growing while isolated", color: "#ec4899", condition: /comment|community|share|connect|together|other|join/i },
   { id: "identity", name: "Identity Transformation", mechanism: '"I\'m the kind of person who invests in myself"', color: "#a855f7", condition: null },
-  { id: "curiosity", name: "Curiosity / Discovery", mechanism: 'Information gap — "what is this?"', color: "#8b5cf6", condition: null },
+  { id: "curiosity", name: "Curiosity / Discovery", mechanism: 'Information gap - "what is this?"', color: "#8b5cf6", condition: null },
   { id: "shame_hiding", name: "Shame / Hiding", mechanism: "Carrying something privately that controls behavior", color: "#6366f1", condition: /quiz|struggle|hidden|secret|pattern|break|shame|guilt/i },
   { id: "hope_transform", name: "Hope / Aspiration", mechanism: "Imagine who you become on the other side", color: "#3b82f6", condition: null },
-  { id: "relief", name: "Relief / Weight Lifted", mechanism: "Exhaustion from carrying something — finally put it down", color: "#06b6d4", condition: /peace|calm|anxiety|stress|burden|carry|tired|exhaust/i },
+  { id: "relief", name: "Relief / Weight Lifted", mechanism: "Exhaustion from carrying something - finally put it down", color: "#06b6d4", condition: /peace|calm|anxiety|stress|burden|carry|tired|exhaust/i },
   { id: "belonging", name: "Belonging / Not Alone", mechanism: 'Social proof, shared experience, "everyone\'s doing this"', color: "#14b8a6", condition: /community|comment|share|together|join|million|thousand/i },
-  { id: "anger_failed", name: "Righteous Anger", mechanism: "Old solutions failed you — apps, willpower, half-measures — this is different", color: "#f59e0b", condition: /fail|wrong|broken|old|instead|frustrat|tried|nothing\s?work/i },
+  { id: "anger_failed", name: "Righteous Anger", mechanism: "Old solutions failed you - apps, willpower, half-measures - this is different", color: "#f59e0b", condition: /fail|wrong|broken|old|instead|frustrat|tried|nothing\s?work/i },
   { id: "fear_loss", name: "Fear of Loss", mechanism: "Every day you don't act, something gets worse or is lost", color: "#ef4444", condition: /lose|miss|worse|damage|hurt|cost|time/i },
   { id: "contrast_replace", name: "Contrast / Replacement", mechanism: "Direct A/B between bad habit and new habit", color: "#22c55e", condition: /instead|replace|scroll|doom|swap|versus|rather/i },
   { id: "nostalgia", name: "Nostalgia / Lost Fire", mechanism: '"Remember when you were motivated? Before the distractions took over."', color: "#a78bfa", condition: /remember|used\sto|before|motivation|drive|closer|grow|momentum|passion/i },
-  { id: "social_proof", name: "Social Proof / Bandwagon", mechanism: 'Millions already switched — numbers, momentum, "you\'re late"', color: "#f97316", condition: null },
+  { id: "social_proof", name: "Social Proof / Bandwagon", mechanism: 'Millions already switched - numbers, momentum, "you\'re late"', color: "#f97316", condition: null },
   { id: "regret_aversion", name: "Regret Aversion", mechanism: '"A year from now you\'ll wish you started today." Future self framing.', color: "#eab308", condition: null },
   { id: "self_frustration", name: "Self-Frustration / Broken Promise", mechanism: '"You keep saying tomorrow. It\'s been months." Failed commitments.', color: "#84cc16", condition: /daily|read|plan|habit|routine|commit|consistent|goal|start/i },
-  { id: "surprise_disrupt", name: "Surprise / Pattern Interrupt", mechanism: '"Wait — THIS exists?? Why does it feel so different?"', color: "#10b981", condition: null },
+  { id: "surprise_disrupt", name: "Surprise / Pattern Interrupt", mechanism: '"Wait - THIS exists?? Why does it feel so different?"', color: "#10b981", condition: null },
   { id: "moral_authority", name: "Counter-Culture Pride", mechanism: '"Everyone scrolls trash. Not you." Being above the noise.', color: "#64748b", condition: /scroll|replace|instead|different|better|trash|doom|phone/i },
   { id: "micro_commitment", name: "Micro-Commitment / Low Bar", mechanism: '"Just 5 minutes. One try. That\'s it." Remove all friction.', color: "#0ea5e9", condition: /daily|minute|quick|easy|simple|start|day|try|small/i },
   { id: "parental_instinct", name: "Parental / Family Shield", mechanism: '"What\'s on YOUR kid\'s phone? Give them this instead."', color: "#d946ef", condition: /kid|child|family|parent|teen|young|son|daughter/i },
@@ -297,9 +297,9 @@ export interface RetargetingFunnelDef {
 }
 
 export const RETARGETING_FUNNEL: RetargetingFunnelDef[] = [
-  { stage: "Cold — Never Seen", emoji: "❄️", frequency: "1-2x / week", emotions: ["Curiosity", "Surprise", "Screen Guilt", "FOMO"], biases: ["Curiosity Gap", "Social Proof", "Framing Effect"], format: "UGC/POV reactions, shocking stats" },
-  { stage: "Warm — Engaged but Didn't Convert", emoji: "🔥", frequency: "3-5x / week", emotions: ["Identity", "Social/Tribe", "Nostalgia", "Anger at Failed Solutions"], biases: ["Bandwagon", "Confirmation Bias", "Anchoring"], format: "Testimonials, before/after, case studies" },
-  { stage: "Hot — Almost Converted", emoji: "💥", frequency: "Daily x 7 days", emotions: ["Urgency", "Micro-Commitment", "Self-Frustration", "Relief"], biases: ["Loss Aversion", "Scarcity", "Endowment", "Hyperbolic Discounting"], format: "Direct CTA, limited-time offers" },
+  { stage: "Cold - Never Seen", emoji: "❄️", frequency: "1-2x / week", emotions: ["Curiosity", "Surprise", "Screen Guilt", "FOMO"], biases: ["Curiosity Gap", "Social Proof", "Framing Effect"], format: "UGC/POV reactions, shocking stats" },
+  { stage: "Warm - Engaged but Didn't Convert", emoji: "🔥", frequency: "3-5x / week", emotions: ["Identity", "Social/Tribe", "Nostalgia", "Anger at Failed Solutions"], biases: ["Bandwagon", "Confirmation Bias", "Anchoring"], format: "Testimonials, before/after, case studies" },
+  { stage: "Hot - Almost Converted", emoji: "💥", frequency: "Daily x 7 days", emotions: ["Urgency", "Micro-Commitment", "Self-Frustration", "Relief"], biases: ["Loss Aversion", "Scarcity", "Endowment", "Hyperbolic Discounting"], format: "Direct CTA, limited-time offers" },
 ];
 
 // --- Platform Formats ---
@@ -326,9 +326,9 @@ export interface ResearchTechniqueDef {
 
 export const RESEARCH_TECHNIQUES: ResearchTechniqueDef[] = [
   { name: "Shadow Scrolling", color: "#f43f5e", description: "Create burner account, follow target audience, calibrate 2-3 days, scroll pre-session to absorb their world" },
-  { name: "Competitor Ad Library Audit", color: "#3b82f6", description: "Meta Ad Library, TikTok Creative Center — analyze longest-running ads to find proven patterns" },
+  { name: "Competitor Ad Library Audit", color: "#3b82f6", description: "Meta Ad Library, TikTok Creative Center - analyze longest-running ads to find proven patterns" },
   { name: "Reddit Thread Deep Dive", color: "#f59e0b", description: "Comment mining, pain point extraction, copy their exact language verbatim" },
-  { name: "Platform-Specific Search", color: "#22c55e", description: "TikTok search, Facebook Groups, Instagram hashtags, YouTube long-form — find where the audience talks" },
+  { name: "Platform-Specific Search", color: "#22c55e", description: "TikTok search, Facebook Groups, Instagram hashtags, YouTube long-form - find where the audience talks" },
   { name: "The 2AM Test", color: "#8b5cf6", description: "Become the avatar. What keeps them up at 2AM? What do they search when nobody's watching?" },
 ];
 
@@ -433,40 +433,40 @@ export const NLP_TECHNIQUES: NLPTechniqueDef[] = [
     power: 92,
     definition: "Embed conclusions inside questions and statements so the brain accepts them without critical evaluation. The reader processes the embedded assumption as fact while answering the surface question. This bypasses the rational gatekeeper entirely.",
     copyExamples: [
-      '"Isn\'t it amazing how [product] changed your daily routine?" — presupposes it\'s amazing AND that it changed their routine',
-      '"When did you realize [product] was what you needed?" — presupposes they already realized it',
+      '"Isn\'t it amazing how [product] changed your daily routine?" - presupposes it\'s amazing AND that it changed their routine',
+      '"When did you realize [product] was what you needed?" - presupposes they already realized it',
     ],
-    adApplication: '"Ready to see why [product] is replacing [competitor]?" — the reader evaluates "ready" while unconsciously accepting that it IS replacing the competitor.',
+    adApplication: '"Ready to see why [product] is replacing [competitor]?" - the reader evaluates "ready" while unconsciously accepting that it IS replacing the competitor.',
   },
   {
     id: "reframing",
     name: "Reframing (Meaning Shift)",
     color: "#f59e0b",
     power: 95,
-    definition: 'Take the same event, behavior, or sensation and change what it MEANS. The physical reality stays identical — the emotional response flips completely. This is the core NLP move: control the frame, control the feeling. Allen Carr reframes withdrawal pangs from "suffering" to "the dying gasps of the nicotine monster."',
+    definition: 'Take the same event, behavior, or sensation and change what it MEANS. The physical reality stays identical - the emotional response flips completely. This is the core NLP move: control the frame, control the feeling. Allen Carr reframes withdrawal pangs from "suffering" to "the dying gasps of the nicotine monster."',
     copyExamples: [
-      'Don\'t say "spend money on [product]" — say "invest in yourself with [product]."',
-      'Don\'t say "give up your old routine" — say "escape the trap you\'ve been stuck in." Same action, opposite emotion.',
+      'Don\'t say "spend money on [product]" - say "invest in yourself with [product]."',
+      'Don\'t say "give up your old routine" - say "escape the trap you\'ve been stuck in." Same action, opposite emotion.',
     ],
-    adApplication: "Reframe the cost as freedom. Reframe effort as escape. Reframe change as returning to who you really are. \"[Product] doesn't add something new — it removes what's been holding you back.\"",
+    adApplication: "Reframe the cost as freedom. Reframe effort as escape. Reframe change as returning to who you really are. \"[Product] doesn't add something new - it removes what's been holding you back.\"",
   },
   {
     id: "dissociation",
     name: "Dissociation (Third-Person Repositioning)",
     color: "#8b5cf6",
     power: 88,
-    definition: "Make the reader observe their OWN behavior from the outside, as if watching a stranger. This breaks the first-person emotional attachment to the current habit or product. From the inside, a habit feels normal. From the outside, it looks absurd. Carr makes smokers watch themselves standing in the rain inhaling poison — suddenly the spell breaks.",
+    definition: "Make the reader observe their OWN behavior from the outside, as if watching a stranger. This breaks the first-person emotional attachment to the current habit or product. From the inside, a habit feels normal. From the outside, it looks absurd. Carr makes smokers watch themselves standing in the rain inhaling poison - suddenly the spell breaks.",
     copyExamples: [
       '"Picture someone paying $X/month for [old solution] and getting [poor result]. That someone is you." Force the third-person view, then snap back to first-person.',
     ],
-    adApplication: '"Watch someone scroll for 3 hours and call it relaxing. Watch someone pay twice the price for half the result. Now ask yourself — is that you?" The absurdity only becomes visible from outside the frame.',
+    adApplication: '"Watch someone scroll for 3 hours and call it relaxing. Watch someone pay twice the price for half the result. Now ask yourself - is that you?" The absurdity only becomes visible from outside the frame.',
   },
   {
     id: "anchoring_stacking",
     name: "Anchoring & Stacking",
     color: "#22c55e",
     power: 90,
-    definition: 'Systematically anchor positive emotional words (freedom, escape, joy, relief, control) to your product, and negative emotional words (trap, prison, waste, drain, stuck) to the alternative/status quo. Through repetition, these anchors become automatic — when the reader thinks of your product their brain fires "freedom" before they can think critically.',
+    definition: 'Systematically anchor positive emotional words (freedom, escape, joy, relief, control) to your product, and negative emotional words (trap, prison, waste, drain, stuck) to the alternative/status quo. Through repetition, these anchors become automatic - when the reader thinks of your product their brain fires "freedom" before they can think critically.',
     copyExamples: [
       'Every mention of the old way: "trapped, draining, stuck, wasting."',
       'Every mention of [product]: "free, effortless, finally, control." Never mix polarity.',
@@ -478,9 +478,9 @@ export const NLP_TECHNIQUES: NLPTechniqueDef[] = [
     name: "Pattern Interrupt + Nested Loops",
     color: "#06b6d4",
     power: 86,
-    definition: "Break the reader's expected thought pattern so their brain shifts from autopilot to active processing. Then open an idea loop (pose a question, start a story) without closing it — the Zeigarnik Effect means the brain holds unfinished thoughts open, making the reader more receptive to everything between the open and close. Carr opens concepts in chapter 3 and doesn't resolve them until chapter 12.",
+    definition: "Break the reader's expected thought pattern so their brain shifts from autopilot to active processing. Then open an idea loop (pose a question, start a story) without closing it - the Zeigarnik Effect means the brain holds unfinished thoughts open, making the reader more receptive to everything between the open and close. Carr opens concepts in chapter 3 and doesn't resolve them until chapter 12.",
     copyExamples: [
-      '"What I\'m about to tell you about [product] will change how you see [category] forever. But first…" — the loop is open. Everything after this gets heightened attention because the brain needs closure.',
+      '"What I\'m about to tell you about [product] will change how you see [category] forever. But first…" - the loop is open. Everything after this gets heightened attention because the brain needs closure.',
     ],
     adApplication: 'Hook: Open the loop ("There\'s something about [product] nobody\'s talking about.") → Body: Interrupt with social proof, benefits, reframes → CTA: Close the loop ("Download to find out.") The unresolved tension drives the click.',
   },
@@ -497,10 +497,10 @@ export interface NLPStackStrategyDef {
 
 export const NLP_STACK_STRATEGY: NLPStackStrategyDef[] = [
   { step: 1, technique: "Presupposition", instruction: 'Open with a presupposition: "Ready to see why people are switching?"' },
-  { step: 2, technique: "Reframing", instruction: 'Hit with a reframe: "You\'re not spending — you\'re escaping"' },
+  { step: 2, technique: "Reframing", instruction: 'Hit with a reframe: "You\'re not spending - you\'re escaping"' },
   { step: 3, technique: "Dissociation", instruction: 'Use dissociation to make the old way look absurd: "Watch someone do X and call it normal"' },
   { step: 4, technique: "Anchoring", instruction: "Anchor [product] to freedom/relief language throughout" },
   { step: 5, technique: "Nested Loop", instruction: "Leave one nested loop unresolved until the CTA forces the click to close it" },
 ];
 
-export const NLP_KEY_PRINCIPLE = "NLP doesn't use willpower. It dismantles the belief system that makes the old behavior feel rational. By the time the reader reaches your CTA, they don't need convincing — they've already changed their mind.";
+export const NLP_KEY_PRINCIPLE = "NLP doesn't use willpower. It dismantles the belief system that makes the old behavior feel rational. By the time the reader reaches your CTA, they don't need convincing - they've already changed their mind.";

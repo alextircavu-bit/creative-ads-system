@@ -35,7 +35,7 @@ export function CopyCheckTab({ input }: CopyCheckTabProps) {
         </div>
         <textarea
           className="w-full min-h-[160px] bg-background/50 border border-border/30 rounded-xl p-4 text-foreground text-sm leading-loose outline-none resize-y transition-all focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 placeholder:text-muted-foreground/30"
-          placeholder="Paste your ad copy here... hooks, scripts, body copy, CTAs — anything you want analyzed."
+          placeholder="Paste your ad copy here... hooks, scripts, body copy, CTAs - anything you want analyzed."
           value={copyText}
           onChange={(e) => setCopyText(e.target.value)}
         />

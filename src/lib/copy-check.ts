@@ -1,5 +1,5 @@
 // ============================================================
-// LOCAL COPY CHECK — Deterministic scoring algorithms
+// LOCAL COPY CHECK - Deterministic scoring algorithms
 // These run client-side, NO AI needed. AI Deep Review is optional.
 // Ported from the original HTML system.
 // ============================================================
