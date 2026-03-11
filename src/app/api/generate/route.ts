@@ -16,8 +16,8 @@ const SECTION_TOKENS: Record<Exclude<Section, "all">, number> = {
   psycheMap: 6000,
   salesPlaybook: 8000,
   research: 5000,
-  creativeTree: 10000,
-  topCreatives: 4000,
+  creativeTree: 14000,
+  topCreatives: 5000,
 };
 
 function repairJSON(raw: string): string {
@@ -26,6 +26,33 @@ function repairJSON(raw: string): string {
   s = s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
   // Remove trailing commas before } or ]
   s = s.replace(/,\s*([}\]])/g, "$1");
+
+  // Fix truncated JSON — close unterminated strings and brackets
+  // Count open brackets/braces to detect truncation
+  let inString = false;
+  let escape = false;
+  const stack: string[] = [];
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (escape) { escape = false; continue; }
+    if (c === "\\") { escape = true; continue; }
+    if (c === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (c === "{" || c === "[") stack.push(c);
+    if (c === "}") { if (stack.length && stack[stack.length - 1] === "{") stack.pop(); }
+    if (c === "]") { if (stack.length && stack[stack.length - 1] === "[") stack.pop(); }
+  }
+
+  // If we ended inside a string, close it
+  if (inString) s += '"';
+  // Close any remaining open brackets/braces
+  while (stack.length) {
+    const open = stack.pop();
+    s += open === "{" ? "}" : "]";
+  }
+  // Clean trailing commas again after repair
+  s = s.replace(/,\s*([}\]])/g, "$1");
+
   return s;
 }
 
