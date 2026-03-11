@@ -1,13 +1,76 @@
 "use client";
 
-import type { TopCreativesData } from "@/types/creative";
+import { useMemo } from "react";
+import type { TopCreativesData, AdSection, DeliveryMode } from "@/types/creative";
+import {
+  calculateSectionTiming,
+  calculateAdDuration,
+  suggestDeliveryMode,
+  DELIVERY_MODE_META,
+  type SectionTiming,
+} from "@/lib/readability";
 
 interface TopCreativesTabProps {
   data: TopCreativesData;
   productName: string;
 }
 
+// Color maps for delivery mode badges
+const MODE_COLORS: Record<string, string> = {
+  "text-overlay": "bg-amber-500/10 text-amber-400 border-amber-500/15",
+  "voiceover": "bg-blue-500/10 text-blue-400 border-blue-500/15",
+  "voiceover-caption": "bg-violet-500/10 text-violet-400 border-violet-500/15",
+  "vo-caption-subs": "bg-emerald-500/10 text-emerald-400 border-emerald-500/15",
+};
+
+function getDeliveryMode(section: AdSection, sectionType: "hook" | "body" | "cta"): DeliveryMode {
+  if (section.deliveryMode) return section.deliveryMode;
+  // Fallback: auto-detect from word count
+  const wordCount = section.text.trim().split(/\s+/).length;
+  return suggestDeliveryMode(wordCount, sectionType);
+}
+
+function TimingBar({ timing }: { timing: SectionTiming }) {
+  const meta = DELIVERY_MODE_META[timing.deliveryMode];
+  return (
+    <div className="flex items-center gap-2 mt-2">
+      <div className="flex-1 h-1 rounded-full bg-white/[0.06] overflow-hidden">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-violet-500/60 to-purple-500/60 transition-all"
+          style={{ width: `${Math.min(100, (timing.recommendedSec / 20) * 100)}%` }}
+        />
+      </div>
+      <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">
+        {timing.recommendedSec}s
+      </span>
+    </div>
+  );
+}
+
 export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
+  // Pre-calculate all timings
+  const creativesWithTiming = useMemo(() => {
+    return data.creatives.map((creative) => {
+      const hookMode = getDeliveryMode(creative.hook, "hook");
+      const bodyMode = getDeliveryMode(creative.body, "body");
+      const ctaMode = getDeliveryMode(creative.cta, "cta");
+
+      const duration = calculateAdDuration(
+        { text: creative.hook.text, deliveryMode: hookMode },
+        { text: creative.body.text, deliveryMode: bodyMode },
+        { text: creative.cta.text, deliveryMode: ctaMode },
+      );
+
+      return {
+        creative,
+        hookMode,
+        bodyMode,
+        ctaMode,
+        duration,
+      };
+    });
+  }, [data.creatives]);
+
   return (
     <div className="mb-10">
       <div className="flex items-center gap-3 mb-8">
@@ -23,7 +86,7 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
       </div>
 
       <div className="flex flex-col gap-10">
-        {data.creatives.map((creative) => (
+        {creativesWithTiming.map(({ creative, hookMode, bodyMode, ctaMode, duration }) => (
           <div key={creative.rank} className="relative">
             {/* Creative header */}
             <div className="flex items-start gap-3 mb-4">
@@ -31,7 +94,13 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
                 {creative.rank}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-base font-extrabold mb-1.5 truncate">&quot;{creative.name}&quot;</div>
+                <div className="flex items-center gap-3 mb-1.5">
+                  <div className="text-base font-extrabold truncate">&quot;{creative.name}&quot;</div>
+                  {/* Total ad duration badge */}
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-white/[0.05] text-muted-foreground border border-white/[0.08] shrink-0">
+                    ~{duration.totalFormatted} total
+                  </span>
+                </div>
                 <div className="flex gap-1.5 flex-wrap">
                   {creative.templateName && (
                     <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
@@ -65,7 +134,7 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
               </div>
             )}
 
-            {/* Scenario + Production - compact row */}
+            {/* Scenario + Production */}
             {(creative.scenario || creative.productionStyle) && (
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {creative.scenario && (
@@ -85,56 +154,77 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
 
             {/* Glass panels - Hook / Body / CTA horizontal */}
             <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "Hook", data: creative.hook, accent: "from-rose-500/40 to-pink-500/40", textColor: "text-rose-300", borderColor: "border-rose-500/20", showUpload: false },
-                { label: "Body", data: creative.body, accent: "from-amber-500/40 to-orange-500/40", textColor: "text-amber-300", borderColor: "border-amber-500/20", showUpload: true },
-                { label: "CTA", data: creative.cta, accent: "from-emerald-500/40 to-green-500/40", textColor: "text-emerald-300", borderColor: "border-emerald-500/20", showUpload: false },
-              ].map((panel) => (
-                <div
-                  key={panel.label}
-                  className={`relative group rounded-2xl border ${panel.borderColor} bg-white/[0.03] backdrop-blur-md overflow-hidden transition-all hover:bg-white/[0.06] hover:border-violet-500/25`}
-                >
-                  {/* Top gradient edge */}
-                  <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${panel.accent}`} />
+              {([
+                { label: "Hook", data: creative.hook, mode: hookMode, timing: duration.hookTiming, accent: "from-rose-500/40 to-pink-500/40", textColor: "text-rose-300", borderColor: "border-rose-500/20", showUpload: false },
+                { label: "Body", data: creative.body, mode: bodyMode, timing: duration.bodyTiming, accent: "from-amber-500/40 to-orange-500/40", textColor: "text-amber-300", borderColor: "border-amber-500/20", showUpload: true },
+                { label: "CTA", data: creative.cta, mode: ctaMode, timing: duration.ctaTiming, accent: "from-emerald-500/40 to-green-500/40", textColor: "text-emerald-300", borderColor: "border-emerald-500/20", showUpload: false },
+              ] as const).map((panel) => {
+                const modeMeta = DELIVERY_MODE_META[panel.mode];
+                const modeColorClass = MODE_COLORS[panel.mode] || MODE_COLORS["voiceover"];
 
-                  {/* Panel content */}
-                  <div className="p-4 flex flex-col h-full">
-                    {/* Label + time */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className={`text-xs font-black tracking-widest uppercase ${panel.textColor}`}>
-                        {panel.label}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground/40 font-mono">
-                        {panel.data.time}
-                      </span>
+                return (
+                  <div
+                    key={panel.label}
+                    className={`relative group rounded-2xl border ${panel.borderColor} bg-white/[0.03] backdrop-blur-md overflow-hidden transition-all hover:bg-white/[0.06] hover:border-violet-500/25`}
+                  >
+                    {/* Top gradient edge */}
+                    <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${panel.accent}`} />
+
+                    {/* Panel content */}
+                    <div className="p-4 flex flex-col h-full">
+                      {/* Label + delivery mode + time */}
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs font-black tracking-widest uppercase ${panel.textColor}`}>
+                          {panel.label}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/40 font-mono">
+                          {panel.data.time}
+                        </span>
+                      </div>
+
+                      {/* Delivery mode badge */}
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide border ${modeColorClass}`}>
+                          {modeMeta.label}
+                        </span>
+                        <span className="text-[9px] text-muted-foreground/30">
+                          {panel.timing.wordCount}w / {panel.timing.recommendedSec}s
+                        </span>
+                        {!panel.timing.isAdFriendly && (
+                          <span className="text-[9px] text-red-400/60 font-bold">Grade {panel.timing.gradeLevel}</span>
+                        )}
+                      </div>
+
+                      {/* Script text */}
+                      <div className="text-sm text-foreground/90 leading-relaxed font-medium mb-3 flex-1">
+                        {panel.data.text}
+                      </div>
+
+                      {/* Visual direction */}
+                      <div className="text-[11px] text-muted-foreground/60 leading-relaxed p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.04]">
+                        <div className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/30 mb-1">Visual</div>
+                        {panel.data.visual}
+                      </div>
+
+                      {/* Timing bar */}
+                      <TimingBar timing={panel.timing} />
+
+                      {/* Upload indicator on Body panel */}
+                      {panel.showUpload && (
+                        <button
+                          type="button"
+                          className="mt-3 w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed border-amber-500/20 bg-amber-500/5 text-amber-400/60 hover:bg-amber-500/10 hover:text-amber-400 hover:border-amber-500/30 transition-all cursor-pointer"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 5v14M5 12h14" />
+                          </svg>
+                          <span className="text-[10px] font-bold tracking-wider uppercase">Upload Experience</span>
+                        </button>
+                      )}
                     </div>
-
-                    {/* Script text */}
-                    <div className="text-sm text-foreground/90 leading-relaxed font-medium mb-3 flex-1">
-                      {panel.data.text}
-                    </div>
-
-                    {/* Visual direction */}
-                    <div className="text-[11px] text-muted-foreground/60 leading-relaxed p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.04]">
-                      <div className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/30 mb-1">Visual</div>
-                      {panel.data.visual}
-                    </div>
-
-                    {/* Upload indicator on Body panel */}
-                    {panel.showUpload && (
-                      <button
-                        type="button"
-                        className="mt-3 w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed border-amber-500/20 bg-amber-500/5 text-amber-400/60 hover:bg-amber-500/10 hover:text-amber-400 hover:border-amber-500/30 transition-all cursor-pointer"
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 5v14M5 12h14" />
-                        </svg>
-                        <span className="text-[10px] font-bold tracking-wider uppercase">Upload Experience</span>
-                      </button>
-                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}

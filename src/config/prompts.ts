@@ -4,7 +4,7 @@
 // content within that framework for the specific product.
 // ============================================================
 
-import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData } from "@/types/creative";
+import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData, DeliveryMode } from "@/types/creative";
 import {
   filterRelevantAngles,
   FRAMEWORKS,
@@ -597,6 +597,29 @@ These templates are pre-matched to ${input.productName} based on how users exper
 
 ${templateContext}
 
+=== DELIVERY MODES ===
+Each section (hook/body/cta) MUST have a deliveryMode. This controls HOW the text appears in the ad:
+
+1. "text-overlay" - Bold text on screen, NO voiceover. Must be SHORT and punchy.
+   Word limits: Hook 3-8 words | Body 5-15 words | CTA 2-6 words
+2. "voiceover" - Voice narration only, no text on screen. Conversational tone.
+   Word limits: Hook 5-15 words | Body 10-45 words | CTA 3-10 words
+3. "voiceover-caption" - Voice narration + a short summary caption on screen.
+   Word limits: Hook 5-12 words | Body 8-35 words | CTA 3-8 words
+4. "vo-caption-subs" - Voice + topic caption at top + word-for-word subtitles.
+   Word limits: Hook 5-15 words | Body 10-45 words | CTA 3-10 words
+
+TIMING RULES (the engine calculates exact duration from word count):
+- Text overlay reads at ~200 WPM (3.3 words/sec on screen)
+- Voiceover speaks at ~150 WPM (2.5 words/sec conversational)
+- Hook: 2-5 seconds max. Body: 3-20 seconds. CTA: 2-4 seconds.
+- CRITICAL: Count your words. A 5-word text overlay hook = ~2s. A 15-word voiceover hook = ~4s.
+
+MIX DELIVERY MODES across creatives for testing variety:
+- At least 1 creative should use "text-overlay" hook (punchy, scroll-stopping)
+- At least 1 should use "voiceover" or "voiceover-caption" for storytelling
+- The CTA can differ from hook/body delivery mode
+
 === YOUR TASK ===
 
 For each of the 5 creatives:
@@ -605,6 +628,8 @@ For each of the 5 creatives:
 3. Write copy that stacks the psychological data (biases, Cialdini, dopamine triggers) into the template
 4. Each creative should use a DIFFERENT template (variety in ad formats = better testing)
 5. Write in the language/lingo of the target audience - not marketing speak, not ChatGPT speak
+6. Assign a deliveryMode to each section (hook/body/cta) and write copy length appropriate for that mode
+7. Count words per section - stay within the word limits for the chosen delivery mode
 
 Generate a JSON object:
 {
@@ -619,12 +644,12 @@ Generate a JSON object:
       "format": "9:16 vertical short-form",
       "scenario": "The specific real-life situation this ad recreates (1-2 sentences)",
       "experienceType": "${primaryExp}",
-      "productionStyle": "Exact production approach matching the template (e.g. 'Hook text overlay + screen recording of ${input.productName} + text CTA')",
-      "hook": { "time": "from template", "text": "exact spoken/text copy", "visual": "what the viewer SEES" },
-      "body": { "time": "from template", "text": "exact copy showing resolution through the product", "visual": "must match template structure" },
-      "cta": { "time": "from template", "text": "exact CTA", "visual": "visual direction" },
+      "productionStyle": "Exact production approach matching the template",
+      "hook": { "time": "from template", "text": "exact copy", "visual": "what viewer sees", "deliveryMode": "text-overlay|voiceover|voiceover-caption|vo-caption-subs" },
+      "body": { "time": "from template", "text": "exact copy", "visual": "must match template", "deliveryMode": "text-overlay|voiceover|voiceover-caption|vo-caption-subs" },
+      "cta": { "time": "from template", "text": "exact CTA", "visual": "visual direction", "deliveryMode": "text-overlay|voiceover|voiceover-caption|vo-caption-subs" },
       "targetSegment": "which audience segment this targets",
-      "whyThisTemplate": "1 sentence - why this template is the best fit for this creative concept"
+      "whyThisTemplate": "1 sentence - why this template fits this concept"
     }
   ]
 }
@@ -636,7 +661,9 @@ CRITICAL:
 4. Stack biases and Cialdini weapons from the analysis into the copy
 5. Copy is word-for-word ready for production - write like the target audience speaks
 6. If the primary experience is "in-app", body visuals MUST be screen recording / app demo
-7. Return ONLY valid JSON. No markdown, no code fences.`;
+7. EVERY section MUST have a deliveryMode field. Mix modes across creatives.
+8. Text overlay copy must be SHORT (3-8 words for hooks). Voiceover copy can be longer.
+9. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================

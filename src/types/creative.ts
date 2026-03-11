@@ -312,6 +312,19 @@ export interface CopyCheckResult {
 
 // --- Top 5 Creatives ---
 
+export type DeliveryMode =
+  | "text-overlay"        // Text on screen only, no voice
+  | "voiceover"           // Voice narration, no on-screen text
+  | "voiceover-caption"   // Voice + summary caption on screen
+  | "vo-caption-subs";    // Voice + caption up top + word-for-word subtitles
+
+export interface AdSection {
+  time: string;
+  text: string;
+  visual: string;
+  deliveryMode?: DeliveryMode; // How the text is delivered in the ad
+}
+
 export interface AdCreativeBlueprint {
   rank: number;
   name: string;
@@ -323,9 +336,9 @@ export interface AdCreativeBlueprint {
   scenario: string; // The real-life situation that makes someone NEED this product
   experienceType: string; // How the user experiences the benefit (in-app, physical, outcome, consumable, utility, etc.)
   productionStyle: string; // Specific production approach (screen recording, real-world footage, before/after, lifestyle, etc.)
-  hook: { time: string; text: string; visual: string };
-  body: { time: string; text: string; visual: string };
-  cta: { time: string; text: string; visual: string };
+  hook: AdSection;
+  body: AdSection;
+  cta: AdSection;
   targetSegment?: string; // Which audience segment this creative targets
   whyThisTemplate?: string; // Why this template was chosen
 }
