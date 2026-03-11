@@ -655,55 +655,56 @@ Primary: ${EXPERIENCE_TYPE_LABELS[primaryExp].name} (${EXPERIENCE_TYPE_LABELS[pr
 === MATCHED TEMPLATES ===
 ${templateContext}
 
-=== HOW TO THINK ABOUT HOOKS ===
+=== HOW TO THINK (creative director reasoning) ===
 
-The product owner wrote a surface-level benefit. Your job is to reason DEEPER:
-- What does this benefit IMPLY about the person's life?
-- What daily situation makes this benefit urgent?
-- What would this person be doing RIGHT BEFORE they need this product?
+STEP 1: BUYER SPECIFICITY
+Before writing anything, reason about WHO buys this product:
+- Is the buyer SPECIFIC? (diapers = parents, pet food = pet owners) Then you CAN laser-target in the creative.
+- Is the buyer BROAD within an identity? (bible app = anyone of faith, meditation app = anyone stressed) Then hooks should speak to the SHARED IDENTITY, not narrow demographic slices.
+- Don't waste creative slots on micro-segments (e.g. "seniors learning phones", "college students away from home church") when the product serves an entire identity group. Let the ad platform's algorithm find sub-segments - that's what it's built for.
+- Vary hooks by EMOTIONAL ANGLE (guilt, comfort, routine, identity, curiosity) not by demographic slice (parents, students, retirees).
 
-The hook should reference that MOMENT or SITUATION - using the product's lexical field (words associated with the category). The viewer should instantly know what world this ad lives in.
+STEP 2: HOOK WRITING
+The hook must pass ONE test: would a real person scrolling TikTok actually think or say this?
+- Use the product's lexical field (words that signal the world: for a bible app = "verse", "scripture", "faith", "God"; for a calorie app = "macros", "food", "plate")
+- The hook should feel like catching someone mid-thought. Not a headline, not a tagline, not a slogan.
+- It can be an incomplete thought that the body resolves ("opened my Bible 0 times this week but..." -> body resolves with the product)
+- Good: "0 verses this week. 847 reels." / "my work food doesn't have macro details but..."
+- Bad: "Track Your Macros Easily" / "The Ultimate Food Scanner" / "my grandkids taught me to use this phone. God taught me what to do with it."
 
-HOOK = scroll-stopping attention text. 5-15 words.
-  - Can be: a relatable scenario, a question, a POV, a bold claim, an incomplete thought that the body resolves
-  - Must use words from the product's world (for a calorie app: "macros", "food", "eating"; for a bible app: "verse", "faith", "scripture")
-  - NOT a headline. NOT a tagline. It's what someone would THINK or SAY.
-  - Good: "my work food doesn't have macro details but..." / "Nobody tells you this about tracking calories"
-  - Bad: "Track Your Macros Easily" / "The Ultimate Food Scanner"
+STEP 3: BODY WRITING
+Body = what the feature actually IS. One simple sentence. Not clever, not poetic, not metaphorical.
+- Good: "an hourly bible verse widget. tap below to download." / "point your phone at any plate. instant macros."
+- Bad: "church in your pocket when you can't get to church" (metaphor, clunky repetition, doesn't describe the actual feature)
+- Bad: "no typing. no searching. verses just appear." (this is AI triplet pattern writing. Real people don't structure sentences like this.)
+- The body can complete an incomplete hook.
 
-BODY = simple description of the product experience. 1 short sentence.
-  - Describe what the feature IS and what it does. Simple. Clear. Not clever.
-  - Good: "an hourly bible verse widget. tap below to download." / "point your phone at any plate. instant macros."
-  - Bad: "Watch as Sarah discovers her hidden calorie intake through our revolutionary AI scanning technology"
-  - The body can complete an incomplete hook ("but... my macro tracker saved me")
+STEP 4: CTA
+CTA = an ACTION. Tell the person what to DO.
+- Good: "Download Free", "Get It Below", "Tap to Install"
+- Bad: "Never Alone", "Start Your Journey", "Find Peace" (these are slogans, not actions)
 
-CTA = button text. 2-5 words.
-
-=== SANITY CHECK YOUR CREATIVES ===
-
-Before generating each creative, ask yourself:
-- Would a REAL person in this segment actually see this ad and think "that's me"?
-- Is the scenario something that happens in REAL LIFE, not a contrived marketing situation?
-- Would someone actually say this hook out loud or type it in a comment?
-- Does the creative make sense as a 10-20 second video ad?
-
-If the answer to any of these is "no", throw it out and try again. Do NOT generate creatives just to fill 5 slots. Every creative must pass the "would this actually work as an ad?" test.
-
-BAD creative example: "Parent Modelling Faith" - who is this targeting? Parents who want their kids to see Bible verses on THEIR lockscreen? That's not a real scenario. Nobody thinks "I should get a lockscreen verse app so my children see me reading scripture."
-
-GOOD creative example: "Morning Verse Reminder" - targets anyone who picks up their phone first thing in the morning. The verse is there before they open Instagram. Real moment, real scenario.
+STEP 5: WRITING QUALITY
+Read your output out loud. Does it sound like a real person or like AI?
+- Avoid the AI triplet pattern: "no X. no Y. Z just happens." This is the #1 giveaway of AI-generated copy.
+- Avoid greeting card sentiments: "God taught me what to do with it" - nobody actually thinks this.
+- Avoid forced poetry or metaphors in ads. Simple > clever.
+- If a sentence sounds clunky or has awkward repetition, rewrite it. Have taste.
+- The ad should feel NATIVE to the platform. Like organic content, not like an ad.
 
 === YOUR TASK ===
 
-Create 5 creatives. Each targets a DIFFERENT audience segment. Template: Hook + Body (text overlay, 10-20 sec total).
+Create 5 creatives. Template: Hook + Body (text overlay, 10-20 sec total).
+
+FIRST: Decide your targeting approach based on buyer specificity (from Step 1 above).
+- If the buyer is BROAD (shared identity group), your 5 creatives should vary by EMOTIONAL ANGLE, not by demographic segment. Each creative hits the same broad audience from a different emotional direction.
+- If the buyer is SPECIFIC, each creative can target a different segment.
 
 For each creative:
-- Pick the segment it targets (creative 1 = segment 1, etc.)
-- Hooks should stop THAT segment's scroll using their specific daily moment
-- 5-6 HOOK VARIATIONS per creative, each pulling a different psychological lever
-- Each hook MUST include 2-3 VIDEO SCENE SUGGESTIONS: ambiguous, varied visual scenarios for what's happening behind the text overlay (e.g., "girl sitting in her car", "someone scrolling in bed at night", "hand picking up phone from nightstand"). These are shooting ideas, not storyboards. Keep them short and open to interpretation.
-- 2-3 BODY VARIATIONS: simple product experience descriptions. What the feature does in plain words.
-- 1 CTA
+- 5-6 HOOK VARIATIONS, each pulling a different psychological lever from the deep dive
+- Each hook MUST include 2-3 VIDEO SCENE SUGGESTIONS: ambiguous, varied visual scenarios for what's happening behind the text overlay (e.g., "girl sitting in her car", "someone scrolling in bed at night", "hand picking up phone from nightstand"). Keep them short and open.
+- 2-3 BODY VARIATIONS: simple feature descriptions. What the product does in plain words.
+- 1 CTA: an action verb (download, get, tap, install). NOT a slogan.
 
 JSON:
 {
@@ -737,13 +738,13 @@ JSON:
 }
 
 CRITICAL:
-1. Each creative = a different audience segment. Each must pass the "would this actually work?" test.
-2. HOOKS must use the product's LEXICAL FIELD - words that signal the category
-3. Each hook has 2-3 visualSuggestions - short, ambiguous video scene ideas for the background
-4. BODY is SIMPLE. Describe the feature plainly. 1 sentence. Great copy is simple.
-5. Creative names should be simple and descriptive, not abstract marketing concepts
-6. Write like the target segment talks - match their vocabulary
-7. If a segment doesn't produce a good creative, skip it and double up on a better segment
+1. Read every hook out loud. If it sounds like AI wrote it, rewrite it. If it sounds like a greeting card, rewrite it.
+2. Body describes the ACTUAL FEATURE in simple words. No metaphors, no poetry.
+3. CTA is an action (download, get, tap) not a slogan (never alone, find peace).
+4. Each hook has 2-3 visualSuggestions - short, ambiguous video scene ideas.
+5. Don't over-segment when the product serves a broad identity group. Vary by emotion, not demographics.
+6. No AI triplet patterns ("no X. no Y. Z just happens.")
+7. Every creative must pass: "would this actually work as a real ad on TikTok/Meta?"
 8. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
