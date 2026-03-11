@@ -666,11 +666,13 @@ Before writing anything, reason about WHO buys this product:
 
 STEP 2: HOOK WRITING
 The hook must pass ONE test: would a real person scrolling TikTok actually think or say this?
-- Use the product's lexical field (words that signal the world: for a bible app = "verse", "scripture", "faith", "God"; for a calorie app = "macros", "food", "plate")
+- STAY IN THE PRODUCT'S WORLD. A Bible app hook must live in the world of faith, scripture, God, verses. Do NOT reposition the product into adjacent worlds (wellness, productivity, self-improvement, parenting). The hook should make a person of faith feel "that's about ME and MY faith."
+- Use the product's lexical field (words that signal the world: for a bible app = "verse", "scripture", "faith", "God", "Bible"; for a calorie app = "macros", "food", "plate")
 - The hook should feel like catching someone mid-thought. Not a headline, not a tagline, not a slogan.
 - It can be an incomplete thought that the body resolves ("opened my Bible 0 times this week but..." -> body resolves with the product)
+- NEVER use the AI list pattern as a hook: "meditation app. journaling app. still missing something." - this is a slogan structured as bullet points. Nobody thinks in product category lists.
 - Good: "0 verses this week. 847 reels." / "my work food doesn't have macro details but..."
-- Bad: "Track Your Macros Easily" / "The Ultimate Food Scanner" / "my grandkids taught me to use this phone. God taught me what to do with it."
+- Bad: "Track Your Macros Easily" / "meditation app. journaling app. missing something." / "my grandkids taught me to use this phone. God taught me what to do with it."
 
 STEP 3: BODY WRITING
 Body = what the feature actually IS. One simple sentence. Not clever, not poetic, not metaphorical.
