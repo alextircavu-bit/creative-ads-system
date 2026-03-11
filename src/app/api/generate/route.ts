@@ -11,13 +11,13 @@ import type { ProjectInput, GenerationResult, PsycheMapData, SalesPlaybookData, 
 
 type Section = "psycheMap" | "salesPlaybook" | "research" | "creativeTree" | "topCreatives" | "all";
 
-// Per-section token limits — tuned to actual output size
+// Per-section token limits — trimmed for speed
 const SECTION_TOKENS: Record<Exclude<Section, "all">, number> = {
-  psycheMap: 8000,
-  salesPlaybook: 10000,
-  research: 6000,
-  creativeTree: 16000,  // largest — scripts for 6 angles x 5 frameworks
-  topCreatives: 5000,
+  psycheMap: 6000,
+  salesPlaybook: 8000,
+  research: 5000,
+  creativeTree: 10000,
+  topCreatives: 4000,
 };
 
 function repairJSON(raw: string): string {
@@ -66,18 +66,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing product name or description" }, { status: 400 });
     }
 
-    // --- Generate ALL sections (3 wall-clock steps, parallel where possible) ---
+    // --- Generate ALL sections (2 wall-clock steps) ---
     if (section === "all") {
-      // Step 1: Psyche Map (no dependencies)
-      const psycheMap = await callClaude(psycheMapPrompt(input), SECTION_TOKENS.psycheMap) as PsycheMapData;
-
-      // Step 2: Sales Playbook + Research in parallel (both only need Psyche Map)
-      const [salesPlaybook, research] = await Promise.all([
-        callClaude(salesPlaybookPrompt(input, psycheMap), SECTION_TOKENS.salesPlaybook) as Promise<SalesPlaybookData>,
-        callClaude(researchPrompt(input, psycheMap), SECTION_TOKENS.research) as Promise<ResearchData>,
+      // Step 1: Psyche Map + Sales Playbook + Research ALL in parallel
+      // Sales/Research barely use Psyche context — fire them all at once
+      const [psycheMap, salesPlaybook, research] = await Promise.all([
+        callClaude(psycheMapPrompt(input), SECTION_TOKENS.psycheMap) as Promise<PsycheMapData>,
+        callClaude(salesPlaybookPrompt(input), SECTION_TOKENS.salesPlaybook) as Promise<SalesPlaybookData>,
+        callClaude(researchPrompt(input), SECTION_TOKENS.research) as Promise<ResearchData>,
       ]);
 
-      // Step 3: Creative Tree + Top Creatives in parallel (need all 3 previous)
+      // Step 2: Creative Tree + Top Creatives in parallel (informed by all 3)
       const [creativeTree, topCreatives] = await Promise.all([
         callClaude(creativeTreePrompt(input, psycheMap, salesPlaybook, research), SECTION_TOKENS.creativeTree),
         callClaude(topCreativesPrompt(input, psycheMap, salesPlaybook, research), SECTION_TOKENS.topCreatives),

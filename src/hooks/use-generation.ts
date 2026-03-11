@@ -218,37 +218,31 @@ export function useProgressiveGeneration() {
     };
 
     try {
-      // === STEP 1: Psyche Map (no dependencies) ===
-      await runSection(0, "psycheMap", "Psyche Map", () =>
-        generationRepository.generatePsycheMap(input)
-      );
-      setProgress(20);
+      // === STEP 1: Psyche Map + Sales Playbook + Research ALL IN PARALLEL ===
+      // Sales/Research barely use Psyche context — fire everything at once
+      setCurrentSection("Psyche Map + Sales + Research");
+      setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: "generating" } : s)));
 
-      // === STEP 2: Sales Playbook + Research IN PARALLEL ===
-      // Both only need Psyche Map. Research doesn't meaningfully depend on Sales.
-      const psycheContext = { psycheMap: accumulated.psycheMap as PsycheMapData };
+      const step1Start = Date.now();
 
-      setCurrentSection("Sales Playbook + Research");
-      setSteps((prev) => prev.map((s, idx) => (idx === 1 || idx === 2 ? { ...s, status: "generating" } : s)));
-
-      const mid1Start = Date.now();
-
-      const [salesData, researchData] = await Promise.all([
-        generationRepository.generateSalesPlaybook(input, psycheContext),
-        generationRepository.generateResearch(input, psycheContext),
+      const [psycheData, salesData, researchData] = await Promise.all([
+        generationRepository.generatePsycheMap(input),
+        generationRepository.generateSalesPlaybook(input),
+        generationRepository.generateResearch(input),
       ]);
 
-      const mid1Elapsed = Date.now() - mid1Start;
+      const step1Elapsed = Date.now() - step1Start;
 
+      accumulated.psycheMap = psycheData;
       accumulated.salesPlaybook = salesData;
       accumulated.research = researchData;
-      setResult((prev) => ({ ...prev, salesPlaybook: salesData, research: researchData }));
-      setSteps((prev) => prev.map((s, idx) => (idx === 1 || idx === 2 ? { ...s, status: "done", elapsed: mid1Elapsed } : s)));
-      setProgress(60);
+      setResult((prev) => ({ ...prev, psycheMap: psycheData, salesPlaybook: salesData, research: researchData }));
+      setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: "done", elapsed: step1Elapsed } : s)));
+      setProgress(50);
       setTotalElapsed(Date.now() - globalStart);
 
-      // === STEP 3: Creative Tree + Top Creatives IN PARALLEL ===
-      // Both depend on all 3 previous outputs.
+      // === STEP 2: Creative Tree + Top Creatives IN PARALLEL ===
+      // Both informed by all 3 previous outputs.
       const fullContext = {
         psycheMap: accumulated.psycheMap as PsycheMapData,
         salesPlaybook: accumulated.salesPlaybook as SalesPlaybookData,
@@ -258,19 +252,19 @@ export function useProgressiveGeneration() {
       setCurrentSection("Creative Tree + Top Creatives");
       setSteps((prev) => prev.map((s, idx) => (idx >= 3 ? { ...s, status: "generating" } : s)));
 
-      const mid2Start = Date.now();
+      const step2Start = Date.now();
 
       const [creativeTreeData, topCreativesData] = await Promise.all([
         generationRepository.generateCreativeTree(input, fullContext),
         generationRepository.generateTopCreatives(input, fullContext),
       ]);
 
-      const mid2Elapsed = Date.now() - mid2Start;
+      const step2Elapsed = Date.now() - step2Start;
 
       accumulated.creativeTree = creativeTreeData;
       accumulated.topCreatives = topCreativesData;
       setResult((prev) => ({ ...prev, creativeTree: creativeTreeData, topCreatives: topCreativesData }));
-      setSteps((prev) => prev.map((s, idx) => (idx >= 3 ? { ...s, status: "done", elapsed: mid2Elapsed } : s)));
+      setSteps((prev) => prev.map((s, idx) => (idx >= 3 ? { ...s, status: "done", elapsed: step2Elapsed } : s)));
       setProgress(100);
       setTotalElapsed(Date.now() - globalStart);
 
