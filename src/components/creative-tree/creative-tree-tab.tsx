@@ -11,13 +11,7 @@ interface CreativeTreeTabProps {
 export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
   const [openAngle, setOpenAngle] = useState<number | null>(null);
   const [openFramework, setOpenFramework] = useState<string | null>(null);
-  const [platformPerAngle, setPlatformPerAngle] = useState<Record<number, string>>({});
-
-  const getActivePlatform = (ei: number) => platformPerAngle[ei] || "tiktok";
-
-  const setPlatform = (ei: number, platform: string) => {
-    setPlatformPerAngle((prev) => ({ ...prev, [ei]: platform }));
-  };
+  const [globalPlatform, setGlobalPlatform] = useState("tiktok");
 
   const toggleAngle = (ei: number) => {
     setOpenAngle(openAngle === ei ? null : ei);
@@ -48,13 +42,12 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
         </div>
       </div>
 
+      <div className="flex gap-5">
+      {/* Left — Emotional Angles */}
+      <div className="flex-[3] min-w-0">
       {data.emotionalAngles.map((angle, ei) => {
         const isAngleOpen = openAngle === ei;
         const scripts = data.scripts[angle.id] || [];
-        const activePlatform = getActivePlatform(ei);
-        const activePlatformFormats = data.platformFormats.find(
-          (pf) => pf.platform.toLowerCase().replace(/[^a-z]/g, "") === activePlatform
-        ) || data.platformFormats[0];
 
         return (
           <div key={angle.id} className="mb-3">
@@ -178,44 +171,60 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
                 </div>
               )}
 
-              {/* Platform Formats */}
-              <div className="px-2 pt-2 pb-1">
-                <div className="bg-secondary/30 border border-border/30 rounded-xl p-4">
-                  <div className="flex gap-1.5 items-center mb-3">
-                    <span className="text-[10px] uppercase tracking-[2px] text-muted-foreground/50 font-bold mr-1">Platform</span>
-                    {platformKeys.map((pk) => (
-                      <button
-                        key={pk.key}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold cursor-pointer transition-all ${
-                          activePlatform === pk.key
-                            ? "bg-violet-500/15 text-violet-400 border border-violet-500/25"
-                            : "border border-border/30 bg-background/30 text-muted-foreground/60 hover:text-foreground"
-                        }`}
-                        onClick={() => setPlatform(ei, pk.key)}
-                      >
-                        {pk.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-[2px] text-muted-foreground/50 font-bold mb-2">
-                    Video Formats ({activePlatformFormats?.platform.toUpperCase() || "TIKTOK"})
-                  </div>
-                  <div className="space-y-1.5">
-                    {(activePlatformFormats?.formats || []).map((fmt, fi) => (
-                      <div key={fi} className="flex items-start gap-2.5 py-2 border-b border-border/20 last:border-b-0">
-                        <span className="px-2 py-1 rounded-lg text-[10px] font-bold tracking-wide shrink-0 bg-indigo-500/10 text-indigo-400 border border-indigo-500/15">
-                          {fmt.type}
-                        </span>
-                        <span className="text-xs text-muted-foreground leading-relaxed">{fmt.description}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         );
       })}
+      </div>
+
+      {/* Right — Platform Video Formats (sticky) */}
+      {data.platformFormats?.length > 0 && (
+        <div className="flex-[2] min-w-[280px]">
+          <div className="sticky top-4">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-indigo-500/20 flex items-center justify-center text-sm shrink-0">
+                📺
+              </div>
+              <div>
+                <div className="text-sm font-bold">Video Formats</div>
+                <div className="text-[10px] text-muted-foreground">Per platform</div>
+              </div>
+            </div>
+
+            <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-4">
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {platformKeys.map((pk) => (
+                  <button
+                    key={pk.key}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold cursor-pointer transition-all ${
+                      globalPlatform === pk.key
+                        ? "bg-violet-500/15 text-violet-400 border border-violet-500/25"
+                        : "border border-border/30 bg-background/30 text-muted-foreground/60 hover:text-foreground"
+                    }`}
+                    onClick={() => setGlobalPlatform(pk.key)}
+                  >
+                    {pk.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-1.5">
+                {(data.platformFormats.find(
+                  (pf) => pf.platform.toLowerCase().replace(/[^a-z]/g, "") === globalPlatform
+                ) || data.platformFormats[0])?.formats.map((fmt, fi) => (
+                  <div key={fi} className="py-2 border-b border-border/20 last:border-b-0">
+                    <span className="inline-block px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wide bg-indigo-500/10 text-indigo-400 border border-indigo-500/15 mb-1">
+                      {fmt.type}
+                    </span>
+                    <div className="text-[11px] text-muted-foreground leading-relaxed">{fmt.description}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
     </div>
   );
 }

@@ -14,26 +14,17 @@ export interface EmotionalAngleDef {
   condition: RegExp | null; // null = always relevant
 }
 
+// Psychological TERRITORIES — broad spaces that fragment into many specific angles.
+// Each territory produces multiple hooks. Claude scores relevance per product.
 export const EMOTIONAL_ANGLES: EmotionalAngleDef[] = [
-  { id: "guilt_screen", name: "Screen Time Guilt", mechanism: "Cognitive dissonance between time wasted and values", color: "#f43f5e", condition: /scroll|reel|feed|watch|time|doom|phone|screen/i },
-  { id: "fomo_community", name: "Community FOMO", mechanism: "Others are connecting and growing while isolated", color: "#ec4899", condition: /comment|community|share|connect|together|other|join/i },
-  { id: "identity", name: "Identity Transformation", mechanism: '"I\'m the kind of person who invests in myself"', color: "#a855f7", condition: null },
-  { id: "curiosity", name: "Curiosity / Discovery", mechanism: 'Information gap - "what is this?"', color: "#8b5cf6", condition: null },
-  { id: "shame_hiding", name: "Shame / Hiding", mechanism: "Carrying something privately that controls behavior", color: "#6366f1", condition: /quiz|struggle|hidden|secret|pattern|break|shame|guilt/i },
-  { id: "hope_transform", name: "Hope / Aspiration", mechanism: "Imagine who you become on the other side", color: "#3b82f6", condition: null },
-  { id: "relief", name: "Relief / Weight Lifted", mechanism: "Exhaustion from carrying something - finally put it down", color: "#06b6d4", condition: /peace|calm|anxiety|stress|burden|carry|tired|exhaust/i },
-  { id: "belonging", name: "Belonging / Not Alone", mechanism: 'Social proof, shared experience, "everyone\'s doing this"', color: "#14b8a6", condition: /community|comment|share|together|join|million|thousand/i },
-  { id: "anger_failed", name: "Righteous Anger", mechanism: "Old solutions failed you - apps, willpower, half-measures - this is different", color: "#f59e0b", condition: /fail|wrong|broken|old|instead|frustrat|tried|nothing\s?work/i },
-  { id: "fear_loss", name: "Fear of Loss", mechanism: "Every day you don't act, something gets worse or is lost", color: "#ef4444", condition: /lose|miss|worse|damage|hurt|cost|time/i },
-  { id: "contrast_replace", name: "Contrast / Replacement", mechanism: "Direct A/B between bad habit and new habit", color: "#22c55e", condition: /instead|replace|scroll|doom|swap|versus|rather/i },
-  { id: "nostalgia", name: "Nostalgia / Lost Fire", mechanism: '"Remember when you were motivated? Before the distractions took over."', color: "#a78bfa", condition: /remember|used\sto|before|motivation|drive|closer|grow|momentum|passion/i },
-  { id: "social_proof", name: "Social Proof / Bandwagon", mechanism: 'Millions already switched - numbers, momentum, "you\'re late"', color: "#f97316", condition: null },
-  { id: "regret_aversion", name: "Regret Aversion", mechanism: '"A year from now you\'ll wish you started today." Future self framing.', color: "#eab308", condition: null },
-  { id: "self_frustration", name: "Self-Frustration / Broken Promise", mechanism: '"You keep saying tomorrow. It\'s been months." Failed commitments.', color: "#84cc16", condition: /daily|read|plan|habit|routine|commit|consistent|goal|start/i },
-  { id: "surprise_disrupt", name: "Surprise / Pattern Interrupt", mechanism: '"Wait - THIS exists?? Why does it feel so different?"', color: "#10b981", condition: null },
-  { id: "moral_authority", name: "Counter-Culture Pride", mechanism: '"Everyone scrolls trash. Not you." Being above the noise.', color: "#64748b", condition: /scroll|replace|instead|different|better|trash|doom|phone/i },
-  { id: "micro_commitment", name: "Micro-Commitment / Low Bar", mechanism: '"Just 5 minutes. One try. That\'s it." Remove all friction.', color: "#0ea5e9", condition: /daily|minute|quick|easy|simple|start|day|try|small/i },
-  { id: "parental_instinct", name: "Parental / Family Shield", mechanism: '"What\'s on YOUR kid\'s phone? Give them this instead."', color: "#d946ef", condition: /kid|child|family|parent|teen|young|son|daughter/i },
+  { id: "identity_tension", name: "Identity Tension", mechanism: "Gap between who you are and who you want to be. The discomfort of not living up to your own standards.", color: "#f43f5e", condition: null },
+  { id: "displacement", name: "Displacement Anxiety", mechanism: "Something valuable in your life is being consumed by the wrong thing. Time, attention, energy going to waste.", color: "#ec4899", condition: null },
+  { id: "loss_decay", name: "Loss & Decay", mechanism: "Something good is slipping away — motivation, connection, health, identity — and you can feel it happening.", color: "#a855f7", condition: null },
+  { id: "social_positioning", name: "Social Positioning", mechanism: "Where you stand relative to others. Being behind, being different, being part of something, or being left out.", color: "#3b82f6", condition: null },
+  { id: "aspiration_gap", name: "Aspiration Gap", mechanism: "The life you imagine vs the life you have. The person you could be vs the person you are right now.", color: "#06b6d4", condition: null },
+  { id: "habit_architecture", name: "Habit Architecture", mechanism: "The invisible systems running your daily behavior. Replacing bad loops with good ones. Friction, triggers, rewards.", color: "#22c55e", condition: null },
+  { id: "discovery_revelation", name: "Discovery & Revelation", mechanism: "Uncovering something hidden about yourself, your patterns, or your potential. The pull of self-knowledge.", color: "#f59e0b", condition: null },
+  { id: "relief_surrender", name: "Relief & Surrender", mechanism: "Exhaustion from carrying something — finally being able to put it down. The appeal of effortlessness.", color: "#14b8a6", condition: null },
 ];
 
 /** Filter angles by product text relevance. Always-relevant angles (condition: null) are always included. */
@@ -141,7 +132,7 @@ export interface CognitiveBiasDef {
 }
 
 export const COGNITIVE_BIASES: CognitiveBiasDef[] = [
-  { name: "Loss Aversion", strength: 90, color: "#f43f5e", pattern: /lose|losing|miss|missing|without|don't|won't|can't|never|every day without/i },
+  { name: "Loss Aversion", strength: 90, color: "#f43f5e", pattern: /lose|losing|miss out|missing out|every day without|slip away|running out|before it's too late|gone forever/i },
   { name: "Curiosity Gap", strength: 88, color: "#ec4899", pattern: /wait|secret|discover|reveal|find out|did you know|what if|how|why|this is|guess what/i },
   { name: "Framing Effect", strength: 87, color: "#a855f7", pattern: /instead of|not .* but|same .* different|think of it as|it's not .* it's/i },
   { name: "Anchoring", strength: 85, color: "#06b6d4", pattern: /\d+\s*(hours?|minutes?|%|x|times)|\$\d|was \$.*now \$|compare|versus|vs/i },
@@ -278,11 +269,11 @@ export interface PersuasionStackLayerDef {
 }
 
 export const PERSUASION_STACK: PersuasionStackLayerDef[] = [
-  { num: 1, name: "Attention Capture", timeRange: "0–3 seconds", color: "#f43f5e", techniques: ["Pattern interrupt", "Curiosity gap", "Bold claim", "Unexpected visual", "Trending audio"] },
-  { num: 2, name: "Emotional Engagement", timeRange: "3–10 seconds", color: "#f59e0b", techniques: ["Guilt hook", "Nostalgia trigger", "Fear of loss", "Identity challenge", "Divine framing"] },
-  { num: 3, name: "Rational Justification", timeRange: "10–20 seconds", color: "#3b82f6", techniques: ["Social proof numbers", "Feature showcase", "Price anchoring", "Testimonial", "Risk reversal"] },
-  { num: 4, name: "Behavioral Trigger", timeRange: "20–30 seconds", color: "#22c55e", techniques: ["Clear CTA", "Urgency layer", "Friction removal", '"Free" emphasis', "One-tap action"] },
-  { num: 5, name: "Habit Formation", timeRange: "Day 1–30", color: "#8b5cf6", techniques: ["Immediate value", "Onboarding reward", "Streak initiation", "Push notification loop", "Social discovery"] },
+  { num: 1, name: "Attention Capture", timeRange: "0–3 seconds", color: "#f43f5e", techniques: ["Pattern interrupt", "Curiosity gap", "Unexpected claim", "Visual disruption", "Audio hook"] },
+  { num: 2, name: "Emotional Engagement", timeRange: "3–10 seconds", color: "#f59e0b", techniques: ["Core emotion trigger", "Identity challenge", "Nostalgia / memory", "Loss framing", "Aspiration pull"] },
+  { num: 3, name: "Rational Justification", timeRange: "10–20 seconds", color: "#3b82f6", techniques: ["Social proof", "Feature demonstration", "Value comparison", "Testimonial evidence", "Risk reversal"] },
+  { num: 4, name: "Behavioral Trigger", timeRange: "20–30 seconds", color: "#22c55e", techniques: ["Clear CTA", "Urgency layer", "Friction removal", "Free emphasis", "One-tap action"] },
+  { num: 5, name: "Habit Formation", timeRange: "Day 1–30", color: "#8b5cf6", techniques: ["Immediate value delivery", "Onboarding reward", "Routine initiation", "Re-engagement loop", "Social discovery"] },
 ];
 
 // --- Retargeting Funnel ---
@@ -329,7 +320,7 @@ export const RESEARCH_TECHNIQUES: ResearchTechniqueDef[] = [
   { name: "Competitor Ad Library Audit", color: "#3b82f6", description: "Meta Ad Library, TikTok Creative Center - analyze longest-running ads to find proven patterns" },
   { name: "Reddit Thread Deep Dive", color: "#f59e0b", description: "Comment mining, pain point extraction, copy their exact language verbatim" },
   { name: "Platform-Specific Search", color: "#22c55e", description: "TikTok search, Facebook Groups, Instagram hashtags, YouTube long-form - find where the audience talks" },
-  { name: "The 2AM Test", color: "#8b5cf6", description: "Become the avatar. What keeps them up at 2AM? What do they search when nobody's watching?" },
+  { name: "The 2AM State", color: "#8b5cf6", description: "Become the avatar at their most vulnerable — alone, scrolling, defenses down. What are they FEELING at 2AM? That emotional state is what your ad must mirror to stop their scroll." },
 ];
 
 // --- Shadow Avatar Steps ---

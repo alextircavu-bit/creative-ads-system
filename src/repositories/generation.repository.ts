@@ -7,6 +7,7 @@ import type {
   TopCreativesData,
   CopyCheckResult,
   GenerationResult,
+  CreativeFeedback,
 } from "@/types/creative";
 
 const API_BASE = "/api";
@@ -31,6 +32,9 @@ interface GenerationContext {
   psycheMap?: PsycheMapData;
   salesPlaybook?: SalesPlaybookData;
   research?: ResearchData;
+  creativeTree?: CreativeTreeData;
+  feedback?: CreativeFeedback;
+  existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[];
 }
 
 export const generationRepository = {

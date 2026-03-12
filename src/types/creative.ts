@@ -49,8 +49,9 @@ export interface AdScript {
 
 export interface ScriptStep {
   label: string;
-  type: "problem" | "agitate" | "solution" | "cta" | "before" | "after" | "attention" | "interest" | "desire";
+  type: "problem" | "agitate" | "solution" | "cta" | "before" | "after" | "attention" | "interest" | "desire" | "full" | "mechanism";
   text: string;
+  hidden?: true;
 }
 
 export interface PlatformFormat {
@@ -207,6 +208,7 @@ export interface System12Trigger {
   trigger: string;
   description: string;
   tip: string;
+  hidden?: true;
 }
 
 export interface NLPTechnique {
@@ -224,6 +226,7 @@ export interface NLPStackStep {
   step: number;
   technique: string;
   script: string; // Personalized ad script for this step
+  hidden?: true;
 }
 
 export interface NLPData {
@@ -286,12 +289,20 @@ export interface AudienceSegment {
   color: string;
 }
 
+export interface BenefitExpansion {
+  surfaceBenefit: string;
+  expandedThreads: string[];
+  identityShift: string;
+  hidden?: true;
+}
+
 export interface ResearchData {
   shadowAvatarSteps: ShadowAvatarStep[];
   searchQueries: SearchQuery[];
   researchTechniques: ResearchTechnique[];
   avatarTraits: AvatarTrait[];
   audienceSegments: AudienceSegment[];
+  benefitExpansion?: BenefitExpansion;
   preCreativeChecklist: string[];
 }
 
@@ -329,6 +340,7 @@ export interface HookVariation {
   text: string;           // The hook text overlay (5-15 words)
   angle: string;          // What psychological angle this pulls
   visualSuggestions?: string[]; // 2-3 ambiguous video scene ideas behind the text
+  hidden?: true;
 }
 
 export interface BodyVariation {
@@ -339,6 +351,8 @@ export interface BodyVariation {
 export interface AdCreativeBlueprint {
   rank: number;
   name: string;
+  sourceAngle?: string;
+  sourceFramework?: string;
   templateId?: string;
   templateName?: string;
   emotion: string;
@@ -357,6 +371,16 @@ export interface AdCreativeBlueprint {
   body?: AdSection;
   targetSegment?: string;
   whyThisTemplate?: string;
+  whyThisScript?: string;
+  hidden?: true;
+}
+
+export interface CreativeFeedback {
+  hookIssues?: string[];    // "hooks are too action-narrating", "staccato fragments", etc.
+  bodyIssues?: string[];    // "body uses metaphors instead of plain feature description"
+  segmentIssues?: string[]; // "over-segmented for broad identity product"
+  ctaIssues?: string[];     // "CTAs are slogans not actions"
+  generalNotes?: string[];  // freeform feedback
 }
 
 export interface TopCreativesData {

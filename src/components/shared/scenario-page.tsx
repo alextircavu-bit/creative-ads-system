@@ -11,8 +11,9 @@ import { TopCreativesTab } from "@/components/top-creatives/top-creatives-tab";
 import { TemplatesPage } from "@/components/templates/templates-page";
 import { useProgressiveGeneration } from "@/hooks/use-generation";
 import type { SectionStep } from "@/hooks/use-generation";
-import { useCreateProject } from "@/hooks/use-projects";
-import type { ProjectInput, ScenarioType, GenerationResult } from "@/types/creative";
+import { useCreateProject, useProjectsByScenario } from "@/hooks/use-projects";
+import { generationRepository } from "@/repositories/generation.repository";
+import type { ProjectInput, ScenarioType, GenerationResult, AdCreativeBlueprint, ProjectRow } from "@/types/creative";
 
 // Sidebar navigation items
 const NAV_MAIN = [
@@ -43,22 +44,73 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
   const [theme, setTheme] = useState<Theme>("dark");
   const [apiKey, setApiKey] = useState("");
   const [showApiInput, setShowApiInput] = useState(false);
-  const { generate, progress, currentSection, result, error, isGenerating, steps, totalElapsed } = useProgressiveGeneration();
+  const { generate, progress, currentSection, result, error, isGenerating, steps, totalElapsed, setResult: setGenerationResult } = useProgressiveGeneration();
   const { createProject } = useCreateProject();
+  const { projects } = useProjectsByScenario(scenario);
+  const [isGeneratingMore, setIsGeneratingMore] = useState(false);
+  const [allCreatives, setAllCreatives] = useState<AdCreativeBlueprint[]>([]);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
   // Apply theme to html element
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
+  // Sync allCreatives with initial generation result
+  useEffect(() => {
+    if (result.topCreatives?.creatives?.length) {
+      setAllCreatives(result.topCreatives.creatives);
+    }
+  }, [result.topCreatives]);
+
+  const handleGenerateMore = async () => {
+    if (!input || isGeneratingMore || isGenerating) return;
+    const r = result as Partial<GenerationResult>;
+    if (!r.topCreatives) return;
+
+    setIsGeneratingMore(true);
+    try {
+      // Build existing creatives summary for the prompt
+      const existingCreatives = allCreatives.map((c) => ({
+        name: c.name,
+        emotion: c.emotion,
+        targetSegment: c.targetSegment,
+        hookTexts: (c.hooks || []).map((h) => h.text),
+      }));
+
+      const newData = await generationRepository.generateTopCreatives(input, {
+        psycheMap: r.psycheMap,
+        salesPlaybook: r.salesPlaybook,
+        research: r.research,
+        creativeTree: r.creativeTree,
+        existingCreatives,
+      });
+
+      if (newData?.creatives?.length) {
+        // Re-rank new creatives starting after existing ones
+        const reranked = newData.creatives.map((c, i) => ({
+          ...c,
+          rank: allCreatives.length + i + 1,
+        }));
+        setAllCreatives((prev) => [...prev, ...reranked]);
+      }
+    } catch (err) {
+      console.error("Generate more failed:", err);
+    } finally {
+      setIsGeneratingMore(false);
+    }
+  };
+
   const handleSubmit = async (formInput: ProjectInput) => {
     setInput(formInput);
     setActiveView("dashboard");
+    setAllCreatives([]);
 
     let projectId: string | undefined;
     try {
       const project = await createProject(formInput);
       projectId = project?.id;
+      if (projectId) setActiveProjectId(projectId);
     } catch {
       // Supabase may not be configured yet
     }
@@ -74,11 +126,37 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
   const goHome = () => {
     setInput(null);
     setActiveView("dashboard");
+    setActiveProjectId(null);
+  };
+
+  const loadProject = (project: ProjectRow) => {
+    if (!project.generation_result || project.status !== "completed") return;
+    const gr = project.generation_result;
+    setInput(project.input_data);
+    setGenerationResult(gr);
+    setActiveProjectId(project.id);
+    setActiveView("dashboard");
+    if (gr.topCreatives?.creatives?.length) {
+      setAllCreatives(gr.topCreatives.creatives);
+    }
+  };
+
+  // Filter completed projects for the history sidebar
+  const completedProjects = projects.filter((p) => p.status === "completed" && p.generation_result);
+
+  const handleLoadProject = (loaded: { input: ProjectInput; result: GenerationResult; id: string }) => {
+    setInput(loaded.input);
+    setGenerationResult(loaded.result);
+    setActiveProjectId(loaded.id);
+    setActiveView("dashboard");
+    if (loaded.result.topCreatives?.creatives?.length) {
+      setAllCreatives(loaded.result.topCreatives.creatives);
+    }
   };
 
   // Landing
   if (!input) {
-    return <LandingForm scenario={scenario} onSubmit={handleSubmit} isLoading={isGenerating} />;
+    return <LandingForm scenario={scenario} onSubmit={handleSubmit} onLoadProject={handleLoadProject} isLoading={isGenerating} />;
   }
 
   const r = result as Partial<GenerationResult>;
@@ -141,6 +219,30 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
               />
             ))}
           </div>
+
+          {/* Previous Generations */}
+          {completedProjects.length > 0 && (
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-muted-foreground/40 px-3 mb-2">History</div>
+              <div className="space-y-0.5 max-h-[200px] overflow-y-auto">
+                {completedProjects.map((p) => (
+                  <button
+                    key={p.id}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+                      activeProjectId === p.id
+                        ? "bg-violet-500/10 text-violet-400"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    }`}
+                    onClick={() => loadProject(p)}
+                    title={p.product_name}
+                  >
+                    <div className="text-[12px] font-medium truncate">{p.product_name}</div>
+                    <div className="text-[10px] text-muted-foreground/50 truncate">{formatRelativeDate(p.created_at)}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </nav>
 
         {/* Bottom: theme toggle */}
@@ -242,7 +344,12 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
               <div className="space-y-10">
                 {/* Top 5 Creatives */}
                 {r.topCreatives ? (
-                  <TopCreativesTab data={r.topCreatives} productName={input.productName} />
+                  <TopCreativesTab
+                    data={{ creatives: allCreatives.length > 0 ? allCreatives : r.topCreatives.creatives }}
+                    productName={input.productName}
+                    onGenerateMore={handleGenerateMore}
+                    isGeneratingMore={isGeneratingMore}
+                  />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-24 rounded-2xl border border-border/30 bg-card/20">
                     <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-5">
@@ -546,6 +653,21 @@ function formatDuration(ms: number): string {
   const sec = totalSec % 60;
   if (min > 0) return `${min}m ${sec}s`;
   return `${sec}s`;
+}
+
+function formatRelativeDate(isoString: string): string {
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function LoadingSection({ label }: { label: string }) {

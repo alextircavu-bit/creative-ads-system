@@ -7,7 +7,7 @@ import {
   creativeTreePrompt,
   topCreativesPrompt,
 } from "@/config/prompts";
-import type { ProjectInput, GenerationResult, PsycheMapData, SalesPlaybookData, ResearchData } from "@/types/creative";
+import type { ProjectInput, GenerationResult, PsycheMapData, SalesPlaybookData, ResearchData, CreativeTreeData, CreativeFeedback } from "@/types/creative";
 
 type Section = "psycheMap" | "salesPlaybook" | "research" | "creativeTree" | "topCreatives" | "all";
 
@@ -16,8 +16,8 @@ const SECTION_TOKENS: Record<Exclude<Section, "all">, number> = {
   psycheMap: 6000,
   salesPlaybook: 8000,
   research: 5000,
-  creativeTree: 14000,
-  topCreatives: 5000,
+  creativeTree: 20000,
+  topCreatives: 8000,
 };
 
 function repairJSON(raw: string): string {
@@ -86,6 +86,9 @@ export async function POST(request: NextRequest) {
         psycheMap?: PsycheMapData;
         salesPlaybook?: SalesPlaybookData;
         research?: ResearchData;
+        creativeTree?: CreativeTreeData;
+        feedback?: CreativeFeedback;
+        existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[];
       };
     };
 
@@ -103,11 +106,17 @@ export async function POST(request: NextRequest) {
         callClaude(researchPrompt(input), SECTION_TOKENS.research) as Promise<ResearchData>,
       ]);
 
-      // Step 2: Creative Tree + Top Creatives in parallel (informed by all 3)
-      const [creativeTree, topCreatives] = await Promise.all([
-        callClaude(creativeTreePrompt(input, psycheMap, salesPlaybook, research), SECTION_TOKENS.creativeTree),
-        callClaude(topCreativesPrompt(input, psycheMap, salesPlaybook, research), SECTION_TOKENS.topCreatives),
-      ]);
+      // Step 2: Creative Tree (informed by all 3)
+      const creativeTree = await callClaude(
+        creativeTreePrompt(input, psycheMap, salesPlaybook, research),
+        SECTION_TOKENS.creativeTree,
+      ) as CreativeTreeData;
+
+      // Step 3: Top Creatives (informed by all 3 + Creative Tree insights)
+      const topCreatives = await callClaude(
+        topCreativesPrompt(input, psycheMap, salesPlaybook, research, creativeTree),
+        SECTION_TOKENS.topCreatives,
+      );
 
       const fullResult: GenerationResult = {
         id: crypto.randomUUID(),
@@ -141,7 +150,7 @@ export async function POST(request: NextRequest) {
         prompt = creativeTreePrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research);
         break;
       case "topCreatives":
-        prompt = topCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research);
+        prompt = topCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research, context?.creativeTree, context?.feedback, context?.existingCreatives);
         break;
       default:
         return NextResponse.json({ error: "Invalid section" }, { status: 400 });

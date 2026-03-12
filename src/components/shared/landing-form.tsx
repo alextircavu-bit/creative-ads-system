@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ProjectInput, ScenarioType } from "@/types/creative";
+import type { ProjectInput, ScenarioType, GenerationResult } from "@/types/creative";
 import { useProjectsByScenario } from "@/hooks/use-projects";
 
 const V4_PRESETS: Record<string, { name: string; benefit: string }> = {
@@ -54,6 +54,7 @@ const V3_PRESETS: Record<string, { appName: string; featureName: string; benefit
 interface LandingFormProps {
   scenario: ScenarioType;
   onSubmit: (input: ProjectInput) => void;
+  onLoadProject?: (project: { input: ProjectInput; result: GenerationResult; id: string }) => void;
   isLoading?: boolean;
 }
 
@@ -61,7 +62,7 @@ function toSlug(str: string): string {
   return str.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps) {
+export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: LandingFormProps) {
   const [productName, setProductName] = useState("");
   const [featureName, setFeatureName] = useState("");
   const [productBenefit, setProductBenefit] = useState("");
@@ -235,24 +236,42 @@ export function LandingForm({ scenario, onSubmit, isLoading }: LandingFormProps)
         <div className="mt-8 w-full max-w-xl">
           <div className="flex items-center gap-2 mb-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">Recent</span>
+            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">Previous Generations</span>
             <div className="h-px flex-1 bg-border" />
           </div>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {uniqueProjects.slice(0, 8).map((p) => (
-              <button
-                key={p.id}
-                className="rounded-lg border border-border bg-card/30 px-3.5 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-violet-500/30 transition-all group"
-                onClick={() => loadFromHistory(p)}
-              >
-                <span className="font-semibold">{p.product_name}</span>
-                {p.product_description && (
-                  <span className="block text-[10px] text-muted-foreground/60 group-hover:text-muted-foreground mt-0.5 max-w-[200px] truncate">
-                    {p.product_description}
-                  </span>
-                )}
-              </button>
-            ))}
+          <div className="flex flex-col gap-1.5">
+            {uniqueProjects.slice(0, 10).map((p) => {
+              const isCompleted = p.status === "completed" && p.generation_result;
+              return (
+                <button
+                  key={p.id}
+                  className="w-full text-left rounded-xl border border-border bg-card/30 px-4 py-3 hover:border-violet-500/30 hover:bg-violet-500/5 transition-all group flex items-center gap-3"
+                  onClick={() => {
+                    if (isCompleted && onLoadProject) {
+                      onLoadProject({ input: p.input_data, result: p.generation_result!, id: p.id });
+                    } else {
+                      loadFromHistory(p);
+                    }
+                  }}
+                >
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${
+                    isCompleted ? "bg-green-400" : p.status === "failed" ? "bg-rose-400" : "bg-muted-foreground/30"
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-foreground truncate">
+                      {p.product_name}
+                      {p.feature_name && <span className="text-muted-foreground font-normal"> — {p.feature_name}</span>}
+                    </div>
+                    {p.product_description && (
+                      <div className="text-[10px] text-muted-foreground/50 truncate mt-0.5">{p.product_description.slice(0, 80)}</div>
+                    )}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground/40 shrink-0">
+                    {isCompleted ? "Load" : p.status === "failed" ? "Failed" : "Retry"}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

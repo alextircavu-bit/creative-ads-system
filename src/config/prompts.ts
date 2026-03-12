@@ -4,7 +4,7 @@
 // content within that framework for the specific product.
 // ============================================================
 
-import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData } from "@/types/creative";
+import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData, CreativeTreeData, CreativeFeedback } from "@/types/creative";
 import {
   filterRelevantAngles,
   FRAMEWORKS,
@@ -30,12 +30,12 @@ import {
   NLP_STACK_STRATEGY,
   NLP_KEY_PRINCIPLE,
 } from "@/config/framework-data";
-import { detectExperienceTypes, matchTemplates, EXPERIENCE_TYPE_LABELS } from "@/config/ad-templates";
+// ad-templates kept in codebase for future template expansion
 
 function buildContext(input: ProjectInput): string {
   const base = `Product: ${input.productName}\nDescription: ${input.productDescription}`;
   if (input.scenario === "v3") {
-    return `${base}\nType: Mobile App\nApp Features: ${input.appFeatures || "N/A"}\nApp Benefits: ${input.appBenefits || "N/A"}\nApp Purpose: ${input.appPurpose || "N/A"}`;
+    return `${base}\nType: Mobile App\nFeature Being Marketed: ${input.featureName || "N/A"}\nApp Features: ${input.appFeatures || "N/A"}\nApp Benefits: ${input.appBenefits || "N/A"}\nApp Purpose: ${input.appPurpose || "N/A"}`;
   }
   return `${base}\nTarget Audience: ${input.targetAudience || "N/A"}\nUSP: ${input.uniqueSellingPoint || "N/A"}`;
 }
@@ -410,10 +410,10 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
 
     HIERARCHY ORDER (you MUST follow this structure):
     1. THE OBVIOUS ONE - the biggest, most common reason anyone would want this. The segment that makes you say "duh, obviously." Highest volume, easiest to target. (e.g., for a calorie app = people trying to lose weight)
-    2. THE SECOND BIGGEST - the next most common use case. Still large, slightly more specific. (e.g., gym/fitness people tracking macros)
-    3. THE LIFESTYLE SEGMENT - a medium-sized group defined by a life situation, not just interest. (e.g., busy parents trying to feed their family better)
-    4. THE HIGH-VALUE NICHE - smaller audience but high intent and willingness to pay. (e.g., athletes, competitors, people with medical dietary needs)
-    5. THE UNEXPECTED ANGLE - a segment most advertisers miss. Smaller but could be a goldmine if it hits. This is where creativity matters. (e.g., people with social anxiety about eating out)
+    2. THE SHAME/PAIN-DRIVEN ONE - the segment motivated by something they're struggling with or ashamed of. These people have the HIGHEST intent because they're in active pain. What private struggle does this product address? (e.g., for a bible app = people fighting temptation; for a calorie app = people who've lost control of their eating)
+    3. THE SECOND BIGGEST - the next most common use case after the obvious. Still large, slightly more specific. (e.g., gym/fitness people tracking macros)
+    4. THE LIFESTYLE SEGMENT - a medium-sized group defined by a life situation or identity shift. (e.g., busy parents trying to feed their family better)
+    5. THE UNEXPECTED ANGLE - a segment most advertisers miss. Could be a goldmine. Think: what weird, non-obvious reason would someone want this? (e.g., people with social anxiety about eating out)
 
     For ${input.productName}, ground each segment in REAL daily moments. When in their day does the need arise? What are they doing right before they'd want this?
 
@@ -432,6 +432,18 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
 
     These are HYPOTHESES to validate through ad testing. Rank 1 gets tested first because it has the highest predicted volume and conversion.
   ],
+
+  "benefitExpansion": {
+    "surfaceBenefit": "the product owner's stated benefit, verbatim from the description",
+    "expandedThreads": [
+      "PERSONALIZE: 5-7 deeper benefit threads derived from the surface benefit. Each thread is a different implication about the person's life, identity, daily routine, or emotional state. These become the RAW MATERIAL for ad hooks.",
+      "Thread 2: what does using this product say about who they want to become?",
+      "Thread 3: what daily frustration does this eliminate?",
+      "Thread 4: what shame or guilt does this address?",
+      "Thread 5: what identity shift happens when they start using this?"
+    ],
+    "identityShift": "PERSONALIZE: In one sentence, who does this person become after adopting this product? The before→after identity transformation."
+  },
 
   "preCreativeChecklist": ["10 checklist items specific to ${input.productName} that must be verified before creating ads"]
 }
@@ -505,18 +517,25 @@ Pre-Creative Checklist: ${researchData.preCreativeChecklist.slice(0, 5).join("; 
     steps: f.steps,
   }));
 
-  return `You are an elite ad creative strategist. You have access to COMPLETE psychological, sales, and research analysis from previous sections. Your job is to create the ULTIMATE Creative Tree - ad copy that is mathematically optimized based on all preceding analysis.
+  return `You are an elite ad creative strategist. You have access to COMPLETE psychological, sales, and research analysis from previous sections. Your job is to EXPLORE psychological territories and produce ad copy that is deeply informed by all preceding analysis.
 
 ${buildContext(input)}
 
 ${contextParts.join("\n\n")}
 
-=== HARDCODED FRAMEWORK (DO NOT CHANGE) ===
+=== PSYCHOLOGICAL TERRITORIES (broad spaces to explore) ===
 
-Emotional Angles (FIXED - these are the angles, ranked by relevance to this product):
+These are NOT conclusions — they are TERRITORIES. Each territory contains many possible angles, hooks, and emotional directions. Your job is to explore what each territory MEANS for this specific product and its audience.
+
 ${JSON.stringify(anglesJSON, null, 2)}
 
-Copywriting Frameworks (FIXED):
+Example: "Identity Tension" for a faith app could produce:
+- "I used to be someone who prayed every morning"
+- "I keep calling myself a Christian but my screen time says otherwise"
+- "The person I want to be reads Scripture. The person I am scrolls TikTok."
+One territory, three completely different hooks — because it's a SPACE, not a conclusion.
+
+Copywriting Frameworks (tools, not rigid columns):
 ${JSON.stringify(frameworksJSON, null, 2)}
 
 Platform Formats (FIXED):
@@ -524,13 +543,13 @@ ${JSON.stringify(PLATFORM_FORMATS, null, 2)}
 
 === YOUR TASK ===
 
-Using ALL the data above (biases, dopamine triggers, pain/pleasure points, Cialdini weapons, awareness levels, avatar traits, value equation), generate ad copy that STACKS these psychological factors for maximum impact.
+Using ALL the data above (biases, dopamine triggers, pain/pleasure points, Cialdini weapons, awareness levels, avatar traits, value equation), EXPLORE each territory for this product and generate copy that stacks psychological factors.
 
 Generate a JSON object:
 {
   "emotionalAngles": [
-    For EACH angle above, keep id/name/mechanism/color, and ADD:
-    - "relevanceScore": 0-100 (score based on how well this angle maps to the psyche map + sales data)
+    For EACH territory above, keep id/name/mechanism/color, and ADD:
+    - "relevanceScore": 0-100 (how rich is this territory for ${input.productName}? A territory with many possible angles scores high.)
   ],
 
   "frameworks": [
@@ -539,17 +558,26 @@ Generate a JSON object:
   ],
 
   "scripts": {
-    "<angle.id>": [
-      For the TOP 6 most relevant angles, generate one script per framework (6 angles x 5 frameworks = 30 scripts).
-      IMPORTANT: Scripts must match the ACTIVE TEMPLATE FORMAT: Hook + Body (text overlay, 10-20 seconds total). Do NOT write long-form ad copy. Each script is a SHORT-FORM ad concept.
+    "<territory.id>": [
+      For the TOP 6 most relevant territories, generate one script per framework (6 territories x 5 frameworks = 30 scripts).
+
+      TWO-PHASE PROCESS for each script:
+
+      PHASE 1 — TERRITORY EXPLORATION: Pick a specific ANGLE within this territory that fits the framework. Then write the script as the framework NATIVELY works. PAS as a real PAS (problem, agitate, solution — full copy). AIDA as real AIDA. Don't constrain to any ad format yet. Write it as if it were a sales letter, landing page, email — whatever the framework was designed for. This is the RAW copywriting.
+
+      PHASE 2 — DISTILLATION: Extract the CORE PSYCHOLOGICAL EFFECT. What does this script DO to the reader? What emotion does it trigger? What tension does it create? Distill that into a hook (5-20 words) and a body (one plain sentence describing the feature).
+
+      IMPORTANT: Each script within the SAME territory should explore a DIFFERENT angle of that territory. Don't repeat the same hook direction across frameworks — the frameworks are tools to approach the territory from different psychological angles.
+
       {
         "frameworkId": "the framework id",
         "steps": [
-          Adapt the framework steps to SHORT-FORM format. Each step = 1-2 sentences MAX.
-          The framework is the STRUCTURE, but the output is a 10-20 second text overlay ad, not a long-form sales letter.
-          { "label": "step label from framework", "type": "problem|agitate|solution|cta|before|after|attention|interest|desire|situation|task|action|result", "text": "SHORT text overlay copy for this step - 1-2 sentences max. This appears on screen for 2-5 seconds." }
+          { "label": "native", "type": "full", "text": "PHASE 1: The full native copywriting execution. Name the specific angle within the territory you're exploring. 3-6 sentences." },
+          { "label": "effect", "type": "mechanism", "text": "PHASE 2: The core psychological effect — what emotion, tension, or reframe does this create? One sentence." },
+          { "label": "hook", "type": "attention|problem|before|situation", "text": "The distilled hook — 5-20 words. This is what stops the scroll." },
+          { "label": "body", "type": "solution|after|desire|result", "text": "The product resolution (one sentence). Plainly describes the feature." }
         ],
-        "hooks": ["5 hook lines (5-15 words each) that combine the emotional angle with the strongest biases and triggers from the psyche map. These are scroll-stopping text overlays, not headlines."]
+        "hooks": ["5 alternative hook lines — each explores a DIFFERENT angle within this same territory. Natural flowing sentences, not fragments."]
       }
     ]
   },
@@ -561,15 +589,19 @@ Generate a JSON object:
 }
 
 CRITICAL RULES:
-1. Every piece of copy MUST reference the psychological data from previous sections
+1. Territories are SPACES to explore, not conclusions to state. Each territory should produce varied, surprising angles.
 2. Hooks must exploit the top biases (${psycheMapData ? psycheMapData.biases.slice(0, 3).map((b) => b.name).join(", ") : "detected biases"})
-3. Scripts must target the strongest Cialdini weapons
+3. Every piece of copy must be informed by the psychological + sales + research data above
 4. Copy must be word-for-word ready for a media buyer
-5. Return ONLY valid JSON. No markdown, no code fences.`;
+5. The 5 alternative hooks per script should each explore a DIFFERENT direction within the territory — not 5 rewrites of the same idea
+6. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================
-// 5. TOP 5 CREATIVES - Generated alongside Creative Tree
+// 5. TOP CREATIVES - Creative Engine
+// Uses ALL deep dive data as intelligence. Creative Tree provides
+// angle relevance scores and psychological mapping, but Top Creatives
+// generates its own ad concepts from scratch using that intelligence.
 // ============================================================
 
 export function topCreativesPrompt(
@@ -577,177 +609,243 @@ export function topCreativesPrompt(
   psycheMapData?: PsycheMapData,
   salesData?: SalesPlaybookData,
   researchData?: ResearchData,
+  creativeTreeData?: CreativeTreeData,
+  feedback?: CreativeFeedback,
+  existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
 ): string {
   const productText = getProductText(input);
+
+  // === DEEP DIVE INTELLIGENCE ===
   const contextParts: string[] = [];
 
   if (psycheMapData) {
-    contextParts.push(`Psychology: ${psycheMapData.cognitiveProfile.name} | Biases: ${psycheMapData.biases.slice(0, 5).map((b) => b.name).join(", ")} | Dopamine: ${psycheMapData.dopamine.trigger} | Pains: ${psycheMapData.painPleasure.pains.join(", ")}`);
+    contextParts.push(`=== PSYCHOLOGY ===
+Profile: ${psycheMapData.cognitiveProfile.name} — ${psycheMapData.cognitiveProfile.description || psycheMapData.cognitiveProfile.mechanism}
+Biases (ranked): ${psycheMapData.biases.slice(0, 7).map((b) => `${b.name} [${b.strength}]${b.description ? ` — ${b.description}` : ""}`).join("\n  ")}
+Pain points: ${psycheMapData.painPleasure.pains.join(" | ")}
+Pleasure points: ${psycheMapData.painPleasure.pleasures.join(" | ")}
+Dopamine: ${psycheMapData.dopamine.trigger} (${psycheMapData.dopamine.triggerPct}%) → ${psycheMapData.dopamine.schedule}
+Habit loop: ${psycheMapData.habitLoop.cue} → ${psycheMapData.habitLoop.routine} → ${psycheMapData.habitLoop.reward}`);
   }
+
   if (salesData) {
-    contextParts.push(`Sales: Value Eq ${salesData.valueEquation.dreamOutcome.score}/${salesData.valueEquation.perceivedLikelihood.score}/${salesData.valueEquation.timeDelay.score}/${salesData.valueEquation.effortSacrifice.score} | Cialdini: ${salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 3).map((w) => w.name).join(", ")} | HSO Hooks: ${salesData.hso.hooks.join(" | ")}`);
+    const topCialdini = salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 3);
+    const topAwareness = salesData.awarenessLevels.sort((a, b) => b.relevance - a.relevance).slice(0, 2);
+    contextParts.push(`=== SALES INTELLIGENCE ===
+Value Equation: Dream ${salesData.valueEquation.dreamOutcome.score} | Likelihood ${salesData.valueEquation.perceivedLikelihood.score} | Speed ${salesData.valueEquation.timeDelay.score} | Effort ${salesData.valueEquation.effortSacrifice.score}
+Top Cialdini: ${topCialdini.map((w) => `${w.name} [${w.power}] — ${w.application || ""}`).join("\n  ")}
+Best awareness levels: ${topAwareness.map((l) => `${l.name}: ${l.adStrategy}`).join("\n  ")}
+HSO hooks: ${salesData.hso.hooks.join(" | ")}
+System 1 triggers: ${salesData.system1Triggers.map((t) => t.trigger).join(", ")}
+NLP techniques: ${salesData.nlp?.techniques?.map((t) => `${t.name} [${t.power}] — ${t.productExample || t.adApplication}`).join("\n  ") || "N/A"}`);
   }
+
   if (researchData) {
-    contextParts.push(`Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}`);
+    const segments = researchData.audienceSegments?.slice(0, 5) || [];
+    contextParts.push(`=== RESEARCH ===
+Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}
+${segments.length > 0 ? `Segments (ranked):\n${segments.map((s, i) => `  ${i + 1}. "${s.name}" — ${s.description}\n     Best angle: ${s.bestAngle} | ROI: ${s.predictedROI} | Conv: ${s.conversionLikelihood}%`).join("\n")}` : ""}
+${researchData.benefitExpansion ? `Benefit expansion:\n  Surface: ${researchData.benefitExpansion.surfaceBenefit}\n  Threads: ${researchData.benefitExpansion.expandedThreads.join("\n  ")}\n  Identity shift: ${researchData.benefitExpansion.identityShift}` : ""}`);
   }
 
-  // Build segment context with full detail for creative mapping
-  const segmentContext = researchData?.audienceSegments?.length
-    ? researchData.audienceSegments.slice(0, 5).map((s, i) => (
-      `Segment ${i + 1}: "${s.name}"
-  Who: ${s.description}
-  Demographics: ${s.demographics}
-  Psychographics: ${s.psychographics}
-  Recommended angle: ${s.bestAngle}
-  Ad strategy: ${s.adStrategy}
-  Predicted ROI: ${s.predictedROI} | Conversion: ${s.conversionLikelihood}%`
-    )).join("\n\n")
-    : "";
-
-  // === TEMPLATE MATCHING ===
-  const experienceTypes = detectExperienceTypes(productText);
-  const primaryExp = experienceTypes[0];
-  const matchedTemplates = matchTemplates(experienceTypes);
-  const top5Templates = matchedTemplates.slice(0, 7);
-
-  const templateContext = top5Templates.map((t, i) => (
-    `${i + 1}. [${t.id}] "${t.title}" (${t.timing})
-   Category: ${t.category} | Experience: ${t.experienceTypes.join(", ")}${t.proven ? " | PROVEN" : ""}
-   Structure: ${t.frames.map((f) => `${f.label} (${f.time})`).join(" > ")}
-   Best for: ${t.bestFor.join(", ")}
-   Why it works: ${t.whyItWorks}`
-  )).join("\n\n");
-
-  // Deep dive psychological tools for hook generation
-  const psycheTools: string[] = [];
-  if (psycheMapData) {
-    psycheMapData.biases.slice(0, 6).forEach((b) => psycheTools.push(`Bias: ${b.name} - ${b.description}`));
-    psycheMapData.painPleasure.pains.forEach((p) => psycheTools.push(`Pain: ${p}`));
-    psycheMapData.painPleasure.pleasures.forEach((p) => psycheTools.push(`Desire: ${p}`));
-    if (psycheMapData.dopamine) psycheTools.push(`Dopamine trigger: ${psycheMapData.dopamine.trigger}`);
-    if (psycheMapData.habitLoop) psycheTools.push(`Habit loop: ${psycheMapData.habitLoop.cue} > ${psycheMapData.habitLoop.routine} > ${psycheMapData.habitLoop.reward}`);
-  }
-  if (salesData) {
-    salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 4).forEach((w) => psycheTools.push(`Cialdini: ${w.name} - ${w.application}`));
-    salesData.awarenessLevels.sort((a, b) => b.relevance - a.relevance).slice(0, 3).forEach((l) => psycheTools.push(`Awareness: ${l.name} - strategy: ${l.adStrategy}`));
-    if (salesData.hso) salesData.hso.hooks.forEach((h) => psycheTools.push(`HSO Hook: ${h}`));
+  // === CREATIVE TREE INTELLIGENCE (angles + relevance, NOT scripts to copy) ===
+  if (creativeTreeData) {
+    const sortedAngles = [...creativeTreeData.emotionalAngles].sort((a, b) => b.relevanceScore - a.relevanceScore);
+    const topAngles = sortedAngles.slice(0, 8);
+    contextParts.push(`=== CREATIVE TREE INTELLIGENCE ===
+Top emotional angles (by relevance):
+${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).join("\n")}
+Use these angles as INSPIRATION. You are NOT limited to them — if you see a stronger angle from the psychology/research data, use it.`);
   }
 
-  return `You are a senior creative director. Create 5 ad blueprints for ${input.productName}.
-DELIVERY MODE FOR THIS BATCH: text-overlay (bold text on screen, no voiceover).
+  return `You are an elite performance creative strategist who creates ads that stop thumbs and convert. You have DEEP psychological intelligence about this product's audience. Use it ALL.
 
 ${buildContext(input)}
 
-${contextParts.length > 0 ? `=== DEEP DIVE ANALYSIS ===\n${contextParts.join("\n")}\n` : ""}
+${contextParts.join("\n\n")}
 
-=== AUDIENCE SEGMENT HIERARCHY ===
-These segments are ranked by predicted impact. Each creative should target a DIFFERENT segment. The 5 creatives = 5 testable hypotheses across the audience hierarchy.
+=== THE ONE TEMPLATE (this is the ONLY format we produce) ===
 
-${segmentContext || "No segments available - generate creatives for broad audience."}
+Every ad follows this exact structure. No exceptions. No other formats.
 
-=== PSYCHOLOGICAL TOOLS (from deep dive) ===
-Use these to craft hooks. Each tool is a lever - pull a DIFFERENT one for each hook variation:
-${psycheTools.join("\n")}
+HOOK (text + visual as ONE UNIT — this is where ALL creative variety lives)
+The first 1-5 seconds. Text overlay + visual reinforce the SAME emotion.
+- The visual sets the emotional context. The text articulates it. They must match.
+- Can be a question, reframe, confession, challenge, observation, social proof, or provocation
+- Taps into an emotion the viewer RELATES to in connection with this product
+- The viewer must think "wait, that's me" or "wait, what?"
+- 5-20 words maximum.
 
-=== EXPERIENCE TYPE ===
-Primary: ${EXPERIENCE_TYPE_LABELS[primaryExp].name} (${EXPERIENCE_TYPE_LABELS[primaryExp].example})
+BRIDGE (implicit — the psychological WHY)
+The connection between hook and body. NOT visible as separate text.
+The viewer's brain fills this in: "I feel [hook tension]... oh, THIS is how I fix it [body]"
+The product makes the hook's premise LITERAL.
 
-=== MATCHED TEMPLATES ===
-${templateContext}
+BODY (screen recording of the feature — CONSTANT, reusable across all hooks)
+The reveal. Screen recording of the actual product feature in action.
+- One plain sentence describing what the feature does, overlaid on the screen recording
+- This is NOT sales copy. It's a factual description of the product experience.
+- The SAME body pairs with dozens of different hooks. The body NEVER changes.
+- This is where the hook's promise becomes real — the viewer sees it working.
 
-=== HOW TO THINK (creative director reasoning) ===
+CTA (text overlay — action, not a slogan)
+"Tap below to get it" / "Download Free" / "Get It Below" / "Try It Free"
+An action the viewer takes. Never a tagline.
 
-STEP 1: BUYER SPECIFICITY
-Before writing anything, reason about WHO buys this product:
-- Is the buyer SPECIFIC? (diapers = parents, pet food = pet owners) Then you CAN laser-target in the creative.
-- Is the buyer BROAD within an identity? (bible app = anyone of faith, meditation app = anyone stressed) Then hooks should speak to the SHARED IDENTITY, not narrow demographic slices.
-- Don't waste creative slots on micro-segments (e.g. "seniors learning phones", "college students away from home church") when the product serves an entire identity group. Let the ad platform's algorithm find sub-segments - that's what it's built for.
-- Vary hooks by EMOTIONAL ANGLE (guilt, comfort, routine, identity, curiosity) not by demographic slice (parents, students, retirees).
+THE DEFAULT PATTERN (proven, but not the only one):
+Emotionally triggering question as hook → screen recording body showing the solution
+Example: "Does anyone else open their Bible wanting to feel something and just... stare at the page?" → [screen recording of verse appearing on lockscreen]
 
-STEP 2: HOOK WRITING
-The hook must pass ONE test: would a real person scrolling TikTok actually think or say this?
-- STAY IN THE PRODUCT'S WORLD. A Bible app hook must live in the world of faith, scripture, God, verses. Do NOT reposition the product into adjacent worlds (wellness, productivity, self-improvement, parenting). The hook should make a person of faith feel "that's about ME and MY faith."
-- Use the product's lexical field (words that signal the world: for a bible app = "verse", "scripture", "faith", "God", "Bible"; for a calorie app = "macros", "food", "plate")
-- The hook should feel like catching someone mid-thought. Not a headline, not a tagline, not a slogan.
-- It can be an incomplete thought that the body resolves ("opened my Bible 0 times this week but..." -> body resolves with the product)
-- NEVER use the AI list pattern as a hook: "meditation app. journaling app. still missing something." - this is a slogan structured as bullet points. Nobody thinks in product category lists.
-- Good: "0 verses this week. 847 reels." / "my work food doesn't have macro details but..."
-- Bad: "Track Your Macros Easily" / "meditation app. journaling app. missing something." / "my grandkids taught me to use this phone. God taught me what to do with it."
+OTHER HOOK APPROACHES (use these too — variety is critical):
+- Reframe: "What if [mundane thing you already do] was [powerful new meaning]?" → body reveals it's real
+- Confession: "I used to [shameful thing] every night before bed" → product as the replacement
+- Challenge: "Try this for 3 days and tell me you don't feel different" → product demo
+- Social proof: "My friend made me download this and now I can't stop" → product experience
+- Founder: "I built this because I couldn't find..." → product as the answer
+- Provocation: "Your [routine/habit] is the reason you [negative outcome]" → product as fix
 
-STEP 3: BODY WRITING
-Body = what the feature actually IS. One simple sentence. Not clever, not poetic, not metaphorical.
-- Good: "an hourly bible verse widget. tap below to download." / "point your phone at any plate. instant macros."
-- Bad: "church in your pocket when you can't get to church" (metaphor, clunky repetition, doesn't describe the actual feature)
-- Bad: "no typing. no searching. verses just appear." (this is AI triplet pattern writing. Real people don't structure sentences like this.)
-- The body can complete an incomplete hook.
+=== PLATFORM VOICE ===
 
-STEP 4: CTA
-CTA = an ACTION. Tell the person what to DO.
-- Good: "Download Free", "Get It Below", "Tap to Install"
-- Bad: "Never Alone", "Start Your Journey", "Find Peace" (these are slogans, not actions)
+The SAME angle must sound different per platform. The hook's meaning stays, the voice changes.
 
-STEP 5: WRITING QUALITY
-Read your output out loud. Does it sound like a real person or like AI?
-- Avoid the AI triplet pattern: "no X. no Y. Z just happens." This is the #1 giveaway of AI-generated copy.
-- Avoid greeting card sentiments: "God taught me what to do with it" - nobody actually thinks this.
-- Avoid forced poetry or metaphors in ads. Simple > clever.
-- If a sentence sounds clunky or has awkward repetition, rewrite it. Have taste.
-- The ad should feel NATIVE to the platform. Like organic content, not like an ad.
+TikTok (Spark Ads — must sound like a real user posted this, NOT an ad):
+- Casual, native, how people actually talk on TikTok
+- "ok but why did no one tell me about this app"
+- "this app literally puts a verse on your lockscreen every hour"
+- "bro I'm not even that religious but this hit different"
+- Short, punchy, conversational. Lowercase energy. No polished copywriting.
 
+Meta/Instagram (slightly older audience, more composed):
+- Can be more thoughtful, slightly longer, more reflective
+- "What if your lockscreen reminded you of God's word every hour?"
+- "I stopped scrolling past my faith and started living it"
+- Still natural, but can use complete sentences and deeper framing.
+
+Each creative should specify its platform and the hooks MUST match that platform's voice.
+
+=== EMOTIONAL DEPTH ===
+
+The hook emotion must RELATE to the product and be TRIGGERING enough to stop the scroll. The right emotion depends entirely on the product and the person using it:
+- A faith app might trigger guilt, longing, or spiritual hunger
+- A candy brand might trigger craving, nostalgia, or indulgence
+- A book app might trigger curiosity, intellectual ego, or fear of being left behind
+- Don't force negative emotions where they don't fit. Don't force positive ones either. Follow the product.
+
+Ask: WHO is this person, and what do they FEEL in relation to this product? Use THAT emotion.
+
+DEPTH is what matters — regardless of whether the emotion is positive or negative:
+- SHALLOW (bad): "Want to read more books?" — generic, nobody stops for this
+- MEDIUM: "I keep adding books to my list and never opening them" — specific, relatable
+- DEEP (good): "I used to be the person who always had something interesting to say" — identity loss, visceral
+
+PLATFORM AD POLICIES — you CAN use negative emotions and uncomfortable truths:
+- Banned/flagged words: "porn", "lust", "sex", "addiction", "addict", "suicide", "kill"
+- The CONCEPTS behind those words are your most powerful tools. Use implication.
+- "That thing you do every night that you promised yourself you'd stop" = powerful AND policy-safe
+- "I" perspective ("I can't stop...") is safer than "you" accusations ("You're addicted to...")
+
+=== NLP IN COPY ===
+
+Weave these into hooks naturally (don't label them, just USE them):
+- PRESUPPOSITION: "When did you stop feeling close to God?" (presupposes they did feel close)
+- REFRAMING: Transform the product from "app" to "daily anchor" or "morning reset"
+- PATTERN INTERRUPT: Break expected scroll patterns with unexpected framing
+- ANCHORING: Link the product to an emotion they already have ("that peace you felt as a kid")
+- DISSOCIATION: "The version of you that [does the bad thing] vs the version that [uses product]"
+
+=== BUYER SPECIFICITY ===
+
+For BROAD IDENTITY products (faith, wellness, self-improvement):
+→ Vary creatives by EMOTIONAL ANGLE, not demographics. Same person, different pain points.
+→ Don't over-segment. A faith app user could be 18 or 65. The EMOTION is the targeting.
+
+For SPECIFIC BUYER products (B2B, niche tools, professional software):
+→ Vary creatives by AUDIENCE SEGMENT. Different people, different use cases.
+
+${(() => {
+    if (!feedback) return "";
+    const parts: string[] = ["=== FEEDBACK (do NOT repeat these issues) ==="];
+    if (feedback.hookIssues?.length) parts.push(`Hooks: ${feedback.hookIssues.join("; ")}`);
+    if (feedback.bodyIssues?.length) parts.push(`Bodies: ${feedback.bodyIssues.join("; ")}`);
+    if (feedback.segmentIssues?.length) parts.push(`Segments: ${feedback.segmentIssues.join("; ")}`);
+    if (feedback.ctaIssues?.length) parts.push(`CTAs: ${feedback.ctaIssues.join("; ")}`);
+    if (feedback.generalNotes?.length) parts.push(`General: ${feedback.generalNotes.join("; ")}`);
+    return parts.join("\n") + "\n";
+  })()}
+${(() => {
+    if (!existingCreatives?.length) return "";
+    const lines = existingCreatives.map((c, i) =>
+      `${i + 1}. "${c.name}" — ${c.emotion}, ${c.targetSegment || "n/a"}: ${c.hookTexts.slice(0, 2).map((h) => `"${h}"`).join(", ")}`
+    );
+    return `=== ALREADY GENERATED (create DIFFERENT ones) ===
+${lines.join("\n")}
+Start ranking from ${existingCreatives.length + 1}. Use different angles, emotions, and hook structures than those listed above.
+`;
+  })()}
 === YOUR TASK ===
 
-Create 5 creatives. Template: Hook + Body (text overlay, 10-20 sec total).
+Generate 5 ad creative blueprints. Each is a COMPLETE, production-ready ad concept.
 
-FIRST: Decide your targeting approach based on buyer specificity (from Step 1 above).
-- If the buyer is BROAD (shared identity group), your 5 creatives should vary by EMOTIONAL ANGLE, not by demographic segment. Each creative hits the same broad audience from a different emotional direction.
-- If the buyer is SPECIFIC, each creative can target a different segment.
+FOR EACH CREATIVE:
+1. Choose an emotional angle informed by the intelligence above (you can combine angles or find new ones the data implies).
+2. Write 5-6 HOOK VARIATIONS — same emotional territory, different psychological levers and sentence structures.
+   - Each hook must have 2-3 visualSuggestions: the visual that plays BEHIND the hook text. It must convey the SAME emotion as the text — they are one unit.
+   - The visual can be UGC (person reacting), scenery/mood, screen content, or anything that serves the hook's emotion.
+   - Good: "UGC — person excitedly showing their phone screen" / "Peaceful nature scenery, golden hour light" / "Someone scrolling mindlessly, visibly bored"
+   - Bad: Visuals disconnected from the hook text's emotion
+3. Write 2-3 BODY VARIATIONS — different ways to plainly describe the SAME product feature.
+   - The body resolves the hook's tension. It's factual, not poetic.
+   - The visual is the screen recording / product demo. Describe what the viewer sees.
+4. One CTA — action verb only.
 
-For each creative:
-- 5-6 HOOK VARIATIONS, each pulling a different psychological lever from the deep dive
-- Each hook MUST include 2-3 VIDEO SCENE SUGGESTIONS: ambiguous, varied visual scenarios for what's happening behind the text overlay (e.g., "girl sitting in her car", "someone scrolling in bed at night", "hand picking up phone from nightstand"). Keep them short and open.
-- 2-3 BODY VARIATIONS: simple feature descriptions. What the product does in plain words.
-- 1 CTA: an action verb (download, get, tap, install). NOT a slogan.
+QUALITY RULES:
+- Each creative must target a DIFFERENT emotional territory. No two creatives hitting the same emotion.
+- Hooks are NATURAL FLOWING SENTENCES. How a person talks, texts, or thinks internally. NOT staccato fragments. NOT triplet lists. NOT AI-sounding copy.
+- Stay in the product's world. Faith app = faith/scripture/God language. Calorie app = food/body/eating language. Don't drift into generic self-improvement.
+- NO fake statistics ("97% of people..."). NO quotation-mark emphasis. NO exclamation marks.
+- Every hook must pass the "would I actually think this?" test. If it sounds like ad copy, rewrite it.
+- NO PROXY EMBARRASSMENT. Never use children, family members, friends, or partners as the source of shame/guilt. "My daughter asked why I never read the Bible" is fabricated — the person scrolling is ALONE. The emotion must come from WITHIN the viewer, not from a fictional third party judging them. The private truth is always more powerful than an invented scene.
+- Visual suggestions describe the viewer's PSYCHOLOGICAL STATE, not a physical scene. Abstract enough to inspire a media buyer, specific enough to evoke emotion.
+- Use at least 3 different hook STRUCTURES across the 5 creatives (question, reframe, confession, challenge, social proof, founder, provocation)
+- TikTok hooks MUST sound like a real person posted it. Meta hooks can be more composed. Match the platform voice.
 
 JSON:
 {
   "creatives": [
     {
-      "rank": 1-5,
-      "name": "simple, descriptive concept name - not clever, not abstract",
-      "templateId": "from matched list",
-      "templateName": "template title",
-      "emotion": "primary emotion",
-      "platform": "TikTok|Meta/IG|YouTube|Snapchat",
+      "rank": 1,
+      "name": "short concept name (2-4 words)",
+      "sourceAngle": "emotional territory this targets",
+      "sourceFramework": "primary psychological mechanism used (NLP technique, bias, Cialdini, etc.)",
+      "emotion": "primary emotion (guilt, shame, fear, curiosity, frustration, longing, wonder, etc.)",
+      "platform": "TikTok or Meta/IG (hooks MUST match platform voice)",
       "format": "9:16 vertical",
-      "scenario": "the specific real daily moment for this segment (1 sentence)",
-      "experienceType": "${primaryExp}",
-      "productionStyle": "production approach",
-      "targetSegment": "segment name from hierarchy",
+      "scenario": "the specific daily moment this ad intercepts (1 sentence)",
+      "productionStyle": "spark ad (TikTok) or polished native (Meta)",
+      "targetSegment": "emotional angle name for broad products, segment name for specific buyers",
       "hooks": [
         {
-          "text": "scroll-stopping hook text",
-          "angle": "which psychological lever",
-          "visualSuggestions": ["person in specific relatable setting", "alternative scene idea", "third option"]
+          "text": "the hook text (5-20 words) — MUST match the platform voice",
+          "angle": "which psychological lever this pulls",
+          "visualSuggestions": ["visual that reinforces the same emotion as the hook text — they are one unit"]
         }
       ],
       "bodies": [
-        { "text": "simple feature description", "visual": "what viewer sees on screen" }
+        { "text": "plain feature description (1 sentence — what it does, not why it matters)", "visual": "what the screen recording shows" }
       ],
-      "cta": { "text": "Download Free" },
-      "whyThisTemplate": "1 sentence"
+      "cta": { "text": "Tap Below to Get It" },
+      "whyThisScript": "1-2 sentences: why this angle + emotion + hook pattern will convert for this product"
     }
   ]
 }
 
 CRITICAL:
-1. Read every hook out loud. If it sounds like AI wrote it, rewrite it. If it sounds like a greeting card, rewrite it.
-2. Body describes the ACTUAL FEATURE in simple words. No metaphors, no poetry.
-3. CTA is an action (download, get, tap) not a slogan (never alone, find peace).
-4. Each hook has 2-3 visualSuggestions - short, ambiguous video scene ideas.
-5. Don't over-segment when the product serves a broad identity group. Vary by emotion, not demographics.
-6. No AI triplet patterns ("no X. no Y. Z just happens.")
-7. Every creative must pass: "would this actually work as a real ad on TikTok/Meta?"
-8. Return ONLY valid JSON. No markdown, no code fences.`;
+1. You are a CREATIVE ENGINE. Generate original concepts using the deep dive intelligence.
+2. Each creative must explore a DIFFERENT emotional territory.
+3. Hooks must feel like real human thoughts, not advertising copy. TikTok = casual native voice. Meta = composed but still human.
+4. ALL creatives use the same format: text hook → screen recording body → text CTA. No other formats.
+5. The body is the SAME product feature across all creatives. Only the hook changes.
+6. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================

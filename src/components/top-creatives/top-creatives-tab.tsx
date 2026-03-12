@@ -10,6 +10,8 @@ import { calculateSectionTiming } from "@/lib/readability";
 interface TopCreativesTabProps {
   data: TopCreativesData;
   productName: string;
+  onGenerateMore?: () => void;
+  isGeneratingMore?: boolean;
 }
 
 // Normalize legacy/new formats
@@ -150,7 +152,7 @@ function PhoneMockup({
   );
 }
 
-export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
+export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratingMore }: TopCreativesTabProps) {
   return (
     <div className="mb-10">
       {/* Header */}
@@ -159,7 +161,9 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
           🎬
         </div>
         <div>
-          <div className="text-lg font-black tracking-tight">Top 5 Ad Creatives</div>
+          <div className="text-lg font-black tracking-tight">
+            Top {data.creatives.length} Ad Creative{data.creatives.length !== 1 ? "s" : ""}
+          </div>
           <div className="text-xs text-muted-foreground mt-0.5">
             Swipe through variations for <strong className="text-foreground">{productName}</strong>
           </div>
@@ -183,15 +187,27 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
       </div>
 
       <div className="flex flex-col gap-12">
-        {data.creatives.map((creative) => {
+        {data.creatives.map((creative, idx) => {
           const hooks = getHooks(creative);
           const bodies = getBodies(creative);
 
           const hookItems = hooks.map((h) => ({ text: h.text, sub: h.angle, visuals: h.visualSuggestions || [] }));
           const bodyItems = bodies.map((b) => ({ text: b.text, sub: b.visual }));
 
+          // Show batch separator between groups of 5
+          const showBatchSeparator = creative.rank > 5 && (creative.rank - 1) % 5 === 0;
+
           return (
-            <div key={creative.rank}>
+            <div key={`${creative.rank}-${idx}`}>
+              {showBatchSeparator && (
+                <div className="flex items-center gap-3 mb-8 -mt-2">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+                  <span className="text-[10px] font-bold uppercase tracking-[2px] text-violet-400/40">
+                    Batch {Math.ceil(creative.rank / 5)}
+                  </span>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+                </div>
+              )}
               {/* Creative header */}
               <div className="flex items-start gap-3 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center text-xs font-black text-violet-300 shrink-0">
@@ -283,6 +299,36 @@ export function TopCreativesTab({ data, productName }: TopCreativesTabProps) {
           );
         })}
       </div>
+
+      {/* Generate 5 More button */}
+      {onGenerateMore && (
+        <div className="flex justify-center mt-10">
+          <button
+            onClick={onGenerateMore}
+            disabled={isGeneratingMore}
+            className="group flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 hover:border-violet-500/40 hover:from-violet-500/15 hover:to-fuchsia-500/15 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isGeneratingMore ? (
+              <>
+                <div className="w-4 h-4 rounded-full border-2 border-violet-400 border-t-transparent animate-spin" />
+                <span className="text-sm font-bold text-violet-400">Generating 5 more...</span>
+              </>
+            ) : (
+              <>
+                <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/20 flex items-center justify-center group-hover:bg-violet-500/25 transition-all">
+                  <svg className="w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-bold text-foreground">Generate 5 More</div>
+                  <div className="text-[10px] text-muted-foreground/50">Different angles, same deep dive</div>
+                </div>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

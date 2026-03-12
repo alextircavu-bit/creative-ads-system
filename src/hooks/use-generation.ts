@@ -118,7 +118,7 @@ export function useGenerateTopCreatives() {
 
   const { trigger, isMutating, error } = useSWRMutation(
     "generate-top-creatives",
-    async (_key: string, { arg }: { arg: { input: ProjectInput; context?: { psycheMap?: PsycheMapData; salesPlaybook?: SalesPlaybookData; research?: ResearchData } } }) => {
+    async (_key: string, { arg }: { arg: { input: ProjectInput; context?: { psycheMap?: PsycheMapData; salesPlaybook?: SalesPlaybookData; research?: ResearchData; creativeTree?: CreativeTreeData } } }) => {
       const res = await generationRepository.generateTopCreatives(arg.input, arg.context);
       setData(res);
       return res;
@@ -146,9 +146,9 @@ export function useAnalyzeCopy() {
 }
 
 // --- Orchestrator: generate sections progressively ---
-// ORDER: Psyche Map → Sales Playbook → Research → (Creative Tree + Top Creatives) in parallel
+// ORDER: (Psyche Map + Sales + Research) in parallel → Creative Tree → Top Creatives
 // Each section feeds its output to the next as context.
-// Steps 4 & 5 run in PARALLEL since they both depend on the same 3 outputs.
+// Top Creatives runs AFTER Creative Tree so it can use the script lab's angle insights.
 
 export type SectionStatus = "pending" | "generating" | "done" | "error";
 
@@ -241,30 +241,27 @@ export function useProgressiveGeneration() {
       setProgress(50);
       setTotalElapsed(Date.now() - globalStart);
 
-      // === STEP 2: Creative Tree + Top Creatives IN PARALLEL ===
-      // Both informed by all 3 previous outputs.
-      const fullContext = {
+      // === STEP 2: Creative Tree (informed by all 3) ===
+      const baseContext = {
         psycheMap: accumulated.psycheMap as PsycheMapData,
         salesPlaybook: accumulated.salesPlaybook as SalesPlaybookData,
         research: accumulated.research as ResearchData,
       };
 
-      setCurrentSection("Creative Tree + Top Creatives");
-      setSteps((prev) => prev.map((s, idx) => (idx >= 3 ? { ...s, status: "generating" } : s)));
+      const creativeTreeData = await runSection(3, "creativeTree", "Script Lab", () =>
+        generationRepository.generateCreativeTree(input, baseContext)
+      ) as CreativeTreeData;
+      setProgress(75);
 
-      const step2Start = Date.now();
+      // === STEP 3: Top Creatives (informed by all 3 + Creative Tree) ===
+      const fullContext = {
+        ...baseContext,
+        creativeTree: creativeTreeData,
+      };
 
-      const [creativeTreeData, topCreativesData] = await Promise.all([
-        generationRepository.generateCreativeTree(input, fullContext),
-        generationRepository.generateTopCreatives(input, fullContext),
-      ]);
-
-      const step2Elapsed = Date.now() - step2Start;
-
-      accumulated.creativeTree = creativeTreeData;
-      accumulated.topCreatives = topCreativesData;
-      setResult((prev) => ({ ...prev, creativeTree: creativeTreeData, topCreatives: topCreativesData }));
-      setSteps((prev) => prev.map((s, idx) => (idx >= 3 ? { ...s, status: "done", elapsed: step2Elapsed } : s)));
+      const topCreativesData = await runSection(4, "topCreatives", "Top Creatives", () =>
+        generationRepository.generateTopCreatives(input, fullContext)
+      );
       setProgress(100);
       setTotalElapsed(Date.now() - globalStart);
 
@@ -302,5 +299,5 @@ export function useProgressiveGeneration() {
     return fullResult;
   }, []);
 
-  return { generate, progress, currentSection, result, error, isGenerating, steps, totalElapsed };
+  return { generate, progress, currentSection, result, error, isGenerating, steps, totalElapsed, setResult };
 }
