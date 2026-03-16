@@ -4,7 +4,25 @@
 // Ported from the original HTML system.
 // ============================================================
 
-import { COGNITIVE_BIASES } from "@/config/framework-data";
+// --- Local Bias Patterns (for copy text analysis, independent of framework-data) ---
+
+const COPY_BIAS_PATTERNS: { name: string; strength: number; color: string; pattern: RegExp }[] = [
+  { name: "Loss Aversion", strength: 90, color: "#f43f5e", pattern: /lose|losing|miss out|missing out|every day without|slip away|running out|before it's too late|gone forever/i },
+  { name: "Curiosity Gap", strength: 88, color: "#ec4899", pattern: /wait|secret|discover|reveal|find out|did you know|what if|how|why|this is|guess what/i },
+  { name: "Framing Effect", strength: 87, color: "#a855f7", pattern: /instead of|not .* but|same .* different|think of it as|it's not .* it's/i },
+  { name: "Anchoring", strength: 85, color: "#06b6d4", pattern: /\d+\s*(hours?|minutes?|%|x|times)|\$\d|was \$.*now \$|compare|versus|vs/i },
+  { name: "Social Proof", strength: 85, color: "#f59e0b", pattern: /million|thousand|people|everyone|joined|community|trending|popular|\d+\s*(users|people|downloads|reviews)/i },
+  { name: "Confirmation Bias", strength: 83, color: "#10b981", pattern: /identity|believ|communit|value|lifestyle|type|kind|who you|are you|be the|self|person/i },
+  { name: "Default Effect", strength: 82, color: "#14b8a6", pattern: /lock\s?screen|auto|default|always|every\s?time|background|notif/i },
+  { name: "Bandwagon Effect", strength: 80, color: "#f97316", pattern: /everyone|trending|viral|movement|wave|join|switch|people are|millions are/i },
+  { name: "Hyperbolic Discounting", strength: 79, color: "#eab308", pattern: /instant|now|today|quick|fast|immediate|minute|second|real.?time|auto|first|right away/i },
+  { name: "Endowment Effect", strength: 76, color: "#84cc16", pattern: /free|trial|try|yours|your|keep|personal|custom|plan|result|my\b/i },
+  { name: "Status Quo Bias", strength: 75, color: "#3b82f6", pattern: /replace|switch|change|instead|new|swap/i },
+  { name: "Authority Bias", strength: 74, color: "#64748b", pattern: /expert|doctor|study|research|proven|science|certified|coach|trainer|professional|clinical|evidence|based/i },
+  { name: "Commitment Escalation", strength: 72, color: "#6366f1", pattern: /daily|habit|routine|plan|day|commit|challenge|streak/i },
+  { name: "IKEA Effect", strength: 70, color: "#22c55e", pattern: /custom|personal|create|quiz|your|plan|build|choose/i },
+  { name: "Scarcity", strength: 68, color: "#f43f5e", pattern: /limited|exclusive|only|last|ends|hurry|running out|spots|left|this week|today only/i },
+];
 
 // --- Syllable Counter ---
 
@@ -146,7 +164,7 @@ export function computePersuasion(text: string): {
 // --- Bias Detection ---
 
 export function detectBiasesInCopy(text: string): { name: string; strength: number; color: string }[] {
-  return COGNITIVE_BIASES
+  return COPY_BIAS_PATTERNS
     .filter((b) => b.pattern.test(text))
     .map(({ name, strength, color }) => ({ name, strength, color }));
 }

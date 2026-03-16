@@ -6,31 +6,26 @@
 
 import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData, CreativeTreeData, CreativeFeedback } from "@/types/creative";
 import {
-  filterRelevantAngles,
+  EMOTIONAL_ANGLES,
   FRAMEWORKS,
   BRAIN_REGIONS,
-  filterActiveBrainRegions,
   COGNITIVE_PROFILES,
-  detectFeatureTypes,
   COGNITIVE_BIASES,
   DOPAMINE_TYPES,
   HABIT_LOOPS,
-  computeValueEquation,
   AWARENESS_LEVELS,
-  scoreCialdiniWeapons,
-  computeStraightLine,
+  CIALDINI_WEAPONS,
   PERSUASION_STACK,
   RETARGETING_FUNNEL,
-  PLATFORM_FORMATS,
+  PLATFORMS,
   RESEARCH_TECHNIQUES,
   SHADOW_AVATAR_STEPS,
   AVATAR_TRAIT_LABELS,
-  matchPainPleasure,
+  PAIN_PLEASURE_MAPPINGS,
   NLP_TECHNIQUES,
   NLP_STACK_STRATEGY,
   NLP_KEY_PRINCIPLE,
 } from "@/config/framework-data";
-// ad-templates kept in codebase for future template expansion
 
 function buildContext(input: ProjectInput): string {
   const base = `Product: ${input.productName}\nDescription: ${input.productDescription}`;
@@ -40,142 +35,97 @@ function buildContext(input: ProjectInput): string {
   return `${base}\nTarget Audience: ${input.targetAudience || "N/A"}\nUSP: ${input.uniqueSellingPoint || "N/A"}`;
 }
 
-function getProductText(input: ProjectInput): string {
-  return [input.productName, input.productDescription, input.appFeatures, input.appBenefits, input.appPurpose, input.targetAudience, input.uniqueSellingPoint]
-    .filter(Boolean)
-    .join(" ");
-}
-
 // ============================================================
 // 1. PSYCHE MAP - Generated FIRST
 // ============================================================
 
 export function psycheMapPrompt(input: ProjectInput): string {
-  const productText = getProductText(input);
-  const activeRegionIds = filterActiveBrainRegions(productText);
-  const featureTypes = detectFeatureTypes(productText);
-  const primaryType = featureTypes[0];
-  const profile = COGNITIVE_PROFILES.find((p) => p.id === primaryType) || COGNITIVE_PROFILES[COGNITIVE_PROFILES.length - 1];
-  const dopamine = DOPAMINE_TYPES[primaryType] || DOPAMINE_TYPES.general;
-  const { pains, pleasures } = matchPainPleasure(productText);
-
   const regionsJSON = BRAIN_REGIONS.map((r) => ({
-    id: r.id,
-    name: r.name,
-    x: r.x,
-    y: r.y,
-    r: r.r,
-    role: r.role,
-    color: r.color,
-    active: activeRegionIds.includes(r.id),
+    id: r.id, name: r.name, x: r.x, y: r.y, r: r.r, role: r.role, color: r.color,
   }));
 
-  const biasesJSON = COGNITIVE_BIASES
-    .filter((b) => b.pattern.test(productText))
-    .map((b) => ({ name: b.name, strength: b.strength, color: b.color }));
-
-  // Include all biases but mark detected ones
-  const allBiasesForPrompt = COGNITIVE_BIASES.map((b) => ({
-    name: b.name,
-    strength: b.strength,
-    color: b.color,
-    detected: b.pattern.test(productText),
-  }));
-
-  return `You are a neuromarketing expert. I'm giving you a HARDCODED framework and pre-computed data. Your ONLY job is to write personalized descriptions, ad tips, and insights for THIS specific product. Do NOT change the structure, scores, regions, or framework - only fill in the personalized text fields.
+  return `You are a neuromarketing expert. I'm giving you a framework CATALOG — the structure of what to analyze. Your job is to ANALYZE this specific product, SCORE every element for relevance, and PERSONALIZE all content.
 
 ${buildContext(input)}
 
-=== PRE-COMPUTED DATA (DO NOT CHANGE THESE VALUES) ===
+=== FRAMEWORK CATALOG (analyze and score for this product) ===
 
-Brain Regions (positions, colors, active status are FIXED):
+Brain Regions (positions and colors are FIXED — you decide which are ACTIVE):
 ${JSON.stringify(regionsJSON, null, 2)}
 
-Cognitive Profile (FIXED):
-Name: ${profile.name}
-Mechanism: ${profile.mechanism}
-Difficulty: ${profile.difficulty}
-Conversion Potential: ${profile.conversionPotential}
+Cognitive Profiles (pick the BEST FIT for this product):
+${JSON.stringify(COGNITIVE_PROFILES, null, 2)}
 
-Dopamine Architecture (FIXED percentages):
-Trigger: ${dopamine.trigger} (${dopamine.triggerPct}%)
-Schedule: ${dopamine.schedule} (${dopamine.schedulePct}%)
-Anticipation: ${dopamine.anticipation}
-Retention: ${dopamine.retention} (${dopamine.retentionPct}%)
+Dopamine Architecture Templates (pick the best fit or customize):
+${JSON.stringify(DOPAMINE_TYPES, null, 2)}
 
-Detected Biases (FIXED names, strengths, colors):
-${JSON.stringify(biasesJSON, null, 2)}
+Habit Loop Templates (pick the best fit or customize):
+${JSON.stringify(HABIT_LOOPS, null, 2)}
 
-All Biases Reference:
-${JSON.stringify(allBiasesForPrompt, null, 2)}
+Cognitive Biases (score each for relevance to this product):
+${JSON.stringify(COGNITIVE_BIASES, null, 2)}
 
-Pain Points (base): ${JSON.stringify(pains)}
-Pleasure Points (base): ${JSON.stringify(pleasures)}
+Pain/Pleasure Reference Categories (use as inspiration — generate product-specific ones):
+${JSON.stringify(PAIN_PLEASURE_MAPPINGS, null, 2)}
 
-Persuasion Stack Layers (FIXED):
+Persuasion Stack Layers (FIXED structure):
 ${JSON.stringify(PERSUASION_STACK, null, 2)}
 
 === YOUR TASK ===
 
-Generate a JSON object using the EXACT structure below. Keep all pre-computed values exactly as given. ONLY fill in the fields marked "PERSONALIZE":
+Analyze ${input.productName} deeply. For each element, decide relevance and score based on the actual product — not keyword matching.
 
 {
   "brainRegions": [
-    For EACH region above, keep id/name/x/y/r/role/color/active exactly as given, and ADD:
-    - "description": "PERSONALIZE: Why this region fires (or doesn't) for ${input.productName} specifically"
-    - "adTip": "PERSONALIZE: Specific ad strategy targeting this brain region for ${input.productName}"
+    For EACH region, keep id/name/x/y/r/role/color exactly as given. YOU decide:
+    - "active": true/false — does this region meaningfully activate for ${input.productName}? Think about the actual user psychology, not surface keywords.
+    - "description": "Why this region fires (or doesn't) for ${input.productName}"
+    - "adTip": "Specific ad strategy targeting this brain region"
   ],
 
   "cognitiveProfile": {
-    "name": "${profile.name}",
-    "emoji": "PERSONALIZE: single emoji",
-    "color": "PERSONALIZE: css color matching the profile",
-    "description": "PERSONALIZE: Deep explanation of how ${input.productName} exploits the ${profile.mechanism} mechanism",
-    "mechanism": "${profile.mechanism}",
-    "difficulty": "${profile.difficulty}",
-    "conversionPotential": "${profile.conversionPotential}",
-    "retentionRisk": "PERSONALIZE: What could cause users to stop using ${input.productName}"
+    Pick the BEST cognitive profile from the catalog. Keep name/mechanism/difficulty/conversionPotential from your chosen profile. Add:
+    "emoji": "single emoji",
+    "color": "css color matching the profile",
+    "description": "Deep explanation of how ${input.productName} exploits this mechanism",
+    "retentionRisk": "What could cause users to stop using ${input.productName}"
   },
 
   "dopamine": {
-    "trigger": "${dopamine.trigger}",
-    "triggerPct": ${dopamine.triggerPct},
-    "schedule": "${dopamine.schedule}",
-    "schedulePct": ${dopamine.schedulePct},
-    "anticipation": "${dopamine.anticipation}",
-    "retention": "${dopamine.retention}",
-    "retentionPct": ${dopamine.retentionPct}
+    Pick the best dopamine template or customize. Include trigger, triggerPct, schedule, schedulePct, anticipation, retention, retentionPct.
+    Adjust the PERCENTAGES if your analysis suggests different values than the template defaults.
   },
 
   "biases": [
-    For each DETECTED bias (detected=true), keep name/strength/color and ADD:
-    - "description": "PERSONALIZE: How this bias applies to ${input.productName}"
-    - "example": "PERSONALIZE: Actual ad copy example exploiting this bias for ${input.productName}"
+    Score ALL 15 biases for relevance to ${input.productName}. Include the TOP 7-10 most relevant ones (strength > 60). For each:
+    - "name": bias name, "strength": 0-100 (YOUR score based on product analysis), "color": from catalog
+    - "description": "How this bias applies to ${input.productName}"
+    - "example": "Actual ad copy example exploiting this bias"
   ],
 
   "habitLoop": {
-    "cue": "PERSONALIZE: specific daily cue for ${input.productName}",
-    "routine": "PERSONALIZE: what the user does with ${input.productName}",
-    "reward": "PERSONALIZE: the reward they get"
+    "cue": "specific daily cue for ${input.productName}",
+    "routine": "what the user does",
+    "reward": "the reward they get"
   },
 
   "persuasionStack": [
-    For EACH layer, keep num/name/timeRange/color/techniques exactly as given, and ADD:
-    - "description": "PERSONALIZE: How to apply this layer specifically for ${input.productName}"
+    For EACH layer, keep num/name/timeRange/color/techniques from catalog. Add:
+    - "description": "How to apply this layer specifically for ${input.productName}"
   ],
 
   "painPleasure": {
-    "pains": ${JSON.stringify(pains)} (refine these for ${input.productName} specifically - keep the core meaning),
-    "pleasures": ${JSON.stringify(pleasures)} (refine these for ${input.productName} specifically - keep the core meaning)
+    "pains": ["5 product-specific pain points — draw from the reference categories or create new ones based on your analysis"],
+    "pleasures": ["5 product-specific pleasure points"]
   },
 
   "audiencePosition": {
-    "axis": "PERSONALIZE: where this audience clusters on a psychological axis",
-    "insight": "PERSONALIZE: detailed insight about audience bias clustering for ${input.productName}"
+    "axis": "where this audience clusters on a psychological axis",
+    "insight": "detailed insight about audience bias clustering"
   }
 }
 
-CRITICAL: Return ONLY valid JSON. No markdown, no code fences. Keep ALL pre-computed values (scores, percentages, coordinates, colors) EXACTLY as provided.`;
+CRITICAL: Return ONLY valid JSON. No markdown, no code fences. Keep layout data (x/y/r/color) from the catalog. All SCORES and ACTIVE flags come from YOUR analysis.`;
 }
 
 // ============================================================
@@ -183,11 +133,6 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code fences. Keep ALL pre-comp
 // ============================================================
 
 export function salesPlaybookPrompt(input: ProjectInput, psycheMapData?: PsycheMapData): string {
-  const productText = getProductText(input);
-  const valueEq = computeValueEquation(productText);
-  const cialdini = scoreCialdiniWeapons(productText);
-  const straightLine = computeStraightLine(productText);
-
   const psycheContext = psycheMapData
     ? `\n=== PSYCHE MAP CONTEXT (from previous analysis) ===
 Cognitive Profile: ${psycheMapData.cognitiveProfile.name} (${psycheMapData.cognitiveProfile.mechanism})
@@ -198,80 +143,100 @@ Dopamine Trigger: ${psycheMapData.dopamine.trigger}
 `
     : "";
 
-  return `You are a world-class sales strategist. I'm giving you a HARDCODED framework with pre-computed scores. Your ONLY job is to write personalized descriptions, strategies, and ad copy for THIS specific product. Do NOT change the structure or scores - only fill in the personalized text fields.
+  return `You are a world-class sales strategist. I'm giving you a framework CATALOG. Your job is to ANALYZE this product, SCORE every element, and PERSONALIZE all content.
 
 ${buildContext(input)}
 ${psycheContext}
-=== PRE-COMPUTED DATA (DO NOT CHANGE THESE VALUES) ===
+=== FRAMEWORK CATALOG (analyze and score for this product) ===
 
-Hormozi Value Equation (FIXED scores):
-- Dream Outcome: ${valueEq.dream}/100
-- Perceived Likelihood: ${valueEq.likelihood}/100
-- Time Delay: ${valueEq.time}/100 (100 = instant)
-- Effort/Sacrifice: ${valueEq.effort}/100 (100 = zero effort)
+Hormozi Value Equation dimensions:
+- Dream Outcome (0-100): How transformative is the promised result?
+- Perceived Likelihood (0-100): How believable is it that this delivers?
+- Time Delay (0-100, 100 = instant): How fast does the user see results?
+- Effort/Sacrifice (0-100, 100 = zero effort): How easy is it to use?
 
-Awareness Levels (FIXED):
+Awareness Levels:
 ${JSON.stringify(AWARENESS_LEVELS, null, 2)}
 
-Cialdini Weapons (FIXED scores):
-${JSON.stringify(cialdini, null, 2)}
+Cialdini 6 Weapons:
+${JSON.stringify(CIALDINI_WEAPONS, null, 2)}
 
-Belfort Straight Line (FIXED scores):
-- Product Certainty: ${straightLine.product}/100
-- Seller Certainty: ${straightLine.seller}/100
-- Action Threshold: ${straightLine.action}/100
+Belfort Straight Line dimensions:
+- Product Certainty (0-100): How confident is the buyer that the product works?
+- Seller Certainty (0-100): How much do they trust the brand/seller?
+- Action Threshold (0-100): How low is the barrier to take action?
 
-Retargeting Funnel (FIXED):
+Retargeting Funnel:
 ${JSON.stringify(RETARGETING_FUNNEL, null, 2)}
 
-NLP Techniques (FIXED - 5 techniques with power ratings):
+NLP Techniques (5 techniques with power ratings):
 ${JSON.stringify(NLP_TECHNIQUES.map((t) => ({ id: t.id, name: t.name, color: t.color, power: t.power, definition: t.definition, copyExamples: t.copyExamples, adApplication: t.adApplication })), null, 2)}
 
-NLP Stack Strategy (FIXED sequence):
+NLP Stack Strategy:
 ${JSON.stringify(NLP_STACK_STRATEGY, null, 2)}
 
 NLP Key Principle: "${NLP_KEY_PRINCIPLE}"
 
+Objection Mapping:
+Every product has 3-5 core buyer objections that silently kill conversions. These are the reasons someone sees the ad, feels interest, but doesn't act. Your job is to surface these objections and show how hooks/body can preemptively neutralize them.
+
+Market Sophistication (Eugene Schwartz, 5 levels):
+1. New Opportunity — market hasn't seen this type of product. Lead with the CLAIM. "This app puts Bible verses on your lockscreen."
+2. Enlarged Claim — competitors exist but claims haven't been pushed. Lead with BIGGER/BETTER claim. "Every hour, a new verse. Automatically."
+3. Mechanism — claims are exhausted. Lead with HOW it works. "AI-selected verses based on your reading history."
+4. Enlarged Mechanism — mechanisms are known. Lead with a UNIQUE mechanism. "The only app that syncs verse themes to your prayer journal."
+5. Identity/Experience — market is saturated. Lead with STORY and IDENTITY. "I stopped saying I'd read my Bible and started living it."
+The level determines what KIND of hook converts, not just what it says.
+
+Purchase Context:
+How the product is sold calibrates ad intensity. A free app download needs soft CTAs ("try it"). A $299 course needs hard conviction-building. Impulse purchases need urgency. Considered purchases need trust. This directly affects hook aggression, CTA wording, and body framing.
+
+Demand Temperature:
+How much existing desire/awareness exists for this product in the market. This is NOT about message saturation (that's Market Sophistication) — this is about whether people already WANT what you're selling or if you need to CREATE the want.
+- LOW: Nobody's searching for this. You must manufacture desire through relatable scenarios. Hooks CANNOT lead with the product — they lead with emotion/scenario and let the product reveal itself. Heavy bridge work needed. (e.g., lockscreen Bible verses — nobody wakes up wanting this)
+- MEDIUM: People know the problem but aren't actively shopping for this solution. Bridge from their existing desire to your product. (e.g., calorie tracker — people want to eat better but aren't comparing apps)
+- HIGH: People are actively looking. Product sells itself. Lead with features, social proof, comparisons. Minimal bridge needed. (e.g., iPhone case — people are already searching)
+
 === YOUR TASK ===
 
-Generate a JSON object. Keep all pre-computed values exactly as given. ONLY fill in personalized text:
+Analyze ${input.productName} and generate a JSON object. YOU decide all scores based on deep analysis of the product — not keyword matching.
 
 {
   "valueEquation": {
-    "dreamOutcome": { "score": ${valueEq.dream}, "text": "PERSONALIZE: analysis for ${input.productName}" },
-    "perceivedLikelihood": { "score": ${valueEq.likelihood}, "text": "PERSONALIZE: analysis" },
-    "timeDelay": { "score": ${valueEq.time}, "text": "PERSONALIZE: analysis" },
-    "effortSacrifice": { "score": ${valueEq.effort}, "text": "PERSONALIZE: analysis" }
+    "dreamOutcome": { "score": YOUR_SCORE (0-100), "text": "analysis for ${input.productName}" },
+    "perceivedLikelihood": { "score": YOUR_SCORE, "text": "analysis" },
+    "timeDelay": { "score": YOUR_SCORE, "text": "analysis" },
+    "effortSacrifice": { "score": YOUR_SCORE, "text": "analysis" }
   },
 
   "awarenessLevels": [
     For EACH of the 5 levels, keep level/name/color/strategy as base, and generate:
-    - "description": "PERSONALIZE: what this user thinks about ${input.productName}"
-    - "adStrategy": "PERSONALIZE: specific strategy for this level"
-    - "exampleHook": "PERSONALIZE: actual hook copy"
-    - "bestFor": "PERSONALIZE: audience type"
-    - "relevance": PERSONALIZE (0-100 based on product fit)
+    - "description": "what this user thinks about ${input.productName}"
+    - "adStrategy": "specific strategy for this level"
+    - "exampleHook": "actual hook copy"
+    - "bestFor": "audience type"
+    - "relevance": YOUR_SCORE (0-100 based on product fit)
   ],
 
   "cialdiniWeapons": [
-    For EACH weapon, keep name/icon/power and generate:
+    For EACH of the 6 weapons, keep name/icon and generate:
     - "color": "#hex matching the weapon",
-    - "description": "PERSONALIZE: how this principle works",
-    - "application": "PERSONALIZE: how to apply for ${input.productName}",
-    - "scriptExample": "PERSONALIZE: actual ad script line",
-    - "power": (keep the pre-computed score)
+    - "description": "how this principle works for ${input.productName}",
+    - "application": "how to apply it",
+    - "scriptExample": "actual ad script line",
+    - "power": YOUR_SCORE (0-100 — how powerful is this weapon for THIS specific product?)
   ],
 
   "straightLine": {
-    "product": { "score": ${straightLine.product}, "text": "PERSONALIZE", "tactics": ["4 specific tactics"] },
-    "seller": { "score": ${straightLine.seller}, "text": "PERSONALIZE", "tactics": ["4 specific tactics"] },
-    "action": { "score": ${straightLine.action}, "text": "PERSONALIZE", "tactics": ["4 specific tactics"] }
+    "product": { "score": YOUR_SCORE (0-100), "text": "analysis", "tactics": ["4 specific tactics"] },
+    "seller": { "score": YOUR_SCORE, "text": "analysis", "tactics": ["4 specific tactics"] },
+    "action": { "score": YOUR_SCORE, "text": "analysis", "tactics": ["4 specific tactics"] }
   },
 
   "hso": {
-    "hooks": ["PERSONALIZE: 3 hook examples for ${input.productName}"],
-    "stories": ["PERSONALIZE: 3 story examples"],
-    "offers": ["PERSONALIZE: 3 offer examples"]
+    "hooks": ["3 hook examples for ${input.productName}"],
+    "stories": ["3 story examples"],
+    "offers": ["3 offer examples"]
   },
 
   "retargetingFunnel": [
@@ -280,12 +245,12 @@ Generate a JSON object. Keep all pre-computed values exactly as given. ONLY fill
     - "color": "#hex",
     - "icon": emoji,
     - "frequency": from framework,
-    - "audience": "PERSONALIZE: who this targets for ${input.productName}",
-    - "description": "PERSONALIZE",
+    - "audience": "who this targets for ${input.productName}",
+    - "description": "strategy description",
     - "bestEmotions": comma-separated from framework emotions,
     - "biasStack": comma-separated from framework biases,
     - "creativeFormat": from framework format,
-    - "example": "PERSONALIZE: actual ad copy for this stage"
+    - "example": "actual ad copy for this stage"
   ],
 
   "closingTechniques": [
@@ -294,7 +259,7 @@ Generate a JSON object. Keep all pre-computed values exactly as given. ONLY fill
     - "source": author,
     - "book": book title,
     - "description": "how it works",
-    - "scriptExample": "PERSONALIZE: actual script for ${input.productName}"
+    - "scriptExample": "actual script for ${input.productName}"
   ],
 
   "system1Triggers": [
@@ -307,18 +272,50 @@ Generate a JSON object. Keep all pre-computed values exactly as given. ONLY fill
 
   "nlp": {
     "techniques": [
-      For EACH of the 5 NLP techniques, keep id/name/color/power/definition/copyExamples/adApplication exactly from the framework, and ADD:
-      - "productExample": "PERSONALIZE: A specific ad copy example applying this NLP technique to ${input.productName}. Must be ready-to-use copy."
+      For EACH of the 5 NLP techniques, keep id/name/color/power/definition/copyExamples/adApplication from the catalog, and ADD:
+      - "productExample": "A specific ad copy example applying this NLP technique to ${input.productName}. Must be ready-to-use copy."
     ],
     "stackStrategy": [
       For EACH of the 5 stack steps, keep step/technique, and generate:
-      - "script": "PERSONALIZE: The actual ad script line for ${input.productName} that implements this NLP step"
+      - "script": "The actual ad script line for ${input.productName} that implements this NLP step"
     ],
     "keyPrinciple": "${NLP_KEY_PRINCIPLE}"
+  },
+
+  "objectionMap": [
+    Generate 3-5 core buyer objections. These are the silent conversion killers — the reasons someone sees the ad, feels interest, but doesn't act. Each:
+    - "objection": "The exact thought in the buyer's head (e.g., 'I'll just forget about it after a week')"
+    - "killMechanism": "How this objection kills the sale (e.g., 'delays action until motivation fades')"
+    - "hookCounter": "A hook angle that preemptively neutralizes this objection"
+    - "bodyCounter": "How the product feature/body can address this"
+  ],
+
+  "marketSophistication": {
+    "level": YOUR_SCORE (1-5 based on how saturated this market is),
+    "name": "the level name from the framework",
+    "description": "Why ${input.productName} is at this sophistication level — what has the market already seen?",
+    "hookStrategy": "What KIND of hook converts at this level (benefit-led, mechanism-led, story-led, identity-led)",
+    "avoidance": "What NOT to do — what the market is tired of seeing"
+  },
+
+  "purchaseContext": {
+    "priceModel": "how ${input.productName} monetizes (free + IAP, subscription, one-time, freemium)",
+    "pricePoint": "approximate price or range",
+    "purchaseType": "impulse | considered | habitual",
+    "conversionAction": "download | subscribe | purchase | sign up",
+    "adIntensity": "soft | medium | hard — how aggressive should the CTA/urgency be?",
+    "reasoning": "Why this calibration — e.g., 'Free app download is zero commitment, so hooks should create curiosity not urgency'"
+  },
+
+  "demandTemperature": {
+    "level": "low | medium | high",
+    "description": "Why ${input.productName} is at this demand level — are people actively searching for this or do you need to create the want?",
+    "hookApproach": "How hooks should be structured given this demand level (scenario-first for low, bridge for medium, product-first for high)",
+    "bridgeWeight": "How much implicit bridge work is needed between hook and body (heavy / moderate / minimal)"
   }
 }
 
-CRITICAL: Return ONLY valid JSON. No markdown, no code fences. Keep ALL pre-computed scores EXACTLY as provided.`;
+CRITICAL: Return ONLY valid JSON. No markdown, no code fences. All SCORES come from YOUR analysis of the product.`;
 }
 
 // ============================================================
@@ -328,8 +325,6 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code fences. Keep ALL pre-comp
 // ============================================================
 
 export function researchPrompt(input: ProjectInput, psycheMapData?: PsycheMapData, salesData?: SalesPlaybookData): string {
-  const productText = getProductText(input);
-
   const previousContext = [];
   if (psycheMapData) {
     previousContext.push(`Cognitive Profile: ${psycheMapData.cognitiveProfile.name}`);
@@ -463,9 +458,6 @@ export function creativeTreePrompt(
   salesData?: SalesPlaybookData,
   researchData?: ResearchData,
 ): string {
-  const productText = getProductText(input);
-  const relevantAngles = filterRelevantAngles(productText);
-
   // Build rich context from ALL previous sections
   const contextParts: string[] = [];
 
@@ -502,7 +494,7 @@ Key Insights: ${researchData.shadowAvatarSteps.map((s) => s.description).join(" 
 Pre-Creative Checklist: ${researchData.preCreativeChecklist.slice(0, 5).join("; ")}`);
   }
 
-  const anglesJSON = relevantAngles.map((a) => ({
+  const anglesJSON = EMOTIONAL_ANGLES.map((a) => ({
     id: a.id,
     name: a.name,
     mechanism: a.mechanism,
@@ -538,8 +530,7 @@ One territory, three completely different hooks — because it's a SPACE, not a 
 Copywriting Frameworks (tools, not rigid columns):
 ${JSON.stringify(frameworksJSON, null, 2)}
 
-Platform Formats (FIXED):
-${JSON.stringify(PLATFORM_FORMATS, null, 2)}
+Platforms: ${PLATFORMS.join(", ")}
 
 === YOUR TASK ===
 
@@ -583,8 +574,13 @@ Generate a JSON object:
   },
 
   "platformFormats": [
-    For EACH platform, keep the platform name and formats list, and ADD for each format:
-    - "description": "PERSONALIZE: specific format recommendation for ${input.productName} that leverages the research insights"
+    For EACH platform (${PLATFORMS.join(", ")}), generate 4-6 format recommendations that make sense for THIS specific product and audience. Don't use generic trend names ("Oh no audio", "trending sound") — describe production STRUCTURES that serve this product's emotional territory.
+    {
+      "platform": "platform name",
+      "formats": [
+        { "type": "short format name (2-4 words)", "description": "How to execute this format for ${input.productName} — specific enough for a media buyer to produce" }
+      ]
+    }
   ]
 }
 
@@ -613,8 +609,6 @@ export function topCreativesPrompt(
   feedback?: CreativeFeedback,
   existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
 ): string {
-  const productText = getProductText(input);
-
   // === DEEP DIVE INTELLIGENCE ===
   const contextParts: string[] = [];
 
@@ -631,13 +625,20 @@ Habit loop: ${psycheMapData.habitLoop.cue} → ${psycheMapData.habitLoop.routine
   if (salesData) {
     const topCialdini = salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 3);
     const topAwareness = salesData.awarenessLevels.sort((a, b) => b.relevance - a.relevance).slice(0, 2);
+    const objections = salesData.objectionMap?.map((o) => `"${o.objection}" → counter: ${o.hookCounter}`).join("\n  ") || "N/A";
+    const sophLevel = salesData.marketSophistication;
+    const purchCtx = salesData.purchaseContext;
     contextParts.push(`=== SALES INTELLIGENCE ===
 Value Equation: Dream ${salesData.valueEquation.dreamOutcome.score} | Likelihood ${salesData.valueEquation.perceivedLikelihood.score} | Speed ${salesData.valueEquation.timeDelay.score} | Effort ${salesData.valueEquation.effortSacrifice.score}
 Top Cialdini: ${topCialdini.map((w) => `${w.name} [${w.power}] — ${w.application || ""}`).join("\n  ")}
 Best awareness levels: ${topAwareness.map((l) => `${l.name}: ${l.adStrategy}`).join("\n  ")}
 HSO hooks: ${salesData.hso.hooks.join(" | ")}
 System 1 triggers: ${salesData.system1Triggers.map((t) => t.trigger).join(", ")}
-NLP techniques: ${salesData.nlp?.techniques?.map((t) => `${t.name} [${t.power}] — ${t.productExample || t.adApplication}`).join("\n  ") || "N/A"}`);
+NLP techniques: ${salesData.nlp?.techniques?.map((t) => `${t.name} [${t.power}] — ${t.productExample || t.adApplication}`).join("\n  ") || "N/A"}
+${sophLevel ? `Market Sophistication: Level ${sophLevel.level} "${sophLevel.name}" — ${sophLevel.hookStrategy}\n  Avoid: ${sophLevel.avoidance}` : ""}
+${purchCtx ? `Purchase Context: ${purchCtx.priceModel} (${purchCtx.pricePoint}) | ${purchCtx.purchaseType} purchase | Ad intensity: ${purchCtx.adIntensity}\n  ${purchCtx.reasoning}` : ""}
+${salesData.demandTemperature ? `Demand Temperature: ${salesData.demandTemperature.level.toUpperCase()} — ${salesData.demandTemperature.hookApproach}\n  Bridge weight: ${salesData.demandTemperature.bridgeWeight}` : ""}
+${salesData.objectionMap?.length ? `Buyer Objections to Neutralize:\n  ${objections}` : ""}`);
   }
 
   if (researchData) {

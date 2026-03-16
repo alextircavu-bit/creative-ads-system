@@ -235,6 +235,37 @@ export interface NLPData {
   keyPrinciple: string;
 }
 
+export interface ObjectionEntry {
+  objection: string;
+  killMechanism: string;
+  hookCounter: string;
+  bodyCounter: string;
+}
+
+export interface MarketSophistication {
+  level: number;        // 1-5 Schwartz scale
+  name: string;         // "New Opportunity" | "Enlarged Claim" | "Mechanism" | "Enlarged Mechanism" | "Identity/Experience"
+  description: string;  // What this level means for this product
+  hookStrategy: string; // How hooks should be structured at this level
+  avoidance: string;    // What NOT to do at this level
+}
+
+export interface PurchaseContext {
+  priceModel: string;   // "free + IAP" | "subscription" | "one-time" | "freemium"
+  pricePoint: string;   // "$0 (free trial)" | "$9.99/mo" etc.
+  purchaseType: string; // "impulse" | "considered" | "habitual"
+  conversionAction: string; // "download" | "subscribe" | "purchase" | "sign up"
+  adIntensity: string;  // "soft" | "medium" | "hard" — how aggressive the CTA/urgency should be
+  reasoning: string;    // Why this calibration
+}
+
+export interface DemandTemperature {
+  level: "low" | "medium" | "high";
+  description: string;    // Why this product is at this demand level
+  hookApproach: string;   // How hooks should be structured given this demand
+  bridgeWeight: string;   // How much bridge work is needed between hook and body
+}
+
 export interface SalesPlaybookData {
   valueEquation: ValueEquation;
   awarenessLevels: AwarenessLevel[];
@@ -246,6 +277,10 @@ export interface SalesPlaybookData {
   system1Triggers: System12Trigger[];
   system2Triggers: System12Trigger[];
   nlp: NLPData;
+  objectionMap: ObjectionEntry[];
+  marketSophistication: MarketSophistication;
+  purchaseContext: PurchaseContext;
+  demandTemperature: DemandTemperature;
 }
 
 // --- Research ---

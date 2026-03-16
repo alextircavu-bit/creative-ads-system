@@ -161,11 +161,11 @@ export interface SectionStep {
 }
 
 const SECTION_DEFS = [
-  { key: "psycheMap", label: "Psyche Map", description: "Mapping brain regions, cognitive biases, dopamine architecture, and habit loops" },
-  { key: "salesPlaybook", label: "Persuasion Engine", description: "Building value equation, awareness levels, Cialdini weapons, NLP techniques, and closing techniques" },
-  { key: "research", label: "Audience DNA", description: "Creating shadow avatar, audience segments, search queries, and pre-creative checklist" },
-  { key: "creativeTree", label: "Script Lab", description: "Generating emotional angles, frameworks, ad scripts, hooks, and platform formats" },
-  { key: "topCreatives", label: "Top Creatives", description: "Crafting 5 template-matched ad blueprints" },
+  { key: "psycheMap", label: "Psychology", description: "Mapping brain regions, cognitive biases, dopamine architecture, and habit loops" },
+  { key: "salesPlaybook", label: "Sales Strategy", description: "Building value equation, awareness levels, Cialdini weapons, NLP techniques, and closing techniques" },
+  { key: "research", label: "Research", description: "Creating shadow avatar, audience segments, search queries, and pre-creative checklist" },
+  { key: "creativeTree", label: "Scripts", description: "Generating emotional angles, frameworks, ad scripts, hooks, and platform formats" },
+  { key: "topCreatives", label: "Ads", description: "Crafting 5 template-matched ad blueprints" },
 ] as const;
 
 export function useProgressiveGeneration() {
@@ -220,7 +220,7 @@ export function useProgressiveGeneration() {
     try {
       // === STEP 1: Psyche Map + Sales Playbook + Research ALL IN PARALLEL ===
       // Sales/Research barely use Psyche context - fire everything at once
-      setCurrentSection("Psyche Map + Sales + Research");
+      setCurrentSection("Psychology + Sales Strategy + Research");
       setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: "generating" } : s)));
 
       const step1Start = Date.now();
@@ -248,7 +248,7 @@ export function useProgressiveGeneration() {
         research: accumulated.research as ResearchData,
       };
 
-      const creativeTreeData = await runSection(3, "creativeTree", "Script Lab", () =>
+      const creativeTreeData = await runSection(3, "creativeTree", "Scripts", () =>
         generationRepository.generateCreativeTree(input, baseContext)
       ) as CreativeTreeData;
       setProgress(75);

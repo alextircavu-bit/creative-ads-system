@@ -1,36 +1,30 @@
 // ============================================================
 // HARDCODED FRAMEWORK DATA - User's IP from the HTML originals
-// Claude NEVER decides what frameworks exist or what angles to use.
-// Claude ONLY personalizes descriptions/copy within this structure.
+// This is the STRUCTURE — what to analyze, what categories exist.
+// Claude decides all SCORES and RELEVANCE per product.
 // ============================================================
 
-// --- Emotional Angles (20) ---
+// --- Psychological Territories (8) ---
 
 export interface EmotionalAngleDef {
   id: string;
   name: string;
   mechanism: string;
   color: string;
-  condition: RegExp | null; // null = always relevant
 }
 
-// Psychological TERRITORIES — broad spaces that fragment into many specific angles.
-// Each territory produces multiple hooks. Claude scores relevance per product.
+// Broad psychological spaces that fragment into many specific angles.
+// Claude scores relevance per product.
 export const EMOTIONAL_ANGLES: EmotionalAngleDef[] = [
-  { id: "identity_tension", name: "Identity Tension", mechanism: "Gap between who you are and who you want to be. The discomfort of not living up to your own standards.", color: "#f43f5e", condition: null },
-  { id: "displacement", name: "Displacement Anxiety", mechanism: "Something valuable in your life is being consumed by the wrong thing. Time, attention, energy going to waste.", color: "#ec4899", condition: null },
-  { id: "loss_decay", name: "Loss & Decay", mechanism: "Something good is slipping away — motivation, connection, health, identity — and you can feel it happening.", color: "#a855f7", condition: null },
-  { id: "social_positioning", name: "Social Positioning", mechanism: "Where you stand relative to others. Being behind, being different, being part of something, or being left out.", color: "#3b82f6", condition: null },
-  { id: "aspiration_gap", name: "Aspiration Gap", mechanism: "The life you imagine vs the life you have. The person you could be vs the person you are right now.", color: "#06b6d4", condition: null },
-  { id: "habit_architecture", name: "Habit Architecture", mechanism: "The invisible systems running your daily behavior. Replacing bad loops with good ones. Friction, triggers, rewards.", color: "#22c55e", condition: null },
-  { id: "discovery_revelation", name: "Discovery & Revelation", mechanism: "Uncovering something hidden about yourself, your patterns, or your potential. The pull of self-knowledge.", color: "#f59e0b", condition: null },
-  { id: "relief_surrender", name: "Relief & Surrender", mechanism: "Exhaustion from carrying something — finally being able to put it down. The appeal of effortlessness.", color: "#14b8a6", condition: null },
+  { id: "identity_tension", name: "Identity Tension", mechanism: "Gap between who you are and who you want to be. The discomfort of not living up to your own standards.", color: "#f43f5e" },
+  { id: "displacement", name: "Displacement Anxiety", mechanism: "Something valuable in your life is being consumed by the wrong thing. Time, attention, energy going to waste.", color: "#ec4899" },
+  { id: "loss_decay", name: "Loss & Decay", mechanism: "Something good is slipping away — motivation, connection, health, identity — and you can feel it happening.", color: "#a855f7" },
+  { id: "social_positioning", name: "Social Positioning", mechanism: "Where you stand relative to others. Being behind, being different, being part of something, or being left out.", color: "#3b82f6" },
+  { id: "aspiration_gap", name: "Aspiration Gap", mechanism: "The life you imagine vs the life you have. The person you could be vs the person you are right now.", color: "#06b6d4" },
+  { id: "habit_architecture", name: "Habit Architecture", mechanism: "The invisible systems running your daily behavior. Replacing bad loops with good ones. Friction, triggers, rewards.", color: "#22c55e" },
+  { id: "discovery_revelation", name: "Discovery & Revelation", mechanism: "Uncovering something hidden about yourself, your patterns, or your potential. The pull of self-knowledge.", color: "#f59e0b" },
+  { id: "relief_surrender", name: "Relief & Surrender", mechanism: "Exhaustion from carrying something — finally being able to put it down. The appeal of effortlessness.", color: "#14b8a6" },
 ];
-
-/** Filter angles by product text relevance. Always-relevant angles (condition: null) are always included. */
-export function filterRelevantAngles(productText: string): EmotionalAngleDef[] {
-  return EMOTIONAL_ANGLES.filter((a) => a.condition === null || a.condition.test(productText));
-}
 
 // --- Copywriting Frameworks (5) ---
 
@@ -60,20 +54,19 @@ export interface BrainRegionDef {
   r: number;
   role: string;
   color: string;
-  condition: RegExp | null;
 }
 
 export const BRAIN_REGIONS: BrainRegionDef[] = [
-  { id: "pfc", name: "Prefrontal Cortex", x: 125, y: 155, r: 28, role: "Decision & Self-Control", color: "#3b82f6", condition: null },
-  { id: "acc", name: "Anterior Cingulate", x: 205, y: 100, r: 22, role: "Guilt & Conflict Detection", color: "#f43f5e", condition: /guilt|conflict|wrong|should|bad|waste|instead|replace|honest|admit/i },
-  { id: "nacc", name: "Nucleus Accumbens", x: 180, y: 218, r: 20, role: "Reward & Dopamine", color: "#22c55e", condition: /scroll|reel|feed|reward|free|discover|new|surprise|quiz|fun|game|explore/i },
-  { id: "amyg", name: "Amygdala", x: 248, y: 262, r: 22, role: "Fear, Urgency & FOMO", color: "#f59e0b", condition: /fear|lose|miss|urgent|now|limited|last|danger|enemy|war|battle|fomo|hurry|running\s?out/i },
-  { id: "hipp", name: "Hippocampus", x: 340, y: 238, r: 24, role: "Memory & Nostalgia", color: "#a78bfa", condition: /remember|used\s?to|before|past|child|young|nostalg|memory|history|ago|once|grew\s?up/i },
-  { id: "ins", name: "Insula", x: 260, y: 185, r: 20, role: "Self-Awareness & Disgust", color: "#ec4899", condition: /quiz|discover|honest|aware|self|assess|reflect|who.{0,4}you|truth|reveal|hidden|feel|gut|real/i },
-  { id: "tpj", name: "Temporo-Parietal Junction", x: 418, y: 155, r: 26, role: "Social Cognition & Empathy", color: "#8b5cf6", condition: /community|comment|share|social|friend|together|join|people|testimonial|story|million|thousand|review/i },
-  { id: "vmpfc", name: "Ventromedial PFC", x: 138, y: 248, r: 20, role: "Value Judgment", color: "#14b8a6", condition: /free|worth|value|price|cost|invest|try|risk|safe|trust|guarantee|cheap|save|money/i },
-  { id: "motor", name: "Motor Cortex", x: 278, y: 48, r: 22, role: "Action Execution", color: "#6366f1", condition: null },
-  { id: "vis", name: "Visual Cortex", x: 462, y: 118, r: 24, role: "Visual Processing", color: "#06b6d4", condition: null },
+  { id: "pfc", name: "Prefrontal Cortex", x: 125, y: 155, r: 28, role: "Decision & Self-Control", color: "#3b82f6" },
+  { id: "acc", name: "Anterior Cingulate", x: 205, y: 100, r: 22, role: "Guilt & Conflict Detection", color: "#f43f5e" },
+  { id: "nacc", name: "Nucleus Accumbens", x: 180, y: 218, r: 20, role: "Reward & Dopamine", color: "#22c55e" },
+  { id: "amyg", name: "Amygdala", x: 248, y: 262, r: 22, role: "Fear, Urgency & FOMO", color: "#f59e0b" },
+  { id: "hipp", name: "Hippocampus", x: 340, y: 238, r: 24, role: "Memory & Nostalgia", color: "#a78bfa" },
+  { id: "ins", name: "Insula", x: 260, y: 185, r: 20, role: "Self-Awareness & Disgust", color: "#ec4899" },
+  { id: "tpj", name: "Temporo-Parietal Junction", x: 418, y: 155, r: 26, role: "Social Cognition & Empathy", color: "#8b5cf6" },
+  { id: "vmpfc", name: "Ventromedial PFC", x: 138, y: 248, r: 20, role: "Value Judgment", color: "#14b8a6" },
+  { id: "motor", name: "Motor Cortex", x: 278, y: 48, r: 22, role: "Action Execution", color: "#6366f1" },
+  { id: "vis", name: "Visual Cortex", x: 462, y: 118, r: 24, role: "Visual Processing", color: "#06b6d4" },
 ];
 
 export const BRAIN_CONNECTIONS: [string, string][] = [
@@ -81,10 +74,6 @@ export const BRAIN_CONNECTIONS: [string, string][] = [
   ["amyg", "hipp"], ["hipp", "tpj"], ["tpj", "vis"], ["ins", "amyg"], ["ins", "acc"],
   ["pfc", "vmpfc"], ["vmpfc", "nacc"], ["nacc", "ins"],
 ];
-
-export function filterActiveBrainRegions(productText: string): string[] {
-  return BRAIN_REGIONS.filter((r) => r.condition === null || r.condition.test(productText)).map((r) => r.id);
-}
 
 // --- Cognitive Profiles (9) ---
 
@@ -108,50 +97,30 @@ export const COGNITIVE_PROFILES: CognitiveProfileDef[] = [
   { id: "general", name: "Value Proposition", mechanism: "Expectancy-Value Theory", difficulty: "Medium", conversionPotential: "Medium" },
 ];
 
-export function detectFeatureTypes(productText: string): string[] {
-  const types: string[] = [];
-  if (/replace|swap|instead|switch|scroll|feed|doom/i.test(productText)) types.push("habit_replacement");
-  if (/quiz|test|discover|assess|score|result|which|what.{0,6}your/i.test(productText)) types.push("self_discovery");
-  if (/lock\s?screen|wallpaper|notification|push|auto|passive|always|background/i.test(productText)) types.push("passive_exposure");
-  if (/chat|ask|talk|write|create|build|plan|track|read|journal/i.test(productText)) types.push("active_engagement");
-  if (/community|comment|share|social|friend|together|join|group/i.test(productText)) types.push("social_connection");
-  if (/streak|challenge|reward|point|level|badge|daily|goal/i.test(productText)) types.push("gamification");
-  if (/learn|teach|course|lesson|study|practice|skill/i.test(productText)) types.push("learning");
-  if (/calm|meditat|relax|sleep|peace|mindful|breath/i.test(productText)) types.push("wellness");
-  if (types.length === 0) types.push("general");
-  return types;
-}
-
 // --- Cognitive Biases (15) ---
 
 export interface CognitiveBiasDef {
   name: string;
-  strength: number;
   color: string;
-  pattern: RegExp;
 }
 
 export const COGNITIVE_BIASES: CognitiveBiasDef[] = [
-  { name: "Loss Aversion", strength: 90, color: "#f43f5e", pattern: /lose|losing|miss out|missing out|every day without|slip away|running out|before it's too late|gone forever/i },
-  { name: "Curiosity Gap", strength: 88, color: "#ec4899", pattern: /wait|secret|discover|reveal|find out|did you know|what if|how|why|this is|guess what/i },
-  { name: "Framing Effect", strength: 87, color: "#a855f7", pattern: /instead of|not .* but|same .* different|think of it as|it's not .* it's/i },
-  { name: "Anchoring", strength: 85, color: "#06b6d4", pattern: /\d+\s*(hours?|minutes?|%|x|times)|\$\d|was \$.*now \$|compare|versus|vs/i },
-  { name: "Social Proof", strength: 85, color: "#f59e0b", pattern: /million|thousand|people|everyone|joined|community|trending|popular|\d+\s*(users|people|downloads|reviews)/i },
-  { name: "Confirmation Bias", strength: 83, color: "#10b981", pattern: /identity|believ|communit|value|lifestyle|type|kind|who you|are you|be the|self|person/i },
-  { name: "Default Effect", strength: 82, color: "#14b8a6", pattern: /lock\s?screen|auto|default|always|every\s?time|background|notif/i },
-  { name: "Bandwagon Effect", strength: 80, color: "#f97316", pattern: /everyone|trending|viral|movement|wave|join|switch|people are|millions are/i },
-  { name: "Hyperbolic Discounting", strength: 79, color: "#eab308", pattern: /instant|now|today|quick|fast|immediate|minute|second|real.?time|auto|first|right away/i },
-  { name: "Endowment Effect", strength: 76, color: "#84cc16", pattern: /free|trial|try|yours|your|keep|personal|custom|plan|result|my\b/i },
-  { name: "Status Quo Bias", strength: 75, color: "#3b82f6", pattern: /replace|switch|change|instead|new|swap/i },
-  { name: "Authority Bias", strength: 74, color: "#64748b", pattern: /expert|doctor|study|research|proven|science|certified|coach|trainer|professional|clinical|evidence|based/i },
-  { name: "Commitment Escalation", strength: 72, color: "#6366f1", pattern: /daily|habit|routine|plan|day|commit|challenge|streak/i },
-  { name: "IKEA Effect", strength: 70, color: "#22c55e", pattern: /custom|personal|create|quiz|your|plan|build|choose/i },
-  { name: "Scarcity", strength: 68, color: "#f43f5e", pattern: /limited|exclusive|only|last|ends|hurry|running out|spots|left|this week|today only/i },
+  { name: "Loss Aversion", color: "#f43f5e" },
+  { name: "Curiosity Gap", color: "#ec4899" },
+  { name: "Framing Effect", color: "#a855f7" },
+  { name: "Anchoring", color: "#06b6d4" },
+  { name: "Social Proof", color: "#f59e0b" },
+  { name: "Confirmation Bias", color: "#10b981" },
+  { name: "Default Effect", color: "#14b8a6" },
+  { name: "Bandwagon Effect", color: "#f97316" },
+  { name: "Hyperbolic Discounting", color: "#eab308" },
+  { name: "Endowment Effect", color: "#84cc16" },
+  { name: "Status Quo Bias", color: "#3b82f6" },
+  { name: "Authority Bias", color: "#64748b" },
+  { name: "Commitment Escalation", color: "#6366f1" },
+  { name: "IKEA Effect", color: "#22c55e" },
+  { name: "Scarcity", color: "#f43f5e" },
 ];
-
-export function detectBiases(text: string): { name: string; strength: number; color: string }[] {
-  return COGNITIVE_BIASES.filter((b) => b.pattern.test(text)).map(({ name, strength, color }) => ({ name, strength, color }));
-}
 
 // --- Dopamine Architecture ---
 
@@ -191,20 +160,6 @@ export const HABIT_LOOPS: Record<string, HabitLoopDef> = {
   default: { cue: "Daily trigger (boredom, habit, notification)", routine: "Engage with app/product", reward: "Value delivery + positive feeling" },
 };
 
-// --- Hormozi Value Equation Scoring ---
-
-export function computeValueEquation(productText: string): { dream: number; likelihood: number; time: number; effort: number } {
-  const dream = /transform|change|life|heal|grow|peace|closer|better|improve/i.test(productText) ? 90
-    : /discover|learn|find|reveal|know|understand/i.test(productText) ? 75 : 65;
-  const likelihood = /proven|study|research|data|testimonial|million|thousand/i.test(productText) ? 85
-    : /believe|trust|authentic/i.test(productText) ? 75 : 65;
-  const time = /instant|immediate|first|day one/i.test(productText) ? 90
-    : /daily|minute|quick|easy|fast/i.test(productText) ? 80 : 60;
-  const effort = /free|no.*sign|no.*cost|no.*effort|auto|passive|set.*forget/i.test(productText) ? 95
-    : /scroll|swipe|browse|tap|simple|easy/i.test(productText) ? 80 : 55;
-  return { dream, likelihood, time, effort };
-}
-
 // --- Schwartz 5 Awareness Levels ---
 
 export interface AwarenessLevelDef {
@@ -227,36 +182,16 @@ export const AWARENESS_LEVELS: AwarenessLevelDef[] = [
 export interface CialdiniWeaponDef {
   name: string;
   icon: string;
-  pattern: RegExp;
-  basePower: number;
-  matchPower: number;
 }
 
 export const CIALDINI_WEAPONS: CialdiniWeaponDef[] = [
-  { name: "Reciprocity", icon: "🎁", pattern: /free|give|gift|value|share|help|tip|teach/i, basePower: 70, matchPower: 90 },
-  { name: "Commitment & Consistency", icon: "🔗", pattern: /daily|habit|routine|streak|commit|challenge|goal/i, basePower: 65, matchPower: 92 },
-  { name: "Social Proof", icon: "👥", pattern: /community|comment|share|million|review|popular|trending/i, basePower: 80, matchPower: 95 },
-  { name: "Authority", icon: "👑", pattern: /expert|pastor|doctor|research|science|proven|official/i, basePower: 60, matchPower: 88 },
-  { name: "Liking", icon: "❤️", pattern: /community|share|ugc|personal|authentic|real|relate/i, basePower: 72, matchPower: 85 },
-  { name: "Scarcity", icon: "⏳", pattern: /limited|exclusive|trial|offer|deal|special|free|ends|only/i, basePower: 55, matchPower: 88 },
+  { name: "Reciprocity", icon: "🎁" },
+  { name: "Commitment & Consistency", icon: "🔗" },
+  { name: "Social Proof", icon: "👥" },
+  { name: "Authority", icon: "👑" },
+  { name: "Liking", icon: "❤️" },
+  { name: "Scarcity", icon: "⏳" },
 ];
-
-export function scoreCialdiniWeapons(productText: string): { name: string; icon: string; power: number }[] {
-  return CIALDINI_WEAPONS.map((w) => ({
-    name: w.name,
-    icon: w.icon,
-    power: w.pattern.test(productText) ? w.matchPower : w.basePower,
-  }));
-}
-
-// --- Belfort Straight Line ---
-
-export function computeStraightLine(productText: string): { product: number; seller: number; action: number } {
-  const product = /free|proven|million|download|rated|review/i.test(productText) ? 85 : 60;
-  const seller = 70;
-  const action = /free|no.*card|instant|easy|quick|simple|one.*tap/i.test(productText) ? 90 : 55;
-  return { product, seller, action };
-}
 
 // --- Neural Persuasion Stack (Kahneman System 1/2) ---
 
@@ -293,19 +228,9 @@ export const RETARGETING_FUNNEL: RetargetingFunnelDef[] = [
   { stage: "Hot - Almost Converted", emoji: "💥", frequency: "Daily x 7 days", emotions: ["Urgency", "Micro-Commitment", "Self-Frustration", "Relief"], biases: ["Loss Aversion", "Scarcity", "Endowment", "Hyperbolic Discounting"], format: "Direct CTA, limited-time offers" },
 ];
 
-// --- Platform Formats ---
+// --- Platforms (format recommendations are AI-generated per product) ---
 
-export interface PlatformFormatDef {
-  platform: string;
-  formats: string[];
-}
-
-export const PLATFORM_FORMATS: PlatformFormatDef[] = [
-  { platform: "TikTok", formats: ["Trending Sound", "POV:", "UGC Reaction", "Split Screen", "Green Screen", "Stitch/Duet", '"I\'m bored" Text', "Day-in-my-life"] },
-  { platform: "Meta/IG", formats: ["Carousel", "Reel (UGC)", "Static + Copy", "Before/After", "Testimonial Quote", "Video Slideshow"] },
-  { platform: "YouTube", formats: ["Pre-roll (6s)", "Pre-roll (15s)", "Shorts", "Creator Integration"] },
-  { platform: "Snapchat", formats: ["Snap Ad (10s)", "Collection Ad", "Story Ad", "AR Lens"] },
-];
+export const PLATFORMS = ["TikTok", "Meta/IG", "YouTube", "Snapchat"] as const;
 
 // --- Research Methodology ---
 
@@ -350,59 +275,41 @@ export const AVATAR_TRAIT_LABELS = [
   "Purchase Trigger",
 ] as const;
 
-// --- Pain/Pleasure Keyword Mapping ---
+// --- Pain/Pleasure Reference Categories ---
 
 export interface PainPleasureMapping {
-  condition: RegExp;
+  category: string;
   pains: string[];
   pleasures: string[];
 }
 
 export const PAIN_PLEASURE_MAPPINGS: PainPleasureMapping[] = [
   {
-    condition: /scroll|doom|feed|phone|screen/i,
+    category: "Screen Time & Digital Consumption",
     pains: ["Hours lost to meaningless content", "Post-scroll guilt and emptiness", "Feeling controlled by the algorithm"],
     pleasures: ["Guilt-free screen time", "Every scroll delivers real value", "Phone becomes a tool, not a trap"],
   },
   {
-    condition: /community|share|alone/i,
+    category: "Community & Social Connection",
     pains: ["Digital isolation despite constant connection", "Feed full of strangers and outrage", "No space for authentic interaction"],
     pleasures: ["Genuine belonging with like-minded people", "Comments that feel like real conversations", "Shared experiences that matter"],
   },
   {
-    condition: /sin|struggle|hidden|shame|quiz/i,
+    category: "Shame, Struggle & Self-Discovery",
     pains: ["Carrying unspoken burdens", "Using phone as numbing agent", "No safe place for self-honesty"],
     pleasures: ["Private, safe self-discovery", "Actionable personal insights", "Breaking cycles with awareness"],
   },
   {
-    condition: /learn|teach|skill/i,
+    category: "Learning & Skill Development",
     pains: ["Stagnation and wasted potential", "Information overload without direction", "Starting and never finishing"],
     pleasures: ["Tangible skill growth", "Structured progress with clear milestones", "Confidence from competence"],
   },
   {
-    condition: /calm|meditat|relax|sleep|peace|mindful|breath|health|fitness|weight|diet/i,
+    category: "Wellness, Health & Mindfulness",
     pains: ["Chronic stress and burnout", "Failed attempts at self-care", "Knowing what to do but not doing it"],
     pleasures: ["Effortless daily wellness", "Feeling in control of your body/mind", "Sustainable habits that stick"],
   },
 ];
-
-export function matchPainPleasure(productText: string): { pains: string[]; pleasures: string[] } {
-  const pains: string[] = [];
-  const pleasures: string[] = [];
-  let matched = false;
-  for (const mapping of PAIN_PLEASURE_MAPPINGS) {
-    if (mapping.condition.test(productText)) {
-      pains.push(...mapping.pains);
-      pleasures.push(...mapping.pleasures);
-      matched = true;
-    }
-  }
-  if (!matched) {
-    pains.push("Current solutions feel incomplete", "Wasting time on things that don't work", "Frustration with the status quo");
-    pleasures.push("A solution that actually delivers", "Time and energy saved", "Confidence in the right choice");
-  }
-  return { pains: [...new Set(pains)].slice(0, 5), pleasures: [...new Set(pleasures)].slice(0, 5) };
-}
 
 // --- Neuro-Linguistic Programming (NLP) Techniques (5) ---
 

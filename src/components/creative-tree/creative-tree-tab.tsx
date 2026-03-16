@@ -86,7 +86,12 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
               } border border-border/50 border-t-0 rounded-b-2xl bg-card/30 backdrop-blur-sm p-2.5`}
             >
               {/* Frameworks */}
-              {data.frameworks.map((fw, fi) => {
+              {scripts.length === 0 && (
+                <div className="px-4 py-6 text-center text-xs text-muted-foreground/50">
+                  No scripts generated for this territory — it scored lower in relevance for this product.
+                </div>
+              )}
+              {scripts.length > 0 && data.frameworks.map((fw, fi) => {
                 const fwKey = `${ei}-${fi}`;
                 const isFwOpen = openFramework === fwKey;
                 const script = scripts.find((s) => s.frameworkId === fw.id);

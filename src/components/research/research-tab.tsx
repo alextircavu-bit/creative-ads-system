@@ -102,7 +102,11 @@ export function ResearchTab({ data, productName }: ResearchTabProps) {
           {data.avatarTraits.map((trait) => (
             <div key={trait.label} className="bg-background/50 border border-border/30 rounded-xl p-3.5 text-center hover:border-amber-500/20 transition-all">
               <div className="text-[10px] uppercase tracking-[1.5px] font-bold text-muted-foreground/40 mb-1.5">{trait.label}</div>
-              <div className="text-sm font-bold text-foreground leading-relaxed">{trait.value}</div>
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {trait.value.split(" / ").map((chip, i) => (
+                  <span key={i} className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/20 text-foreground">{chip.trim()}</span>
+                ))}
+              </div>
             </div>
           ))}
         </div>

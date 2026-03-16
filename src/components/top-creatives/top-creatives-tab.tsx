@@ -232,6 +232,11 @@ export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratin
                     <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/15">
                       {creative.emotion}
                     </span>
+                    {creative.productionStyle && /ugc|spark|user.generated/i.test(creative.productionStyle) && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/15">
+                        UGC
+                      </span>
+                    )}
                   </div>
                   {creative.scenario && (
                     <div className="text-[11px] text-muted-foreground/35 mt-1.5">{creative.scenario}</div>
