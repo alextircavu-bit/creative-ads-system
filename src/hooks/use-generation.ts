@@ -3,26 +3,28 @@ import useSWRMutation from "swr/mutation";
 import { generationRepository } from "@/repositories/generation.repository";
 import { projectRepository } from "@/repositories/project.repository";
 import type {
-  ProjectInput,
-  GenerationResult,
-  CreativeTreeData,
-  PsycheMapData,
-  SalesPlaybookData,
-  ResearchData,
-  TopCreativesData,
-  CopyCheckResult,
+  IProjectInput,
+  IGenerationResult,
+  ICreativeTreeData,
+  IPsycheMapData,
+  ISalesPlaybookData,
+  IResearchData,
+  ITopCreativesData,
+  ICopyCheckResult,
 } from "@/types/creative";
+import { EProjectStatus, ESectionStatus } from "@/config/enums";
+import { SECTION_STEPS, type ISectionStep } from "@/config/generation-config";
 
 // --- Full Generation (all sections at once) ---
 
 export function useGenerateAll() {
-  const [result, setResult] = useState<GenerationResult | null>(null);
+  const [result, setResult] = useState<IGenerationResult | null>(null);
 
   const { trigger, isMutating, error } = useSWRMutation(
     "generate-all",
-    async (_key: string, { arg }: { arg: { input: ProjectInput; projectId?: string } }) => {
+    async (_key: string, { arg }: { arg: { input: IProjectInput; projectId?: string } }) => {
       if (arg.projectId) {
-        await projectRepository.updateStatus(arg.projectId, "generating");
+        await projectRepository.updateStatus(arg.projectId, EProjectStatus.Generating);
       }
 
       try {
@@ -36,7 +38,7 @@ export function useGenerateAll() {
         return res;
       } catch (err) {
         if (arg.projectId) {
-          await projectRepository.updateStatus(arg.projectId, "failed");
+          await projectRepository.updateStatus(arg.projectId, EProjectStatus.Failed);
         }
         throw err;
       }
@@ -54,11 +56,11 @@ export function useGenerateAll() {
 // --- Section-by-section generation ---
 
 export function useGeneratePsycheMap() {
-  const [data, setData] = useState<PsycheMapData | null>(null);
+  const [data, setData] = useState<IPsycheMapData | null>(null);
 
   const { trigger, isMutating, error } = useSWRMutation(
     "generate-psyche-map",
-    async (_key: string, { arg }: { arg: ProjectInput }) => {
+    async (_key: string, { arg }: { arg: IProjectInput }) => {
       const res = await generationRepository.generatePsycheMap(arg);
       setData(res);
       return res;
@@ -69,11 +71,11 @@ export function useGeneratePsycheMap() {
 }
 
 export function useGenerateSalesPlaybook() {
-  const [data, setData] = useState<SalesPlaybookData | null>(null);
+  const [data, setData] = useState<ISalesPlaybookData | null>(null);
 
   const { trigger, isMutating, error } = useSWRMutation(
     "generate-sales-playbook",
-    async (_key: string, { arg }: { arg: { input: ProjectInput; context?: { psycheMap?: PsycheMapData } } }) => {
+    async (_key: string, { arg }: { arg: { input: IProjectInput; context?: { psycheMap?: IPsycheMapData } } }) => {
       const res = await generationRepository.generateSalesPlaybook(arg.input, arg.context);
       setData(res);
       return res;
@@ -84,11 +86,11 @@ export function useGenerateSalesPlaybook() {
 }
 
 export function useGenerateResearch() {
-  const [data, setData] = useState<ResearchData | null>(null);
+  const [data, setData] = useState<IResearchData | null>(null);
 
   const { trigger, isMutating, error } = useSWRMutation(
     "generate-research",
-    async (_key: string, { arg }: { arg: { input: ProjectInput; context?: { psycheMap?: PsycheMapData; salesPlaybook?: SalesPlaybookData } } }) => {
+    async (_key: string, { arg }: { arg: { input: IProjectInput; context?: { psycheMap?: IPsycheMapData; salesPlaybook?: ISalesPlaybookData } } }) => {
       const res = await generationRepository.generateResearch(arg.input, arg.context);
       setData(res);
       return res;
@@ -99,11 +101,11 @@ export function useGenerateResearch() {
 }
 
 export function useGenerateCreativeTree() {
-  const [data, setData] = useState<CreativeTreeData | null>(null);
+  const [data, setData] = useState<ICreativeTreeData | null>(null);
 
   const { trigger, isMutating, error } = useSWRMutation(
     "generate-creative-tree",
-    async (_key: string, { arg }: { arg: { input: ProjectInput; context?: { psycheMap?: PsycheMapData; salesPlaybook?: SalesPlaybookData; research?: ResearchData } } }) => {
+    async (_key: string, { arg }: { arg: { input: IProjectInput; context?: { psycheMap?: IPsycheMapData; salesPlaybook?: ISalesPlaybookData; research?: IResearchData } } }) => {
       const res = await generationRepository.generateCreativeTree(arg.input, arg.context);
       setData(res);
       return res;
@@ -114,11 +116,11 @@ export function useGenerateCreativeTree() {
 }
 
 export function useGenerateTopCreatives() {
-  const [data, setData] = useState<TopCreativesData | null>(null);
+  const [data, setData] = useState<ITopCreativesData | null>(null);
 
   const { trigger, isMutating, error } = useSWRMutation(
     "generate-top-creatives",
-    async (_key: string, { arg }: { arg: { input: ProjectInput; context?: { psycheMap?: PsycheMapData; salesPlaybook?: SalesPlaybookData; research?: ResearchData; creativeTree?: CreativeTreeData } } }) => {
+    async (_key: string, { arg }: { arg: { input: IProjectInput; context?: { psycheMap?: IPsycheMapData; salesPlaybook?: ISalesPlaybookData; research?: IResearchData; creativeTree?: ICreativeTreeData } } }) => {
       const res = await generationRepository.generateTopCreatives(arg.input, arg.context);
       setData(res);
       return res;
@@ -131,11 +133,11 @@ export function useGenerateTopCreatives() {
 // --- Copy Check ---
 
 export function useAnalyzeCopy() {
-  const [result, setResult] = useState<CopyCheckResult | null>(null);
+  const [result, setResult] = useState<ICopyCheckResult | null>(null);
 
   const { trigger, isMutating, error } = useSWRMutation(
     "analyze-copy",
-    async (_key: string, { arg }: { arg: { input: ProjectInput; copyText: string } }) => {
+    async (_key: string, { arg }: { arg: { input: IProjectInput; copyText: string } }) => {
       const res = await generationRepository.analyzeCopy(arg.input, arg.copyText);
       setResult(res);
       return res;
@@ -150,45 +152,40 @@ export function useAnalyzeCopy() {
 // Each section feeds its output to the next as context.
 // Top Creatives runs AFTER Creative Tree so it can use the script lab's angle insights.
 
-export type SectionStatus = "pending" | "generating" | "done" | "error";
-
-export interface SectionStep {
-  key: string;
-  label: string;
-  description: string;
-  status: SectionStatus;
+/**
+ * Section step with status tracking
+ * Extends the base ISectionStep with status and elapsed time
+ */
+export interface ISectionStepWithStatus extends ISectionStep {
+  status: ESectionStatus;
   elapsed: number | null;  // ms
 }
 
-const SECTION_DEFS = [
-  { key: "psycheMap", label: "Psychology", description: "Mapping brain regions, cognitive biases, dopamine architecture, and habit loops" },
-  { key: "salesPlaybook", label: "Sales Strategy", description: "Building value equation, awareness levels, Cialdini weapons, NLP techniques, and closing techniques" },
-  { key: "research", label: "Research", description: "Creating shadow avatar, audience segments, search queries, and pre-creative checklist" },
-  { key: "creativeTree", label: "Scripts", description: "Generating emotional angles, frameworks, ad scripts, hooks, and platform formats" },
-  { key: "topCreatives", label: "Ads", description: "Crafting 5 ad blueprints in parallel batches" },
-] as const;
+// Re-export types for convenience
+export type { ISectionStep };
+export { ESectionStatus };
 
 export function useProgressiveGeneration() {
   const [progress, setProgress] = useState(0);
   const [currentSection, setCurrentSection] = useState<string | null>(null);
-  const [result, setResult] = useState<Partial<GenerationResult>>({});
+  const [result, setResult] = useState<Partial<IGenerationResult>>({});
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [steps, setSteps] = useState<SectionStep[]>(() =>
-    SECTION_DEFS.map((d) => ({ ...d, status: "pending", elapsed: null }))
+  const [steps, setSteps] = useState<ISectionStepWithStatus[]>(() =>
+    SECTION_STEPS.map((d) => ({ ...d, status: ESectionStatus.Pending, elapsed: null }))
   );
   const [totalElapsed, setTotalElapsed] = useState(0);
 
-  const generate = useCallback(async (input: ProjectInput, projectId?: string) => {
+  const generate = useCallback(async (input: IProjectInput, projectId?: string) => {
     setIsGenerating(true);
     setError(null);
     setProgress(0);
     setResult({});
     setTotalElapsed(0);
-    setSteps(SECTION_DEFS.map((d) => ({ ...d, status: "pending", elapsed: null })));
+    setSteps(SECTION_STEPS.map((d) => ({ ...d, status: ESectionStatus.Pending, elapsed: null })));
 
     if (projectId) {
-      await projectRepository.updateStatus(projectId, "generating").catch(() => {});
+      await projectRepository.updateStatus(projectId, EProjectStatus.Generating).catch(() => {});
     }
 
     const accumulated: Record<string, unknown> = {};
@@ -197,7 +194,7 @@ export function useProgressiveGeneration() {
     // Helper to run a sequential section
     const runSection = async (index: number, key: string, label: string, fn: () => Promise<unknown>) => {
       setCurrentSection(label);
-      setSteps((prev) => prev.map((s, idx) => (idx === index ? { ...s, status: "generating" } : s)));
+      setSteps((prev) => prev.map((s, idx) => (idx === index ? { ...s, status: ESectionStatus.Generating } : s)));
 
       const sectionStart = Date.now();
       try {
@@ -206,13 +203,13 @@ export function useProgressiveGeneration() {
         accumulated[key] = data;
         setResult((prev) => ({ ...prev, [key]: data }));
         setTotalElapsed(Date.now() - globalStart);
-        setSteps((prev) => prev.map((s, idx) => (idx === index ? { ...s, status: "done", elapsed } : s)));
+        setSteps((prev) => prev.map((s, idx) => (idx === index ? { ...s, status: ESectionStatus.Done, elapsed } : s)));
         return data;
       } catch (err) {
         const elapsed = Date.now() - sectionStart;
         const msg = err instanceof Error ? err.message : "Generation failed";
         setTotalElapsed(Date.now() - globalStart);
-        setSteps((prev) => prev.map((s, idx) => (idx === index ? { ...s, status: "error", elapsed } : s)));
+        setSteps((prev) => prev.map((s, idx) => (idx === index ? { ...s, status: ESectionStatus.Error, elapsed } : s)));
         throw new Error(`Failed at ${label}: ${msg}`);
       }
     };
@@ -221,7 +218,7 @@ export function useProgressiveGeneration() {
       // === STEP 1: Psyche Map + Sales Playbook + Research ALL IN PARALLEL ===
       // Sales/Research barely use Psyche context - fire everything at once
       setCurrentSection("Psychology + Sales Strategy + Research");
-      setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: "generating" } : s)));
+      setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: ESectionStatus.Generating } : s)));
 
       const step1Start = Date.now();
 
@@ -237,20 +234,20 @@ export function useProgressiveGeneration() {
       accumulated.salesPlaybook = salesData;
       accumulated.research = researchData;
       setResult((prev) => ({ ...prev, psycheMap: psycheData, salesPlaybook: salesData, research: researchData }));
-      setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: "done", elapsed: step1Elapsed } : s)));
+      setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: ESectionStatus.Done, elapsed: step1Elapsed } : s)));
       setProgress(50);
       setTotalElapsed(Date.now() - globalStart);
 
       // === STEP 2: Creative Tree (informed by all 3) ===
       const baseContext = {
-        psycheMap: accumulated.psycheMap as PsycheMapData,
-        salesPlaybook: accumulated.salesPlaybook as SalesPlaybookData,
-        research: accumulated.research as ResearchData,
+        psycheMap: accumulated.psycheMap as IPsycheMapData,
+        salesPlaybook: accumulated.salesPlaybook as ISalesPlaybookData,
+        research: accumulated.research as IResearchData,
       };
 
       const creativeTreeData = await runSection(3, "creativeTree", "Scripts", () =>
         generationRepository.generateCreativeTree(input, baseContext)
-      ) as CreativeTreeData;
+      ) as ICreativeTreeData;
       setProgress(75);
 
       // === STEP 3: Top Creatives (informed by all 3 + Creative Tree) ===
@@ -271,7 +268,7 @@ export function useProgressiveGeneration() {
       setTotalElapsed(Date.now() - globalStart);
 
       if (projectId) {
-        await projectRepository.updateStatus(projectId, "failed").catch(() => {});
+        await projectRepository.updateStatus(projectId, EProjectStatus.Failed).catch(() => {});
       }
 
       setIsGenerating(false);
@@ -279,14 +276,14 @@ export function useProgressiveGeneration() {
     }
 
     // Success - build full result
-    const fullResult: GenerationResult = {
+    const fullResult: IGenerationResult = {
       id: projectId || crypto.randomUUID(),
       input,
-      psycheMap: accumulated.psycheMap as GenerationResult["psycheMap"],
-      salesPlaybook: accumulated.salesPlaybook as GenerationResult["salesPlaybook"],
-      research: accumulated.research as GenerationResult["research"],
-      creativeTree: accumulated.creativeTree as GenerationResult["creativeTree"],
-      topCreatives: accumulated.topCreatives as GenerationResult["topCreatives"],
+      psycheMap: accumulated.psycheMap as IGenerationResult["psycheMap"],
+      salesPlaybook: accumulated.salesPlaybook as IGenerationResult["salesPlaybook"],
+      research: accumulated.research as IGenerationResult["research"],
+      creativeTree: accumulated.creativeTree as IGenerationResult["creativeTree"],
+      topCreatives: accumulated.topCreatives as IGenerationResult["topCreatives"],
       createdAt: new Date().toISOString(),
     };
 

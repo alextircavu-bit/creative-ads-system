@@ -4,25 +4,13 @@
 // Ported from the original HTML system.
 // ============================================================
 
-// --- Local Bias Patterns (for copy text analysis, independent of framework-data) ---
-
-const COPY_BIAS_PATTERNS: { name: string; strength: number; color: string; pattern: RegExp }[] = [
-  { name: "Loss Aversion", strength: 90, color: "#f43f5e", pattern: /lose|losing|miss out|missing out|every day without|slip away|running out|before it's too late|gone forever/i },
-  { name: "Curiosity Gap", strength: 88, color: "#ec4899", pattern: /wait|secret|discover|reveal|find out|did you know|what if|how|why|this is|guess what/i },
-  { name: "Framing Effect", strength: 87, color: "#a855f7", pattern: /instead of|not .* but|same .* different|think of it as|it's not .* it's/i },
-  { name: "Anchoring", strength: 85, color: "#06b6d4", pattern: /\d+\s*(hours?|minutes?|%|x|times)|\$\d|was \$.*now \$|compare|versus|vs/i },
-  { name: "Social Proof", strength: 85, color: "#f59e0b", pattern: /million|thousand|people|everyone|joined|community|trending|popular|\d+\s*(users|people|downloads|reviews)/i },
-  { name: "Confirmation Bias", strength: 83, color: "#10b981", pattern: /identity|believ|communit|value|lifestyle|type|kind|who you|are you|be the|self|person/i },
-  { name: "Default Effect", strength: 82, color: "#14b8a6", pattern: /lock\s?screen|auto|default|always|every\s?time|background|notif/i },
-  { name: "Bandwagon Effect", strength: 80, color: "#f97316", pattern: /everyone|trending|viral|movement|wave|join|switch|people are|millions are/i },
-  { name: "Hyperbolic Discounting", strength: 79, color: "#eab308", pattern: /instant|now|today|quick|fast|immediate|minute|second|real.?time|auto|first|right away/i },
-  { name: "Endowment Effect", strength: 76, color: "#84cc16", pattern: /free|trial|try|yours|your|keep|personal|custom|plan|result|my\b/i },
-  { name: "Status Quo Bias", strength: 75, color: "#3b82f6", pattern: /replace|switch|change|instead|new|swap/i },
-  { name: "Authority Bias", strength: 74, color: "#64748b", pattern: /expert|doctor|study|research|proven|science|certified|coach|trainer|professional|clinical|evidence|based/i },
-  { name: "Commitment Escalation", strength: 72, color: "#6366f1", pattern: /daily|habit|routine|plan|day|commit|challenge|streak/i },
-  { name: "IKEA Effect", strength: 70, color: "#22c55e", pattern: /custom|personal|create|quiz|your|plan|build|choose/i },
-  { name: "Scarcity", strength: 68, color: "#f43f5e", pattern: /limited|exclusive|only|last|ends|hurry|running out|spots|left|this week|today only/i },
-];
+import {
+  COPY_BIAS_PATTERNS,
+  EMOTION_WORDS,
+  POWER_WORDS,
+  FRAMEWORK_DETECTION_PATTERNS,
+  TREND_CHECK_PATTERNS,
+} from "@/config/copy-analysis-patterns";
 
 // --- Syllable Counter ---
 
@@ -104,21 +92,6 @@ export function checkGrammar(text: string): { score: number; issues: GrammarIssu
 
 // --- Persuasion Score ---
 
-const EMOTION_WORDS: Record<string, string[]> = {
-  urgency: ["now", "today", "hurry", "before", "last", "limited", "ends", "deadline", "immediately", "running out"],
-  fear: ["lose", "miss", "risk", "danger", "worst", "never", "without", "failing", "losing"],
-  desire: ["imagine", "discover", "unlock", "transform", "become", "achieve", "gain", "exclusive", "secret", "revealed"],
-  social: ["everyone", "millions", "thousands", "joined", "trending", "popular", "community", "together", "people"],
-  authority: ["proven", "research", "expert", "study", "certified", "science", "evidence", "clinical"],
-  action: ["download", "try", "start", "get", "join", "click", "grab", "claim", "sign up", "free"],
-};
-
-const POWER_WORDS = [
-  "you", "your", "free", "new", "because", "instantly", "guaranteed", "proven",
-  "secret", "exclusive", "easy", "simple", "fast", "love", "save", "results",
-  "amazing", "incredible",
-];
-
 export function computePersuasion(text: string): {
   score: number;
   powerWordCount: number;
@@ -181,16 +154,25 @@ export function computeTrends(text: string): { score: number; checks: TrendCheck
   const words = text.split(/\s+/).filter((w) => w.length > 0);
   const avgWordsPerSentence = sentences.length > 0 ? words.length / sentences.length : 0;
 
-  const checks: TrendCheck[] = [
-    { name: "Conversational Tone", passed: /\byou\b|your|you're|you'll|you've/i.test(text) },
-    { name: "Short-Form Optimized", passed: avgWordsPerSentence <= 14 },
-    { name: "Question Hook", passed: /^[^.!]*\?/.test(text) },
-    { name: "Numeric Specificity", passed: /\d+/.test(text) },
-    { name: "Emoji Integration", passed: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(text) },
-    { name: "UGC Voice", passed: /I |me |my |I'm|I've|I was|I just/i.test(text) },
-    { name: "Low-Friction CTA", passed: /free|no (credit|sign|cost)|one tap|just try|no commitment/i.test(text) },
-    { name: "Social Proof", passed: /\d+\s*(million|k|thousand|users|people|reviews|downloads)/i.test(text) },
-  ];
+  const checks: TrendCheck[] = TREND_CHECK_PATTERNS.map((trendPattern) => {
+    let passed = false;
+
+    if (trendPattern.checkFn) {
+      passed = trendPattern.checkFn(text);
+    } else if (trendPattern.pattern) {
+      passed = trendPattern.pattern.test(text);
+    }
+
+    // Special handling for short-form-optimized (already handled by checkFn, but keeping for clarity)
+    if (trendPattern.id === "short-form-optimized") {
+      passed = avgWordsPerSentence <= 14;
+    }
+
+    return {
+      name: trendPattern.name,
+      passed,
+    };
+  });
 
   const passed = checks.filter((c) => c.passed).length;
   const score = Math.round((passed / checks.length) * 100);
@@ -201,31 +183,14 @@ export function computeTrends(text: string): { score: number; checks: TrendCheck
 
 export function detectFrameworks(text: string): string[] {
   const matched: string[] = [];
-  const lower = text.toLowerCase();
 
-  // PAS: problem + agitate + solve pattern
-  if (/problem|struggle|pain|frustrated|tired of/i.test(text) && /worse|imagine|what if|keep/i.test(text) && /solution|fix|answer|introducing|finally/i.test(text)) {
-    matched.push("PAS");
-  }
+  for (const framework of FRAMEWORK_DETECTION_PATTERNS) {
+    // Check if all patterns for this framework match
+    const allPatternsMatch = framework.patterns.every(({ pattern }) => pattern.test(text));
 
-  // AIDA: attention + interest + desire + action
-  if (/\?|stop|wait|imagine|did you know/i.test(text) && /because|here's|the truth|what makes/i.test(text) && /download|try|start|get|click|join/i.test(text)) {
-    matched.push("AIDA");
-  }
-
-  // BAB: before/after contrast
-  if (/before|used to|remember when|without/i.test(text) && /now|after|with|today|finally/i.test(text)) {
-    matched.push("BAB");
-  }
-
-  // 4Ps: problem + promise + proof + push
-  if (/problem|struggle/i.test(text) && /promise|guarantee|will/i.test(text) && /proven|result|testimonial|\d+/i.test(text)) {
-    matched.push("4Ps");
-  }
-
-  // STAR: situation + task + action + result
-  if (/situation|when|story/i.test(text) && /had to|needed|wanted/i.test(text) && /did|used|tried|started/i.test(text) && /result|outcome|now|finally/i.test(text)) {
-    matched.push("STAR");
+    if (allPatternsMatch) {
+      matched.push(framework.abbreviation);
+    }
   }
 
   return matched;

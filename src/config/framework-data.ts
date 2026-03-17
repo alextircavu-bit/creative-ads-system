@@ -6,7 +6,7 @@
 
 // --- Psychological Territories (8) ---
 
-export interface EmotionalAngleDef {
+export interface IEmotionalAngleDef {
   id: string;
   name: string;
   mechanism: string;
@@ -28,7 +28,7 @@ export const EMOTIONAL_ANGLES: EmotionalAngleDef[] = [
 
 // --- Copywriting Frameworks (5) ---
 
-export interface FrameworkDef {
+export interface IFrameworkDef {
   id: string;
   name: string;
   abbreviation: string;
@@ -46,7 +46,7 @@ export const FRAMEWORKS: FrameworkDef[] = [
 
 // --- Brain Regions (10) ---
 
-export interface BrainRegionDef {
+export interface IBrainRegionDef {
   id: string;
   name: string;
   x: number;
@@ -77,7 +77,7 @@ export const BRAIN_CONNECTIONS: [string, string][] = [
 
 // --- Cognitive Profiles (9) ---
 
-export interface CognitiveProfileDef {
+export interface ICognitiveProfileDef {
   id: string;
   name: string;
   mechanism: string;
@@ -99,7 +99,7 @@ export const COGNITIVE_PROFILES: CognitiveProfileDef[] = [
 
 // --- Cognitive Biases (15) ---
 
-export interface CognitiveBiasDef {
+export interface ICognitiveBiasDef {
   name: string;
   color: string;
 }
@@ -124,7 +124,7 @@ export const COGNITIVE_BIASES: CognitiveBiasDef[] = [
 
 // --- Dopamine Architecture ---
 
-export interface DopamineTypeDef {
+export interface IDopamineTypeDef {
   trigger: string;
   schedule: string;
   anticipation: string;
@@ -146,7 +146,7 @@ export const DOPAMINE_TYPES: Record<string, DopamineTypeDef> = {
 
 // --- Habit Loop Templates ---
 
-export interface HabitLoopDef {
+export interface IHabitLoopDef {
   cue: string;
   routine: string;
   reward: string;
@@ -162,7 +162,7 @@ export const HABIT_LOOPS: Record<string, HabitLoopDef> = {
 
 // --- Schwartz 5 Awareness Levels ---
 
-export interface AwarenessLevelDef {
+export interface IAwarenessLevelDef {
   level: number;
   name: string;
   color: string;
@@ -179,7 +179,7 @@ export const AWARENESS_LEVELS: AwarenessLevelDef[] = [
 
 // --- Cialdini 6 Weapons ---
 
-export interface CialdiniWeaponDef {
+export interface ICialdiniWeaponDef {
   name: string;
   icon: string;
 }
@@ -195,7 +195,7 @@ export const CIALDINI_WEAPONS: CialdiniWeaponDef[] = [
 
 // --- Neural Persuasion Stack (Kahneman System 1/2) ---
 
-export interface PersuasionStackLayerDef {
+export interface IPersuasionStackLayerDef {
   num: number;
   name: string;
   timeRange: string;
@@ -213,7 +213,7 @@ export const PERSUASION_STACK: PersuasionStackLayerDef[] = [
 
 // --- Retargeting Funnel ---
 
-export interface RetargetingFunnelDef {
+export interface IRetargetingFunnelDef {
   stage: string;
   emoji: string;
   frequency: string;
@@ -234,7 +234,7 @@ export const PLATFORMS = ["TikTok", "Meta/IG", "YouTube", "Snapchat"] as const;
 
 // --- Research Methodology ---
 
-export interface ResearchTechniqueDef {
+export interface IResearchTechniqueDef {
   name: string;
   color: string;
   description: string;
@@ -250,7 +250,7 @@ export const RESEARCH_TECHNIQUES: ResearchTechniqueDef[] = [
 
 // --- Shadow Avatar Steps ---
 
-export interface ShadowAvatarStepDef {
+export interface IShadowAvatarStepDef {
   num: number;
   color: string;
   title: string;
@@ -277,7 +277,7 @@ export const AVATAR_TRAIT_LABELS = [
 
 // --- Pain/Pleasure Reference Categories ---
 
-export interface PainPleasureMapping {
+export interface IPainPleasureMapping {
   category: string;
   pains: string[];
   pleasures: string[];
@@ -313,7 +313,7 @@ export const PAIN_PLEASURE_MAPPINGS: PainPleasureMapping[] = [
 
 // --- Neuro-Linguistic Programming (NLP) Techniques (5) ---
 
-export interface NLPTechniqueDef {
+export interface INLPTechniqueDef {
   id: string;
   name: string;
   color: string;
@@ -387,7 +387,7 @@ export const NLP_TECHNIQUES: NLPTechniqueDef[] = [
 export const NLP_POSITIVE_ANCHORS = ["freedom", "escape", "joy", "relief", "control"];
 export const NLP_NEGATIVE_ANCHORS = ["trap", "prison", "waste", "drain", "stuck"];
 
-export interface NLPStackStrategyDef {
+export interface INLPStackStrategyDef {
   step: number;
   technique: string;
   instruction: string;
@@ -408,7 +408,7 @@ export const NLP_KEY_PRINCIPLE = "NLP doesn't use willpower. It dismantles the b
 // Tags drive the visual treatment in the Sora2 prompt filter.
 // Add new tags here anytime — they'll automatically be available to Claude.
 
-export interface StyleTagCategory {
+export interface IStyleTagCategory {
   category: string;
   tags: string[];
 }

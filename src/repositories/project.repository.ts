@@ -1,8 +1,12 @@
 import { supabase } from "@/lib/supabase";
-import type { ProjectInput, ProjectRow, GenerationResult } from "@/types/creative";
+import type { IProjectInput, IProjectRow, IGenerationResult } from "@/types/creative";
+import { EScenario, EProjectStatus } from "@/config/enums";
+import { DB_TABLES } from "@/config/constants";
 
-/** Stamp sora2Prompts on each hook, 1:1 with its visualSuggestions */
-function stampSora2Prompts(result: GenerationResult): void {
+/**
+ * Stamp sora2Prompts on each hook, 1:1 with its visualSuggestions
+ */
+function stampSora2Prompts(result: IGenerationResult): void {
   const creatives = result.topCreatives?.creatives || [];
   for (const creative of creatives) {
     for (const hook of creative.hooks || []) {
@@ -17,42 +21,71 @@ function stampSora2Prompts(result: GenerationResult): void {
   }
 }
 
-export const projectRepository = {
-  async getAll(): Promise<ProjectRow[]> {
+/**
+ * Repository for project CRUD operations
+ * Handles Supabase database operations for projects table
+ */
+class ProjectRepository {
+  private static instance: ProjectRepository;
+
+  private constructor() {
+    // Private constructor prevents direct instantiation
+  }
+
+  public static getInstance(): ProjectRepository {
+    if (!ProjectRepository.instance) {
+      ProjectRepository.instance = new ProjectRepository();
+    }
+    return ProjectRepository.instance;
+  }
+
+  /**
+   * Get all projects, ordered by creation date (newest first)
+   */
+  public async getAll(): Promise<IProjectRow[]> {
     const { data, error } = await supabase
-      .from("projects")
+      .from(DB_TABLES.PROJECTS)
       .select("*")
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(error.message);
     return data ?? [];
-  },
+  }
 
-  async getById(id: string): Promise<ProjectRow | null> {
+  /**
+   * Get a single project by ID
+   */
+  public async getById(id: string): Promise<IProjectRow | null> {
     const { data, error } = await supabase
-      .from("projects")
+      .from(DB_TABLES.PROJECTS)
       .select("*")
       .eq("id", id)
       .single();
 
     if (error && error.code !== "PGRST116") throw new Error(error.message);
     return data;
-  },
+  }
 
-  async getByScenario(scenario: "v3" | "v4"): Promise<ProjectRow[]> {
+  /**
+   * Get all projects for a specific scenario
+   */
+  public async getByScenario(scenario: EScenario): Promise<IProjectRow[]> {
     const { data, error } = await supabase
-      .from("projects")
+      .from(DB_TABLES.PROJECTS)
       .select("*")
       .eq("scenario", scenario)
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(error.message);
     return data ?? [];
-  },
+  }
 
-  async create(input: ProjectInput): Promise<ProjectRow> {
+  /**
+   * Create a new project
+   */
+  public async create(input: IProjectInput): Promise<IProjectRow> {
     const { data, error } = await supabase
-      .from("projects")
+      .from(DB_TABLES.PROJECTS)
       .insert({
         scenario: input.scenario,
         product_name: input.productName,
@@ -61,25 +94,32 @@ export const projectRepository = {
         feature_name: input.featureName || null,
         feature_id: input.featureId || null,
         input_data: input,
-        status: "pending",
+        status: EProjectStatus.Pending,
       })
       .select()
       .single();
 
     if (error) throw new Error(error.message);
     return data;
-  },
+  }
 
-  async updateStatus(id: string, status: ProjectRow["status"]): Promise<void> {
+  /**
+   * Update project status
+   */
+  public async updateStatus(id: string, status: EProjectStatus): Promise<void> {
     const { error } = await supabase
-      .from("projects")
+      .from(DB_TABLES.PROJECTS)
       .update({ status, updated_at: new Date().toISOString() })
       .eq("id", id);
 
     if (error) throw new Error(error.message);
-  },
+  }
 
-  async saveResult(id: string, result: GenerationResult): Promise<void> {
+  /**
+   * Save generation result to project and mark as completed
+   * Automatically stamps hidden fields and sora2Prompts
+   */
+  public async saveResult(id: string, result: IGenerationResult): Promise<void> {
     // Stamp hidden: true on subsections not rendered in the main UI
     if (result.research?.benefitExpansion) result.research.benefitExpansion.hidden = true;
     if (result.salesPlaybook?.system1Triggers) result.salesPlaybook.system1Triggers.forEach((t) => { t.hidden = true; });
@@ -107,19 +147,29 @@ export const projectRepository = {
     stampSora2Prompts(result);
 
     const { error } = await supabase
-      .from("projects")
+      .from(DB_TABLES.PROJECTS)
       .update({
         generation_result: result,
-        status: "completed",
+        status: EProjectStatus.Completed,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id);
 
     if (error) throw new Error(error.message);
-  },
+  }
 
-  async delete(id: string): Promise<void> {
-    const { error } = await supabase.from("projects").delete().eq("id", id);
+  /**
+   * Delete a project
+   */
+  public async delete(id: string): Promise<void> {
+    const { error } = await supabase
+      .from(DB_TABLES.PROJECTS)
+      .delete()
+      .eq("id", id);
+
     if (error) throw new Error(error.message);
-  },
-};
+  }
+}
+
+// Export singleton instance
+export const projectRepository = ProjectRepository.getInstance();

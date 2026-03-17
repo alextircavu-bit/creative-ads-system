@@ -8,7 +8,7 @@ export type ExperienceType = "in-app" | "physical" | "outcome" | "consumable" | 
 
 export type TemplateCategory = "app" | "physical" | "universal";
 
-export interface StoryboardFrame {
+export interface IStoryboardFrame {
   icon: string;
   label: string;
   time: string;
@@ -16,7 +16,7 @@ export interface StoryboardFrame {
   size?: "sm" | "md" | "lg" | "xl"; // flex sizing
 }
 
-export interface AdTemplate {
+export interface IAdTemplate {
   id: string;
   category: TemplateCategory;
   title: string;

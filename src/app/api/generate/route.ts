@@ -7,22 +7,11 @@ import {
   creativeTreePrompt,
   topCreativesPrompt,
 } from "@/config/prompts";
-import type { ProjectInput, GenerationResult, PsycheMapData, SalesPlaybookData, ResearchData, CreativeTreeData, CreativeFeedback } from "@/types/creative";
-
-type Section = "psycheMap" | "salesPlaybook" | "research" | "creativeTree" | "topCreatives" | "all";
-
-// Per-section config: token limits + model selection
-// Psyche/Sales use Sonnet (structured data). Research/Creative/Top use Opus (creative quality).
-const OPUS = "claude-opus-4-20250514";
-const SONNET = "claude-sonnet-4-20250514";
-
-const SECTION_CONFIG: Record<Exclude<Section, "all">, { tokens: number; model: string }> = {
-  psycheMap:      { tokens: 6000,  model: SONNET },
-  salesPlaybook:  { tokens: 8000,  model: SONNET },
-  research:       { tokens: 5000,  model: OPUS },
-  creativeTree:   { tokens: 12000, model: OPUS },  // trimmed from 20k (18 scripts instead of 30)
-  topCreatives:   { tokens: 8000,  model: OPUS },   // per-batch (2-3 creatives each, run in parallel)
-};
+import type { IProjectInput, IGenerationResult, IPsycheMapData, ISalesPlaybookData, IResearchData, ICreativeTreeData, ICreativeFeedback } from "@/types/creative";
+import { ESectionType } from "@/config/enums";
+import { CLAUDE_MODELS } from "@/config/constants";
+import { SECTION_CONFIGS } from "@/config/generation-config";
+import { SYSTEM_PROMPTS } from "@/config/system-prompts";
 
 function repairJSON(raw: string): string {
   let s = raw.trim();
@@ -62,12 +51,12 @@ function repairJSON(raw: string): string {
 
 async function callClaude(prompt: string, maxTokens: number, model?: string): Promise<unknown> {
   const message = await anthropic.messages.create({
-    model: model || OPUS,
+    model: model || CLAUDE_MODELS.OPUS,
     max_tokens: maxTokens,
     messages: [
       { role: "user", content: prompt },
     ],
-    system: "You are an expert ad creative strategist and behavioral psychologist. You return ONLY valid JSON with no markdown formatting, no code fences, no explanation. Just raw JSON.",
+    system: SYSTEM_PROMPTS.GENERATION,
     temperature: 0.4,
   });
 
@@ -84,14 +73,14 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { input, section, context } = body as {
-      input: ProjectInput;
-      section: Section;
+      input: IProjectInput;
+      section: ESectionType;
       context?: {
-        psycheMap?: PsycheMapData;
-        salesPlaybook?: SalesPlaybookData;
-        research?: ResearchData;
-        creativeTree?: CreativeTreeData;
-        feedback?: CreativeFeedback;
+        psycheMap?: IPsycheMapData;
+        salesPlaybook?: ISalesPlaybookData;
+        research?: IResearchData;
+        creativeTree?: ICreativeTreeData;
+        feedback?: ICreativeFeedback;
         existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[];
       };
     };
@@ -101,20 +90,20 @@ export async function POST(request: NextRequest) {
     }
 
     // --- Generate ALL sections (3 wall-clock steps) ---
-    if (section === "all") {
+    if (section === ESectionType.All) {
       // Step 1: Psyche Map (Sonnet) + Sales Playbook (Sonnet) + Research (Opus) in parallel
       const [psycheMap, salesPlaybook, research] = await Promise.all([
-        callClaude(psycheMapPrompt(input), SECTION_CONFIG.psycheMap.tokens, SECTION_CONFIG.psycheMap.model) as Promise<PsycheMapData>,
-        callClaude(salesPlaybookPrompt(input), SECTION_CONFIG.salesPlaybook.tokens, SECTION_CONFIG.salesPlaybook.model) as Promise<SalesPlaybookData>,
-        callClaude(researchPrompt(input), SECTION_CONFIG.research.tokens, SECTION_CONFIG.research.model) as Promise<ResearchData>,
+        callClaude(psycheMapPrompt(input), SECTION_CONFIGS[ESectionType.PsycheMap].tokens, SECTION_CONFIGS[ESectionType.PsycheMap].model) as Promise<IPsycheMapData>,
+        callClaude(salesPlaybookPrompt(input), SECTION_CONFIGS[ESectionType.SalesPlaybook].tokens, SECTION_CONFIGS[ESectionType.SalesPlaybook].model) as Promise<ISalesPlaybookData>,
+        callClaude(researchPrompt(input), SECTION_CONFIGS[ESectionType.Research].tokens, SECTION_CONFIGS[ESectionType.Research].model) as Promise<IResearchData>,
       ]);
 
       // Step 2: Creative Tree (Opus, informed by all 3)
       const creativeTree = await callClaude(
         creativeTreePrompt(input, psycheMap, salesPlaybook, research),
-        SECTION_CONFIG.creativeTree.tokens,
-        SECTION_CONFIG.creativeTree.model,
-      ) as CreativeTreeData;
+        SECTION_CONFIGS[ESectionType.CreativeTree].tokens,
+        SECTION_CONFIGS[ESectionType.CreativeTree].model,
+      ) as ICreativeTreeData;
 
       // Step 3: Top Creatives — split into 3 parallel Opus calls (2+2+1 creatives)
       // Each batch generates a subset, then we merge
@@ -126,9 +115,9 @@ export async function POST(request: NextRequest) {
           );
 
       const [batch1, batch2, batch3] = await Promise.all([
-        callClaude(batchPrompt(1, 2, 1), SECTION_CONFIG.topCreatives.tokens, SECTION_CONFIG.topCreatives.model) as Promise<{ creatives: GenerationResult["topCreatives"]["creatives"] }>,
-        callClaude(batchPrompt(2, 2, 3), SECTION_CONFIG.topCreatives.tokens, SECTION_CONFIG.topCreatives.model) as Promise<{ creatives: GenerationResult["topCreatives"]["creatives"] }>,
-        callClaude(batchPrompt(3, 1, 5), SECTION_CONFIG.topCreatives.tokens, SECTION_CONFIG.topCreatives.model) as Promise<{ creatives: GenerationResult["topCreatives"]["creatives"] }>,
+        callClaude(batchPrompt(1, 2, 1), SECTION_CONFIGS[ESectionType.TopCreatives].tokens, SECTION_CONFIGS[ESectionType.TopCreatives].model) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        callClaude(batchPrompt(2, 2, 3), SECTION_CONFIGS[ESectionType.TopCreatives].tokens, SECTION_CONFIGS[ESectionType.TopCreatives].model) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        callClaude(batchPrompt(3, 1, 5), SECTION_CONFIGS[ESectionType.TopCreatives].tokens, SECTION_CONFIGS[ESectionType.TopCreatives].model) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
       ]);
 
       // Merge batches and re-rank
@@ -140,14 +129,14 @@ export async function POST(request: NextRequest) {
 
       const topCreatives = { creatives: allCreatives };
 
-      const fullResult: GenerationResult = {
+      const fullResult: IGenerationResult = {
         id: crypto.randomUUID(),
         input,
         psycheMap,
         salesPlaybook,
         research,
-        creativeTree: creativeTree as GenerationResult["creativeTree"],
-        topCreatives: topCreatives as GenerationResult["topCreatives"],
+        creativeTree: creativeTree as IGenerationResult["creativeTree"],
+        topCreatives: topCreatives as IGenerationResult["topCreatives"],
         createdAt: new Date().toISOString(),
       };
 
@@ -156,22 +145,22 @@ export async function POST(request: NextRequest) {
 
     // --- Individual section generation ---
     let prompt: string;
-    const config = SECTION_CONFIG[section] || { tokens: 8000, model: OPUS };
+    const config = SECTION_CONFIGS[section] || { tokens: 8000, model: CLAUDE_MODELS.OPUS, temperature: 0.4 };
 
     switch (section) {
-      case "psycheMap":
+      case ESectionType.PsycheMap:
         prompt = psycheMapPrompt(input);
         break;
-      case "salesPlaybook":
+      case ESectionType.SalesPlaybook:
         prompt = salesPlaybookPrompt(input, context?.psycheMap);
         break;
-      case "research":
+      case ESectionType.Research:
         prompt = researchPrompt(input, context?.psycheMap, context?.salesPlaybook);
         break;
-      case "creativeTree":
+      case ESectionType.CreativeTree:
         prompt = creativeTreePrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research);
         break;
-      case "topCreatives": {
+      case ESectionType.TopCreatives: {
         // "Generate 5 more" — also split into parallel batches for speed
         const basePrompt = topCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research, context?.creativeTree, context?.feedback, context?.existingCreatives);
         const batchPrompt = (batchNum: number, batchSize: number, startRank: number) =>

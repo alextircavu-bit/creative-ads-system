@@ -7,7 +7,7 @@ export type ScenarioType = "v3" | "v4";
 // V3 = mobile app ads (features, benefits, purpose)
 // V4 = any product ads (generic)
 
-export interface ProjectInput {
+export interface IProjectInput {
   scenario: ScenarioType;
   productName: string;
   productDescription: string;
@@ -25,7 +25,7 @@ export interface ProjectInput {
 
 // --- Creative Tree ---
 
-export interface EmotionalAngle {
+export interface IEmotionalAngle {
   id: string;
   name: string;
   mechanism: string;
@@ -33,7 +33,7 @@ export interface EmotionalAngle {
   relevanceScore: number;
 }
 
-export interface Framework {
+export interface IFramework {
   id: string;
   name: string;
   abbreviation: string;
@@ -41,34 +41,34 @@ export interface Framework {
   description: string;
 }
 
-export interface AdScript {
+export interface IAdScript {
   frameworkId: string;
-  steps: ScriptStep[];
+  steps: IScriptStep[];
   hooks: string[];
 }
 
-export interface ScriptStep {
+export interface IScriptStep {
   label: string;
   type: "problem" | "agitate" | "solution" | "cta" | "before" | "after" | "attention" | "interest" | "desire" | "full" | "mechanism";
   text: string;
   hidden?: true;
 }
 
-export interface PlatformFormat {
+export interface IPlatformFormat {
   platform: string;
   formats: { type: string; description: string }[];
 }
 
-export interface CreativeTreeData {
-  emotionalAngles: EmotionalAngle[];
-  frameworks: Framework[];
-  scripts: Record<string, AdScript[]>; // keyed by emotionalAngle.id
-  platformFormats: PlatformFormat[];
+export interface ICreativeTreeData {
+  emotionalAngles: IEmotionalAngle[];
+  frameworks: IFramework[];
+  scripts: Record<string, IAdScript[]>; // keyed by emotionalAngle.id
+  platformFormats: IPlatformFormat[];
 }
 
 // --- Psyche Map ---
 
-export interface BrainRegion {
+export interface IBrainRegion {
   id: string;
   name: string;
   role: string;
@@ -81,7 +81,7 @@ export interface BrainRegion {
   r: number;
 }
 
-export interface CognitiveProfile {
+export interface ICognitiveProfile {
   name: string;
   emoji: string;
   color: string;
@@ -92,7 +92,7 @@ export interface CognitiveProfile {
   retentionRisk: string;
 }
 
-export interface DopamineArchitecture {
+export interface IDopamineArchitecture {
   trigger: string;
   triggerPct: number;
   schedule: string;
@@ -102,7 +102,7 @@ export interface DopamineArchitecture {
   retentionPct: number;
 }
 
-export interface CognitiveBias {
+export interface ICognitiveBias {
   name: string;
   strength: number;
   color: string;
@@ -110,13 +110,13 @@ export interface CognitiveBias {
   example: string;
 }
 
-export interface HabitLoop {
+export interface IHabitLoop {
   cue: string;
   routine: string;
   reward: string;
 }
 
-export interface PersuasionStackLayer {
+export interface IPersuasionStackLayer {
   num: number;
   name: string;
   color: string;
@@ -125,32 +125,32 @@ export interface PersuasionStackLayer {
   techniques: string[];
 }
 
-export interface PainPleasureMatrix {
+export interface IPainPleasureMatrix {
   pains: string[];
   pleasures: string[];
 }
 
-export interface PsycheMapData {
-  brainRegions: BrainRegion[];
-  cognitiveProfile: CognitiveProfile;
-  dopamine: DopamineArchitecture;
-  biases: CognitiveBias[];
-  habitLoop: HabitLoop;
-  persuasionStack: PersuasionStackLayer[];
-  painPleasure: PainPleasureMatrix;
+export interface IPsycheMapData {
+  brainRegions: IBrainRegion[];
+  cognitiveProfile: ICognitiveProfile;
+  dopamine: IDopamineArchitecture;
+  biases: ICognitiveBias[];
+  habitLoop: IHabitLoop;
+  persuasionStack: IPersuasionStackLayer[];
+  painPleasure: IPainPleasureMatrix;
   audiencePosition: { axis: string; insight: string };
 }
 
 // --- Sales Playbook ---
 
-export interface ValueEquation {
+export interface IValueEquation {
   dreamOutcome: { score: number; text: string };
   perceivedLikelihood: { score: number; text: string };
   timeDelay: { score: number; text: string };
   effortSacrifice: { score: number; text: string };
 }
 
-export interface AwarenessLevel {
+export interface IAwarenessLevel {
   level: number;
   name: string;
   color: string;
@@ -161,7 +161,7 @@ export interface AwarenessLevel {
   relevance: number;
 }
 
-export interface CialdiniWeapon {
+export interface ICialdiniWeapon {
   name: string;
   icon: string;
   color: string;
@@ -171,19 +171,19 @@ export interface CialdiniWeapon {
   power: number;
 }
 
-export interface StraightLineCertainty {
+export interface IStraightLineCertainty {
   product: { score: number; text: string; tactics: string[] };
   seller: { score: number; text: string; tactics: string[] };
   action: { score: number; text: string; tactics: string[] };
 }
 
-export interface HSOFramework {
+export interface IHSOFramework {
   hooks: string[];
   stories: string[];
   offers: string[];
 }
 
-export interface RetargetingStage {
+export interface IRetargetingStage {
   name: string;
   color: string;
   icon: string;
@@ -196,7 +196,7 @@ export interface RetargetingStage {
   example: string;
 }
 
-export interface ClosingTechnique {
+export interface IClosingTechnique {
   name: string;
   source: string;
   book: string;
@@ -204,14 +204,14 @@ export interface ClosingTechnique {
   scriptExample: string;
 }
 
-export interface System12Trigger {
+export interface ISystem12Trigger {
   trigger: string;
   description: string;
   tip: string;
   hidden?: true;
 }
 
-export interface NLPTechnique {
+export interface INLPTechnique {
   id: string;
   name: string;
   color: string;
@@ -222,27 +222,27 @@ export interface NLPTechnique {
   productExample: string; // Personalized by Claude for the specific product
 }
 
-export interface NLPStackStep {
+export interface INLPStackStep {
   step: number;
   technique: string;
   script: string; // Personalized ad script for this step
   hidden?: true;
 }
 
-export interface NLPData {
-  techniques: NLPTechnique[];
-  stackStrategy: NLPStackStep[];
+export interface INLPData {
+  techniques: INLPTechnique[];
+  stackStrategy: INLPStackStep[];
   keyPrinciple: string;
 }
 
-export interface ObjectionEntry {
+export interface IObjectionEntry {
   objection: string;
   killMechanism: string;
   hookCounter: string;
   bodyCounter: string;
 }
 
-export interface MarketSophistication {
+export interface IMarketSophistication {
   level: number;        // 1-5 Schwartz scale
   name: string;         // "New Opportunity" | "Enlarged Claim" | "Mechanism" | "Enlarged Mechanism" | "Identity/Experience"
   description: string;  // What this level means for this product
@@ -250,7 +250,7 @@ export interface MarketSophistication {
   avoidance: string;    // What NOT to do at this level
 }
 
-export interface PurchaseContext {
+export interface IPurchaseContext {
   priceModel: string;   // "free + IAP" | "subscription" | "one-time" | "freemium"
   pricePoint: string;   // "$0 (free trial)" | "$9.99/mo" etc.
   purchaseType: string; // "impulse" | "considered" | "habitual"
@@ -259,58 +259,58 @@ export interface PurchaseContext {
   reasoning: string;    // Why this calibration
 }
 
-export interface DemandTemperature {
+export interface IDemandTemperature {
   level: "low" | "medium" | "high";
   description: string;    // Why this product is at this demand level
   hookApproach: string;   // How hooks should be structured given this demand
   bridgeWeight: string;   // How much bridge work is needed between hook and body
 }
 
-export interface SalesPlaybookData {
-  valueEquation: ValueEquation;
-  awarenessLevels: AwarenessLevel[];
-  cialdiniWeapons: CialdiniWeapon[];
-  straightLine: StraightLineCertainty;
-  hso: HSOFramework;
-  retargetingFunnel: RetargetingStage[];
-  closingTechniques: ClosingTechnique[];
-  system1Triggers: System12Trigger[];
-  system2Triggers: System12Trigger[];
-  nlp: NLPData;
-  objectionMap: ObjectionEntry[];
-  marketSophistication: MarketSophistication;
-  purchaseContext: PurchaseContext;
-  demandTemperature: DemandTemperature;
+export interface ISalesPlaybookData {
+  valueEquation: IValueEquation;
+  awarenessLevels: IAwarenessLevel[];
+  cialdiniWeapons: ICialdiniWeapon[];
+  straightLine: IStraightLineCertainty;
+  hso: IHSOFramework;
+  retargetingFunnel: IRetargetingStage[];
+  closingTechniques: IClosingTechnique[];
+  system1Triggers: ISystem12Trigger[];
+  system2Triggers: ISystem12Trigger[];
+  nlp: INLPData;
+  objectionMap: IObjectionEntry[];
+  marketSophistication: IMarketSophistication;
+  purchaseContext: IPurchaseContext;
+  demandTemperature: IDemandTemperature;
 }
 
 // --- Research ---
 
-export interface ShadowAvatarStep {
+export interface IShadowAvatarStep {
   num: number;
   color: string;
   title: string;
   description: string;
 }
 
-export interface SearchQuery {
+export interface ISearchQuery {
   platform: string;
   query: string;
   why: string;
 }
 
-export interface ResearchTechnique {
+export interface IResearchTechnique {
   name: string;
   color: string;
   description: string;
   steps: string[];
 }
 
-export interface AvatarTrait {
+export interface IAvatarTrait {
   label: string;
   value: string;
 }
 
-export interface AudienceSegment {
+export interface IAudienceSegment {
   name: string;
   description: string;
   demographics: string;
@@ -324,27 +324,27 @@ export interface AudienceSegment {
   color: string;
 }
 
-export interface BenefitExpansion {
+export interface IBenefitExpansion {
   surfaceBenefit: string;
   expandedThreads: string[];
   identityShift: string;
   hidden?: true;
 }
 
-export interface ResearchData {
-  shadowAvatarSteps: ShadowAvatarStep[];
-  searchQueries: SearchQuery[];
-  researchTechniques: ResearchTechnique[];
-  avatarTraits: AvatarTrait[];
-  audienceSegments: AudienceSegment[];
-  benefitExpansion?: BenefitExpansion;
+export interface IResearchData {
+  shadowAvatarSteps: IShadowAvatarStep[];
+  searchQueries: ISearchQuery[];
+  researchTechniques: IResearchTechnique[];
+  avatarTraits: IAvatarTrait[];
+  audienceSegments: IAudienceSegment[];
+  benefitExpansion?: IBenefitExpansion;
   preCreativeChecklist: string[];
 }
 
 // --- Copy Check ---
 
 // AI Deep Review result (qualitative - local scoring is in lib/copy-check.ts)
-export interface CopyCheckResult {
+export interface ICopyCheckResult {
   qualitativeReview?: {
     overallImpression: string;
     emotionalImpact: string;
@@ -375,7 +375,7 @@ export type VisualHookType =
   | "product-in-context"    // Product being used in its natural environment
   | "dynamic";              // Claude-generated style that doesn't fit known archetypes
 
-export interface VisualStyle {
+export interface IVisualStyle {
   type: VisualHookType;
   name: string;            // Short human-readable name (e.g. "Podcast Set Authority", "Morning Routine Window")
   description: string;     // What footage to source/film — specific enough for a media buyer
@@ -388,30 +388,30 @@ export type HookAudioSource =
   | "sora2"       // Person speaks on camera — Sora2 generates voice. Prompt INCLUDES dialogue.
   | "elevenlabs"; // No person speaking — ElevenLabs VO laid over silent/ambient Sora2 footage.
 
-export interface VisualSuggestion {
+export interface IVisualSuggestion {
   idea: string;            // The visual concept (what the viewer sees)
   prompt: string;          // Scene description for Sora2. If audioSource="sora2": INCLUDE dialogue/speech. If "elevenlabs": visual-only.
   clipDuration: SoraClipDuration; // Sora2 clip length: "4s" | "8s" | "12s". Multiple clips stitch to cover hook duration.
   styleTags: string[];     // Sora2 style/mood tags. Drive the visual treatment. E.g. ["ugc", "iphone", "handheld"] or ["cinematic", "sci-fi", "VFX"].
 }
 
-export interface AdSection {
+export interface IAdSection {
   time: string;
   text: string;
   visual: string;
   deliveryMode?: DeliveryMode;
 }
 
-export interface HookVariation {
+export interface IHookVariation {
   // --- TEXT LAYER ---
   text: string;           // On-screen caption. Full hook for text-overlay, short summary for VO+caption.
   // --- AUDIO ---
   audioSource?: HookAudioSource; // "sora2" = person speaks in clip. "elevenlabs" = separate VO over footage.
   voiceoverScript?: string; // The spoken words. If sora2: baked into Sora2 prompt. If elevenlabs: separate audio track.
   // --- VISUAL LAYER (Sora2 clips) ---
-  visualStyle: VisualStyle;              // What type of footage (podcast, scenic, street, etc.)
-  visualSuggestions: VisualSuggestion[]; // 2-3 Sora2 clips. Each has clipDuration (4s/8s/12s). Stitched to cover hook duration.
-  sora2Prompts?: Sora2Prompt[];         // Extracted Sora2 prompt payloads, 1:1 with visualSuggestions. Stamped on save.
+  visualStyle: IVisualStyle;              // What type of footage (podcast, scenic, street, etc.)
+  visualSuggestions: IVisualSuggestion[]; // 2-3 Sora2 clips. Each has clipDuration (4s/8s/12s). Stitched to cover hook duration.
+  sora2Prompts?: ISora2Prompt[];         // Extracted Sora2 prompt payloads, 1:1 with visualSuggestions. Stamped on save.
   // --- TIMING ---
   duration: string;       // Total hook duration. Sum of stitched clips.
   // --- METADATA ---
@@ -419,7 +419,7 @@ export interface HookVariation {
   hidden?: true;
 }
 
-export interface BodyVariation {
+export interface IBodyVariation {
   // --- TEXT LAYER ---
   text: string;           // On-screen text: plain feature description
   // --- AUDIO LAYER (ElevenLabs — always separate, never Sora2) ---
@@ -430,7 +430,7 @@ export interface BodyVariation {
   duration?: string;      // Total body duration.
 }
 
-export interface AdCreativeBlueprint {
+export interface IAdCreativeBlueprint {
   rank: number;
   name: string;
   sourceAngle?: string;
@@ -445,20 +445,20 @@ export interface AdCreativeBlueprint {
   productionStyle: string;
   deliveryMode: DeliveryMode;
   // Multiple variations for swipeable cards
-  hooks: HookVariation[];
-  bodies: BodyVariation[];
+  hooks: IHookVariation[];
+  bodies: IBodyVariation[];
   // Single CTA (overlay bar, not a video section)
   cta: { text: string; deliveryMode?: DeliveryMode };
   // Legacy single hook/body for backward compat with existing data
-  hook?: AdSection;
-  body?: AdSection;
+  hook?: IAdSection;
+  body?: IAdSection;
   targetSegment?: string;
   whyThisTemplate?: string;
   whyThisScript?: string;
   hidden?: true;
 }
 
-export interface CreativeFeedback {
+export interface ICreativeFeedback {
   hookIssues?: string[];    // "hooks are too action-narrating", "staccato fragments", etc.
   bodyIssues?: string[];    // "body uses metaphors instead of plain feature description"
   segmentIssues?: string[]; // "over-segmented for broad identity product"
@@ -466,33 +466,33 @@ export interface CreativeFeedback {
   generalNotes?: string[];  // freeform feedback
 }
 
-export interface Sora2Prompt {
+export interface ISora2Prompt {
   description: string;
   voiceline_script: string | null;
   duration_seconds: number;
   style_tags: string[];
 }
 
-export interface TopCreativesData {
-  creatives: AdCreativeBlueprint[];
+export interface ITopCreativesData {
+  creatives: IAdCreativeBlueprint[];
 }
 
 // --- Full Generation Result ---
 
-export interface GenerationResult {
+export interface IGenerationResult {
   id: string;
-  input: ProjectInput;
-  creativeTree: CreativeTreeData;
-  psycheMap: PsycheMapData;
-  salesPlaybook: SalesPlaybookData;
-  research: ResearchData;
-  topCreatives: TopCreativesData;
+  input: IProjectInput;
+  creativeTree: ICreativeTreeData;
+  psycheMap: IPsycheMapData;
+  salesPlaybook: ISalesPlaybookData;
+  research: IResearchData;
+  topCreatives: ITopCreativesData;
   createdAt: string;
 }
 
 // --- Supabase row ---
 
-export interface ProjectRow {
+export interface IProjectRow {
   id: string;
   scenario: ScenarioType;
   product_name: string;
@@ -500,8 +500,8 @@ export interface ProjectRow {
   app_id: string | null;
   feature_name: string | null;
   feature_id: string | null;
-  input_data: ProjectInput;
-  generation_result: GenerationResult | null;
+  input_data: IProjectInput;
+  generation_result: IGenerationResult | null;
   status: "pending" | "generating" | "completed" | "failed";
   created_at: string;
   updated_at: string;

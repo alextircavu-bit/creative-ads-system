@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic } from "@/lib/anthropic";
+import { CLAUDE_MODELS } from "@/config/constants";
 
 // Merges the Sora2 Adaptive Prompt Engine v3 methodology with structured JSON brief output.
 // 3-layer approach: Story → Recording → Guardrails
@@ -209,7 +210,7 @@ ${styleTags.length > 0 ? `STYLE/MOOD TAGS: ${styleTags.join(", ")}` : "No style 
 Generate the complete Sora 2 production brief JSON. Remember: this must look like REAL footage, not AI-generated content.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: CLAUDE_MODELS.SONNET,
       max_tokens: 2500,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],

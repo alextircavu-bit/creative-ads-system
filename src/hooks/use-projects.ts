@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import { projectRepository } from "@/repositories/project.repository";
-import type { ProjectInput, ScenarioType } from "@/types/creative";
+import type { IProjectInput, ScenarioType } from "@/types/creative";
 
 // --- Fetchers ---
 
@@ -52,7 +52,7 @@ export function useProject(id: string | null) {
 export function useCreateProject() {
   const { trigger, isMutating, error } = useSWRMutation(
     "projects",
-    async (_key: string, { arg }: { arg: ProjectInput }) => {
+    async (_key: string, { arg }: { arg: IProjectInput }) => {
       return projectRepository.create(arg);
     }
   );

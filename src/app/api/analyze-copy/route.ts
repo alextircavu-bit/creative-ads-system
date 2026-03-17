@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic } from "@/lib/anthropic";
 import { copyCheckPrompt } from "@/config/prompts";
-import type { ProjectInput } from "@/types/creative";
+import type { IProjectInput } from "@/types/creative";
+import { CLAUDE_MODELS } from "@/config/constants";
+import { SYSTEM_PROMPTS } from "@/config/system-prompts";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { input, copyText } = body as { input: ProjectInput; copyText: string };
+    const { input, copyText } = body as { input: IProjectInput; copyText: string };
 
     if (!copyText?.trim()) {
       return NextResponse.json({ error: "No copy text provided" }, { status: 400 });
@@ -15,12 +17,12 @@ export async function POST(request: NextRequest) {
     const prompt = copyCheckPrompt(input, copyText);
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: CLAUDE_MODELS.SONNET,
       max_tokens: 4000,
       messages: [
         { role: "user", content: prompt },
       ],
-      system: "You are a senior copywriter and conversion optimization expert. Return ONLY valid JSON, no markdown.",
+      system: SYSTEM_PROMPTS.COPY_ANALYSIS,
       temperature: 0.5,
     });
 
