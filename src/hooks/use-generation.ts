@@ -165,7 +165,7 @@ const SECTION_DEFS = [
   { key: "salesPlaybook", label: "Sales Strategy", description: "Building value equation, awareness levels, Cialdini weapons, NLP techniques, and closing techniques" },
   { key: "research", label: "Research", description: "Creating shadow avatar, audience segments, search queries, and pre-creative checklist" },
   { key: "creativeTree", label: "Scripts", description: "Generating emotional angles, frameworks, ad scripts, hooks, and platform formats" },
-  { key: "topCreatives", label: "Ads", description: "Crafting 5 template-matched ad blueprints" },
+  { key: "topCreatives", label: "Ads", description: "Crafting 5 ad blueprints in parallel batches" },
 ] as const;
 
 export function useProgressiveGeneration() {

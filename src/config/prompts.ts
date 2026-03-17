@@ -25,6 +25,7 @@ import {
   NLP_TECHNIQUES,
   NLP_STACK_STRATEGY,
   NLP_KEY_PRINCIPLE,
+  SORA2_STYLE_TAGS,
 } from "@/config/framework-data";
 
 function buildContext(input: ProjectInput): string {
@@ -550,7 +551,7 @@ Generate a JSON object:
 
   "scripts": {
     "<territory.id>": [
-      For the TOP 6 most relevant territories, generate one script per framework (6 territories x 5 frameworks = 30 scripts).
+      For the TOP 3 most relevant territories, generate one script per framework (3 territories x 5 frameworks = 15 scripts). Then for the NEXT 3 territories, generate just ONE script each using the best-fit framework (3 more = 18 total).
 
       TWO-PHASE PROCESS for each script:
 
@@ -665,62 +666,138 @@ ${buildContext(input)}
 
 ${contextParts.join("\n\n")}
 
-=== THE ONE TEMPLATE (this is the ONLY format we produce) ===
+=== AD STRUCTURE ===
 
-Every ad follows this exact structure. No exceptions. No other formats.
+Every ad has 3 visual parts + CTA:
 
-HOOK (text + visual as ONE UNIT — this is where ALL creative variety lives)
-The first 1-5 seconds. Text overlay + visual reinforce the SAME emotion.
-- The visual sets the emotional context. The text articulates it. They must match.
-- Can be a question, reframe, confession, challenge, observation, social proof, or provocation
-- Taps into an emotion the viewer RELATES to in connection with this product
-- The viewer must think "wait, that's me" or "wait, what?"
-- 5-20 words maximum.
+HOOK (the person / scene — this is where ALL creative variety lives)
+- VISUAL: A person on camera, a scene, a setting. NOT the product yet.
+  Text-overlay: scenic vista, category anchor, dramatic footage.
+  VO+caption: talking head, podcast set, street interview, confession to camera, reaction.
+- COPY: Text on screen (text-overlay) OR voiceover + caption (VO+caption).
+- PURPOSE: Stop the scroll. The viewer thinks "wait, that's me" or "wait, what?"
+- 5-20 words for text. VO scripts: 15-30 words.
 
-BRIDGE (implicit — the psychological WHY)
-The connection between hook and body. NOT visible as separate text.
-The viewer's brain fills this in: "I feel [hook tension]... oh, THIS is how I fix it [body]"
-The product makes the hook's premise LITERAL.
+BRIDGE (the psychological WHY — connects hook tension to product resolution)
+- The bridge is NOT a separate visual section. It lives in the TRANSITION between hook and body.
+- For VO+caption: the bridge is in the voiceover script. The last sentence of the hook VO or first sentence of the body VO must EXPLICITLY connect the emotional tension to the product.
+- For text-overlay: the bridge is in the body text — it must answer WHY the product resolves the hook's tension.
+- WITHOUT a bridge, the hook and body feel like two unrelated ads stitched together.
 
-BODY (screen recording of the feature — CONSTANT, reusable across all hooks)
-The reveal. Screen recording of the actual product feature in action.
-- One plain sentence describing what the feature does, overlaid on the screen recording
-- This is NOT sales copy. It's a factual description of the product experience.
-- The SAME body pairs with dozens of different hooks. The body NEVER changes.
-- This is where the hook's promise becomes real — the viewer sees it working.
+THE BRIDGE TEST: Read the hook, then read the body. Does the viewer understand WHY this product solves the problem the hook raised? If not, the bridge is missing.
 
-CTA (text overlay — action, not a slogan)
-"Tap below to get it" / "Download Free" / "Get It Below" / "Try It Free"
-An action the viewer takes. Never a tagline.
+Examples of GOOD bridges:
+  Hook: "My kids think this is normal" (parent worried about generational faith loss)
+  BAD body: "Scripture appears on your lockscreen every hour" (how does a lockscreen verse fix my kids not praying?)
+  GOOD bridge via VO: "...so I started putting Scripture where I couldn't ignore it. Now my kids see me reading God's word — not just talking about it."
+  The bridge connects "kids think this is normal" → "I need to model faith" → "this makes Scripture visible in my daily life" → "my kids see it too."
 
-THE DEFAULT PATTERN (proven, but not the only one):
-Emotionally triggering question as hook → screen recording body showing the solution
-Example: "Does anyone else open their Bible wanting to feel something and just... stare at the page?" → [screen recording of verse appearing on lockscreen]
+  Hook: "I used to set my alarm early to read my Bible"
+  Bridge: "Then I found this thing that meets me where I already am."
+  Body: "It puts a verse on your lockscreen every hour."
+  The bridge connects "I tried and failed at discipline" → "this removes the effort" → "here's how."
 
-OTHER HOOK APPROACHES (use these too — variety is critical):
-- Reframe: "What if [mundane thing you already do] was [powerful new meaning]?" → body reveals it's real
-- Confession: "I used to [shameful thing] every night before bed" → product as the replacement
-- Challenge: "Try this for 3 days and tell me you don't feel different" → product demo
-- Social proof: "My friend made me download this and now I can't stop" → product experience
-- Founder: "I built this because I couldn't find..." → product as the answer
-- Provocation: "Your [routine/habit] is the reason you [negative outcome]" → product as fix
+Different hooks need different bridges because different emotional tensions resolve differently:
+  - Guilt hook → bridge must show how the product removes the source of guilt
+  - Curiosity hook → bridge must deliver the reveal
+  - Identity hook → bridge must show the identity shift the product enables
+  - Fear hook → bridge must show how the product eliminates the threat
+
+BODY (the product experience — CONSTANT, reusable across all hooks)
+- VISUAL: Screen recording / product demo / app in action. The visual CUTS from the person/scene to the product.
+  This is always the product being used. The viewer sees the feature working.
+- COPY: One plain sentence describing what the feature does.
+  VO+caption: voiceover CONTINUES over the product footage (same speaker, same breath).
+  The narrator describes what the viewer is seeing on screen. The VO must include the bridge — it can't just jump to "here's the feature."
+- PURPOSE: Resolve the hook's tension THROUGH the bridge. The viewer thinks: "I feel [hook emotion]... oh, THAT'S why this fixes it... and here's how it works."
+
+CTA — action verb only. "Tap below to get it" / "Download Free" / "Try It Free"
+
+THE VISUAL CUT is what makes ads work:
+  Hook: person talking to camera about their struggle → Bridge in VO → Body: cut to app showing the solution
+  Hook: scenic vista with text question → Body text bridges to feature → Screen recording of the feature
+  The voiceover (when present) is ONE CONTINUOUS FLOW across this visual cut. The bridge lives in the flow.
+
+=== DELIVERY MODES ===
+
+Each creative must specify ONE delivery mode. MIX these across the 5 creatives:
+
+"text-overlay" — Text appears on screen only. No speaking voice. Silent scroll format.
+  Best for: scenic visuals, screen recordings, dramatic footage, category anchors.
+  Hook "text" = the full on-screen hook (5-20 words). No voiceoverScript needed.
+
+"voiceover-caption" — A person SPEAKS the copy + a short caption appears on screen.
+  Best for: UGC reactions, street interviews, authority staging, talking head, confessions, story-driven hooks.
+  This is where COPYWRITING FRAMEWORKS COME ALIVE. The voiceoverScript is ONE CONTINUOUS NARRATION across hook + body. It covers the ENTIRE ad.
+
+  TOTAL AD DURATION: 15-30 seconds. This is the sweet spot. Never exceed 30s.
+
+  TIMING MATH (Hemingway method — short sentences, natural pauses):
+  - Speaking pace: ~2.2 words/second (NOT 2.5 — account for ElevenLabs pauses, breaths, emphasis)
+  - Hook VO: 15-30 words = 7-14 seconds. This is the emotional setup.
+  - Body VO: 10-20 words = 5-9 seconds. This narrates over the product demo.
+  - CTA: 2-3 seconds.
+  - TOTAL WORD COUNT for entire VO (hook + body): 25-50 words MAX. Count your words.
+
+  Hook "voiceoverScript" = what the person says during the hook (15-30 words). Short, punchy, conversational. Every word earns its place.
+  Hook "text" = short caption summary on screen (5-15 words, the distilled punch).
+  Body "voiceoverScript" = what the narrator says over the product demo (10-20 words). Continues naturally from hook VO.
+  Body "text" = short on-screen text describing the feature.
+
+  Example (BibleChat, confession framework, ~32 words total = ~15s):
+    Hook voiceoverScript: "I used to set my alarm early to read my Bible. Every morning I'd scroll instead. Then I found something that meets me where I already am." (bridge: "meets me where I already am" connects failure→effortless solution)
+    Hook text: "I set my alarm to read Scripture. I scrolled instead."
+    Body voiceoverScript: "Now a verse just appears on my lockscreen every hour. I don't even have to try." (resolves: no discipline needed)
+    Body text: "Scripture appears on your lockscreen automatically"
+    Notice: the bridge lives in the last hook sentence + first body sentence. The transition is seamless.
+
+Choose the delivery mode that SERVES the visual hook style. A street interview is voiceover-caption. A scenic vista with text is text-overlay. A person confessing to camera is voiceover-caption. A talking head reacting is voiceover-caption.
+
+=== VISUAL HOOK STYLES ===
+
+The visual hook is what STOPS THE SCROLL before the text even registers. Think like a clip farmer: what footage would you source or film for this product?
+
+For each hook, choose a visual style that makes sense for THIS product and THIS emotion. Here are known archetypes — but you are NOT limited to these. If you invent a style that doesn't fit these categories, use type "dynamic".
+
+KNOWN VISUAL HOOK TYPES:
+- "authority-staging": Borrow credibility from a recognizable context. Podcast set (implies someone important is speaking), news desk, lecture hall, professional setting. The viewer assumes authority before reading a word. Works for: products that need credibility, expert-adjacent positioning.
+- "scenic-interrupt": A beautiful or captivating vista that stops the thumb. Mountain, ocean, golden hour, rain on glass. The beauty earns 2 seconds of attention while the text hook lands. Works for: reflective/spiritual products, lifestyle brands, aspiration hooks.
+- "category-anchor": Show the THING the viewer already has feelings about. A bible for a faith app. Food close-up for a calorie tracker. A gym for a fitness app. The visual triggers existing associations. Works for: products tied to a physical object or activity the audience cares about.
+- "routine-window": Place the product in a daily moment the viewer recognizes as theirs. Waking up and checking phone. Commuting on the train. Getting into bed. Lunch break scroll. The viewer sees their own life. Works for: habit-forming products, low-demand products that need to CREATE need by showing integration.
+- "social-curiosity": Street interviews, reactions, "what did this person say?" format. The viewer wants to hear the answer. Works for: products with social proof, surprising benefits, or polarizing hooks.
+- "narrative-animation": Animated or illustrated storytelling. Signals "this is a story, not an ad." Lowers ad resistance. Works for: complex products, story-driven hooks, abstract concepts.
+- "ugc-reaction": Raw user-generated reaction footage. Person genuinely reacting to the product. Works for: products with "wow" moments, discovery hooks, social proof.
+- "dramatic-reenactment": Acted-out relatable scenario. Skit, POV, mini-drama. Person in the situation the hook describes. Works for: relatable pain points, confession hooks, challenge hooks.
+- "product-in-context": Product being used in its natural environment. Works for: physical products, consumables, utility products.
+- "dynamic": A style you invented that doesn't fit the above. Name it and describe it.
+
+HOW TO REASON ABOUT VISUAL HOOK STYLE:
+1. What does THIS audience scroll past every day? What would make THEM stop?
+2. What visual context makes the hook text MORE believable or MORE emotional?
+3. What footage would a media buyer actually source or film for this?
+4. The visual and text/voice must convey the SAME emotion — they are one unit.
+5. For VO+Caption: the visual and voiceover script are TIGHTLY COUPLED. What the person says must sync with what the viewer sees. "I used to set my alarm early to read my Bible" plays over footage of someone hitting snooze. "I found this app" plays over the person picking up their phone. Think of it as a storyboard — each beat of the script has a matching visual beat.
+6. VARY styles across hooks. Don't use the same visual style for every hook in a creative.
+7. Before choosing a visual style for each hook, you MUST mentally evaluate ALL 10 types against this specific hook's emotion and delivery mode. Ask for each: "Would this style make the hook more believable and stop the scroll?" Then pick the one that scores highest. Don't skip styles because they feel unconventional — a podcast set or street interview might outperform a scenic vista for the right hook. The visual style must SERVE the hook's psychological mechanism.
 
 === PLATFORM VOICE ===
 
 The SAME angle must sound different per platform. The hook's meaning stays, the voice changes.
 
 TikTok (Spark Ads — must sound like a real user posted this, NOT an ad):
-- Casual, native, how people actually talk on TikTok
-- "ok but why did no one tell me about this app"
-- "this app literally puts a verse on your lockscreen every hour"
-- "bro I'm not even that religious but this hit different"
-- Short, punchy, conversational. Lowercase energy. No polished copywriting.
+- How people ACTUALLY talk on TikTok. Not how a copywriter thinks they talk.
+- "ok but why did no one tell me about this"
+- "I literally have three Bible apps and don't open any of them"
+- "bro I set my alarm to pray and hit snooze every single time"
+- "this is the only thing that actually made me read Scripture again"
+- Short, specific, confessional. Real details, not abstract concepts. Lowercase energy.
 
 Meta/Instagram (slightly older audience, more composed):
-- Can be more thoughtful, slightly longer, more reflective
-- "What if your lockscreen reminded you of God's word every hour?"
-- "I stopped scrolling past my faith and started living it"
-- Still natural, but can use complete sentences and deeper framing.
+- More thoughtful, slightly longer, but STILL concrete and specific. No metaphors.
+- "I kept saying I'd start reading my Bible again. It's been two years."
+- "My daughter asked me why we don't pray anymore. I didn't have an answer."
+- "I used to read a chapter every morning. Now I can't get through a verse."
+- Complete sentences, real situations, specific details. NOT poetic reframing.
 
 Each creative should specify its platform and the hooks MUST match that platform's voice.
 
@@ -731,8 +808,6 @@ The hook emotion must RELATE to the product and be TRIGGERING enough to stop the
 - A candy brand might trigger craving, nostalgia, or indulgence
 - A book app might trigger curiosity, intellectual ego, or fear of being left behind
 - Don't force negative emotions where they don't fit. Don't force positive ones either. Follow the product.
-
-Ask: WHO is this person, and what do they FEEL in relation to this product? Use THAT emotion.
 
 DEPTH is what matters — regardless of whether the emotion is positive or negative:
 - SHALLOW (bad): "Want to read more books?" — generic, nobody stops for this
@@ -789,25 +864,89 @@ Generate 5 ad creative blueprints. Each is a COMPLETE, production-ready ad conce
 
 FOR EACH CREATIVE:
 1. Choose an emotional angle informed by the intelligence above (you can combine angles or find new ones the data implies).
-2. Write 5-6 HOOK VARIATIONS — same emotional territory, different psychological levers and sentence structures.
-   - Each hook must have 2-3 visualSuggestions: the visual that plays BEHIND the hook text. It must convey the SAME emotion as the text — they are one unit.
-   - The visual can be UGC (person reacting), scenery/mood, screen content, or anything that serves the hook's emotion.
-   - Good: "UGC — person excitedly showing their phone screen" / "Peaceful nature scenery, golden hour light" / "Someone scrolling mindlessly, visibly bored"
-   - Bad: Visuals disconnected from the hook text's emotion
-3. Write 2-3 BODY VARIATIONS — different ways to plainly describe the SAME product feature.
-   - The body resolves the hook's tension. It's factual, not poetic.
-   - The visual is the screen recording / product demo. Describe what the viewer sees.
-4. One CTA — action verb only.
+2. Choose a DELIVERY MODE (text-overlay or voiceover-caption). Mix across creatives.
+3. Write 5-6 HOOK VARIATIONS — same emotional territory, different psychological levers, sentence structures, AND visual styles.
+   - Each hook MUST have a visualStyle with type, name, and description (what footage to source/film).
+   - Each hook MUST have 2-3 visualSuggestions. These are SORA2 CLIPS that get stitched together.
+     IMPORTANT — each visualSuggestion must include:
+     • "idea": what the viewer sees in this clip (1 sentence summary)
+     • "prompt": RICH Sora2 scene description (see VISUAL PROMPT DEPTH below)
+     • "clipDuration": "4s" | "8s" | "12s" (Sora2 only generates these lengths)
+     The clips stitch together to cover the hook duration. E.g., a 12s hook = one 12s clip OR one 8s + one 4s clip.
+   - The visual style and hook text must convey the SAME emotion. They are one unit.
+   - VARY visual styles across hooks. Don't use the same visual style for every hook.
+   - The visual style must make sense with the bridge to the body.
+4. Write 2-3 BODY VARIATIONS — different ways to plainly describe the SAME product feature.
+   - Body visual is ALWAYS real screen recording / product footage. NOT Sora2 generated.
+   - For VO+caption: the voiceover continues from the hook (same speaker). It narrates what the viewer sees on screen.
+5. One CTA — action verb only.
+
+=== PRODUCTION PIPELINE ===
+
+Every ad is assembled from 3 layers: visual, audio, text.
+
+AUDIO SOURCE depends on the hook's visual style — set "audioSource" per hook:
+
+"sora2" — Person speaks ON CAMERA in the Sora2 clip.
+  Use when: authority-staging (podcast), social-curiosity (street interview), ugc-reaction, dramatic-reenactment — any style where a person is visibly talking.
+  Sora2 prompt MUST include the dialogue/speech (it generates the person's voice).
+  The voiceoverScript = what the person says in the Sora2 clip.
+  Body: screen recording. Body VO is either a DIFFERENT ElevenLabs voice narrating the product, or NO voiceover (just text overlay on the screen recording).
+
+"elevenlabs" — No person speaking on camera. ElevenLabs VO covers the entire ad.
+  Use when: scenic-interrupt, category-anchor, routine-window, narrative-animation, product-in-context — any style where there's no visible speaker.
+  Sora2 prompt is VISUAL ONLY (no dialogue/speech).
+  The voiceoverScript = ElevenLabs audio track, laid over the footage.
+  Body: screen recording + ElevenLabs VO continues (same speaker, same breath).
+
+VISUAL LAYER: Sora2 clips (hook) + screen recording (body, always real footage).
+TEXT LAYER: Caption overlay, burned onto video.
+
+=== SORA2 STYLE TAG CATALOG ===
+Pick 3-6 tags per visual suggestion. These tell Sora2 HOW to render the footage.
+THE GOAL IS REALISM. Every clip must look indistinguishable from real footage — like someone actually filmed it on their phone, in a real studio, on a real street. NOT AI showcase material. No fireworks, no impossible camera moves, no hyperreal lighting. The viewer should never think "this looks AI generated."
+The video DESCRIPTION is king — it conveys the emotion and message. The style tags just ensure the rendering looks real and matches how this scene would actually be captured in the real world.
+${SORA2_STYLE_TAGS.map(c => `${c.category.toUpperCase()}: ${c.tags.join(", ")}`).join("\n")}
+
+=== VISUAL PROMPT DEPTH ===
+
+The "prompt" field on each visualSuggestion is the most important field. It becomes the direct input to Sora2 video generation. BLAND PROMPTS = BLAND VIDEO.
+
+Think like a cinematographer writing shot notes. Every prompt must answer:
+1. WHO — specific person description (age range, build, skin tone, hair, expression, wardrobe). Real people, not models. Bags under eyes, messy hair, wrinkled clothes.
+2. WHERE — specific environment with LIVED-IN details (background clutter, worn surfaces, mixed lighting, real objects). Not a set.
+3. HOW IT'S CAPTURED — exact camera/device (iPhone 15 Pro front camera, Sony FX3 with 35mm, webcam), camera behavior (handheld micro-shake, locked tripod, slow breathing drift), focus behavior.
+4. LIGHT — primary source, secondary source, imperfections (mixed color temps, uneven coverage, hot spots, blown highlights).
+5. MOTION — what the subject does physically (micro-behaviors: adjusting position, glancing away, half-smile, rubbing neck). Subtle, realistic. Not posed.
+6. MOOD — the emotional register the footage carries. How it FEELS, not just what it shows.
+
+If audioSource is "sora2" (person speaks on camera): INCLUDE the dialogue in the prompt. Describe vocal delivery (tone, pace, emotion). Time visual action to dialogue.
+If audioSource is "elevenlabs": NO dialogue in the prompt. Visual only. The footage is SILENT — ElevenLabs VO is laid over in post.
+
+PROMPT LENGTH: 3-6 sentences minimum. Each sentence adds a layer of visual specificity.
+
+BAD prompt: "A woman sitting in bed looking at her phone at night"
+GOOD prompt: "A woman in her late 20s, dark hair pulled into a loose bun, wearing an oversized faded grey t-shirt, sitting cross-legged on an unmade bed with crumpled white sheets. Soft warm light from a bedside lamp casts uneven shadows across her face. She holds her phone close, the screen glow illuminating tired eyes with visible dark circles. Shot on iPhone 13 front camera, slightly grainy low-light sensor noise, shallow depth of field blurring the cluttered nightstand behind her. She scrolls slowly, then pauses — a subtle shift in expression, something between recognition and guilt."
+
+BAD prompt: "Person on a podcast set talking"
+GOOD prompt: "A man in his mid-30s, short beard, wearing a navy crewneck sweater, sits behind a podcast desk with a Shure SM7B microphone on a boom arm. Warm studio lighting from a key light camera-left, soft fill from an LED panel behind. Background shows acoustic foam panels, a bookshelf with worn spines, and a half-empty coffee mug. Shot on Sony FX3 with 35mm f/1.4, shallow depth of field softening the background. He leans slightly forward, speaking directly to camera with quiet intensity — measured pace, occasional pauses between thoughts."
 
 QUALITY RULES:
 - Each creative must target a DIFFERENT emotional territory. No two creatives hitting the same emotion.
 - Hooks are NATURAL FLOWING SENTENCES. How a person talks, texts, or thinks internally. NOT staccato fragments. NOT triplet lists. NOT AI-sounding copy.
+- NO METAPHORS. NO POETRY. NO LITERARY LANGUAGE. Real people don't say "spiritually starving in a feast" or "drowning in a sea of distraction." They say "I own three Bibles and haven't opened one in six months" or "I set my alarm to pray and hit snooze every single time." Write how the TARGET AUDIENCE actually talks — their vocabulary, their sentence structure, their level of articulation. A 22-year-old on TikTok talks differently than a 45-year-old mom on Instagram. Match the real person, not the poet.
+  BAD: "you ever realize you're spiritually starving while sitting in front of a feast?"
+  GOOD: "I have every Bible app on my phone and I still don't read Scripture"
+  BAD: "lost in the noise of modern life"
+  GOOD: "I scroll for two hours every night and then wonder why I feel empty"
 - Stay in the product's world. Faith app = faith/scripture/God language. Calorie app = food/body/eating language. Don't drift into generic self-improvement.
 - NO fake statistics ("97% of people..."). NO quotation-mark emphasis. NO exclamation marks.
-- Every hook must pass the "would I actually think this?" test. If it sounds like ad copy, rewrite it.
-- NO PROXY EMBARRASSMENT. Never use children, family members, friends, or partners as the source of shame/guilt. "My daughter asked why I never read the Bible" is fabricated — the person scrolling is ALONE. The emotion must come from WITHIN the viewer, not from a fictional third party judging them. The private truth is always more powerful than an invented scene.
-- Visual suggestions describe the viewer's PSYCHOLOGICAL STATE, not a physical scene. Abstract enough to inspire a media buyer, specific enough to evoke emotion.
+- Every hook must pass the "would a real person say this out loud to a friend?" test. If it sounds like a sermon, a poem, or ad copy, rewrite it in plain language.
+- NO PROXY EMBARRASSMENT. Never use children, family members, friends, or partners as the source of shame/guilt. The emotion must come from WITHIN the viewer, not from a fictional third party judging them.
+- NEVER imply the viewer doesn't need the app. Phrases like "no app needed", "without any app", "you don't even need to open an app" are FORBIDDEN. If the product has a widget or feature that works outside the main app (lockscreen, widget, notification), it's still PART of the app being sold. The viewer MUST download the app to get the feature. Don't undermine the product you're advertising.
+- NEVER use the word "AI" or "artificial intelligence" in hooks or body copy unless the product's core value proposition IS its AI. For most products, "AI" is an implementation detail, not a selling point. Sell the OUTCOME, not the technology.
 - Use at least 3 different hook STRUCTURES across the 5 creatives (question, reframe, confession, challenge, social proof, founder, provocation)
+- Use at least 3 different VISUAL HOOK STYLES across the 5 creatives. Don't default to the same visual approach for every creative.
 - TikTok hooks MUST sound like a real person posted it. Meta hooks can be more composed. Match the platform voice.
 
 JSON:
@@ -821,21 +960,42 @@ JSON:
       "emotion": "primary emotion (guilt, shame, fear, curiosity, frustration, longing, wonder, etc.)",
       "platform": "TikTok or Meta/IG (hooks MUST match platform voice)",
       "format": "9:16 vertical",
+      "deliveryMode": "text-overlay | voiceover-caption",
       "scenario": "the specific daily moment this ad intercepts (1 sentence)",
-      "productionStyle": "spark ad (TikTok) or polished native (Meta)",
+      "productionStyle": "spark ad / polished native / UGC / studio — describe the production approach",
       "targetSegment": "emotional angle name for broad products, segment name for specific buyers",
       "hooks": [
         {
-          "text": "the hook text (5-20 words) — MUST match the platform voice",
+          "text": "on-screen text: full hook for text-overlay (5-20 words), OR short caption for VO+caption (5-15 words)",
+          "audioSource": "sora2 | elevenlabs — see PRODUCTION PIPELINE above. Determines how Sora2 prompt is structured.",
+          "voiceoverScript": "VO+caption ONLY (15-30 words). If sora2: what the person SAYS on camera (include in Sora2 prompt too). If elevenlabs: separate VO track. Omit for text-overlay.",
+          "duration": "realistic duration. Text-overlay: '3s'. VO+caption: calculate at ~2.2 words/sec with pauses (15 words = '7s', 25 words = '11s'). Must match word count.",
           "angle": "which psychological lever this pulls",
-          "visualSuggestions": ["visual that reinforces the same emotion as the hook text — they are one unit"]
+          "visualStyle": {
+            "type": "authority-staging | scenic-interrupt | category-anchor | routine-window | social-curiosity | narrative-animation | ugc-reaction | dramatic-reenactment | product-in-context | dynamic",
+            "name": "short human-readable name (e.g. 'Podcast Set Authority', 'Morning Routine Window')",
+            "description": "what footage to source/film — specific enough for a media buyer to produce. For VO+caption: describe what's VISUALLY HAPPENING as the person speaks — the visual and script are tightly coupled."
+          },
+          "visualSuggestions": [
+            {
+              "idea": "what the viewer sees in this clip segment",
+              "prompt": "RICH scene description for Sora2 (3-6 sentences). Follow VISUAL PROMPT DEPTH rules above. Must include: specific person details, environment with lived-in texture, exact camera/device, lighting sources with imperfections, physical micro-behaviors, mood. If audioSource='sora2': INCLUDE dialogue and vocal delivery. If 'elevenlabs': visual only, no speech.",
+              "clipDuration": "4s | 8s | 12s (Sora2 lengths only). Clips stitch to cover hook duration.",
+              "styleTags": ["Pick 3-6 tags from the SORA2 STYLE TAG CATALOG below. Choose tags that match THIS specific clip's creative intent."]
+            }
+          ]
         }
       ],
       "bodies": [
-        { "text": "plain feature description (1 sentence — what it does, not why it matters)", "visual": "what the screen recording shows" }
+        {
+          "text": "on-screen text: plain feature description (1 sentence)",
+          "voiceoverScript": "VO+caption ONLY (10-20 words). MUST bridge from hook emotion to product — don't just describe the feature, explain WHY it resolves the hook's tension. If hook audioSource='sora2': this is a DIFFERENT ElevenLabs narrator (or omit for text-only body). If 'elevenlabs': SAME speaker continues. Omit for text-overlay.",
+          "duration": "realistic duration. Text-overlay: '5s'. VO+caption: calculate at ~2.2 words/sec (10 words = '5s', 20 words = '9s').",
+          "visual": "what the screen recording / product footage shows"
+        }
       ],
       "cta": { "text": "Tap Below to Get It" },
-      "whyThisScript": "1-2 sentences: why this angle + emotion + hook pattern will convert for this product"
+      "whyThisScript": "1-2 sentences: why this angle + emotion + visual style + delivery mode will convert for this product"
     }
   ]
 }
@@ -844,9 +1004,11 @@ CRITICAL:
 1. You are a CREATIVE ENGINE. Generate original concepts using the deep dive intelligence.
 2. Each creative must explore a DIFFERENT emotional territory.
 3. Hooks must feel like real human thoughts, not advertising copy. TikTok = casual native voice. Meta = composed but still human.
-4. ALL creatives use the same format: text hook → screen recording body → text CTA. No other formats.
-5. The body is the SAME product feature across all creatives. Only the hook changes.
-6. Return ONLY valid JSON. No markdown, no code fences.`;
+4. MIX delivery modes across creatives. Not everything is text-overlay. Voiceover hooks feel different from text hooks — write them accordingly.
+5. MIX visual hook styles. The visual is what stops the scroll. Reason about what footage THIS audience would stop for.
+6. The body is the SAME product feature across all creatives. Only the hook changes.
+7. EVERY creative MUST include: hooks (5-6), bodies (2-3), and cta. Do NOT skip bodies — they are required.
+8. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================

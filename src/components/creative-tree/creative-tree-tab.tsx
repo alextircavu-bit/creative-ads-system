@@ -30,19 +30,14 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
   return (
     <div>
       {/* Section header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/20 flex items-center justify-center text-lg shrink-0">
-          🎨
-        </div>
-        <div>
-          <div className="text-lg font-black tracking-tight">Emotional Angles & Copy</div>
-          <div className="text-xs text-muted-foreground mt-0.5">
-            {data.emotionalAngles.length} angles × {data.frameworks.length} frameworks - tap to explore scripts
-          </div>
-        </div>
+      <div className="mb-5">
+        <h2 className="text-sm font-semibold tracking-tight text-foreground">Emotional Angles & Copy</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {data.emotionalAngles.length} angles / {data.frameworks.length} frameworks
+        </p>
       </div>
 
-      <div className="flex gap-5">
+      <div className="flex gap-6">
       {/* Left — Emotional Angles */}
       <div className="flex-[3] min-w-0">
       {data.emotionalAngles.map((angle, ei) => {
@@ -50,24 +45,24 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
         const scripts = data.scripts[angle.id] || [];
 
         return (
-          <div key={angle.id} className="mb-3">
+          <div key={angle.id} className="border-b border-border/40 last:border-b-0">
             {/* Emotional Angle Header */}
             <div
-              className={`flex items-center gap-3 px-4 py-3.5 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl cursor-pointer transition-all hover:border-violet-500/30 ${
-                isAngleOpen ? "border-violet-500/30 rounded-b-none" : ""
+              className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/50 ${
+                isAngleOpen ? "bg-muted/30" : ""
               }`}
               onClick={() => toggleAngle(ei)}
             >
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shrink-0 shadow-sm"
+                className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold text-white shrink-0"
                 style={{ background: angle.color }}
               >
                 {ei + 1}
               </div>
-              <div className="text-sm font-bold flex-1">{angle.name}</div>
+              <div className="text-sm font-medium flex-1 text-foreground">{angle.name}</div>
               <div className="text-xs text-muted-foreground flex-[2] hidden sm:block">{angle.mechanism}</div>
               <svg
-                className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isAngleOpen ? "rotate-90" : ""}`}
+                className={`w-3.5 h-3.5 text-muted-foreground/60 transition-transform duration-150 ${isAngleOpen ? "rotate-90" : ""}`}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -83,11 +78,11 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
             <div
               className={`${
                 isAngleOpen ? "block" : "hidden"
-              } border border-border/50 border-t-0 rounded-b-2xl bg-card/30 backdrop-blur-sm p-2.5`}
+              } border-t border-border/30 bg-muted/20 pl-8 pr-3 py-2`}
             >
               {/* Frameworks */}
               {scripts.length === 0 && (
-                <div className="px-4 py-6 text-center text-xs text-muted-foreground/50">
+                <div className="px-3 py-5 text-center text-xs text-muted-foreground/50">
                   No scripts generated for this territory — it scored lower in relevance for this product.
                 </div>
               )}
@@ -97,24 +92,24 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
                 const script = scripts.find((s) => s.frameworkId === fw.id);
 
                 return (
-                  <div key={fw.id}>
+                  <div key={fw.id} className="border-b border-border/20 last:border-b-0">
                     <div
-                      className="flex items-center gap-3 px-3.5 py-2.5 bg-secondary/50 border border-transparent rounded-xl cursor-pointer hover:bg-secondary/80 transition-all"
+                      className="flex items-center gap-2.5 px-2 py-2 cursor-pointer transition-colors hover:bg-muted/40"
                       onClick={() => toggleFw(fwKey)}
                     >
                       <div
-                        className="w-2 h-2 rounded-full shrink-0"
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
                         style={{ background: fw.color }}
                       />
                       <span
-                        className="px-2 py-0.5 rounded-md text-[10px] font-extrabold tracking-widest shrink-0"
-                        style={{ background: fw.color + "15", color: fw.color }}
+                        className="px-1.5 py-px rounded text-[10px] font-bold tracking-wider shrink-0"
+                        style={{ background: fw.color + "12", color: fw.color }}
                       >
                         {fw.abbreviation}
                       </span>
                       <div className="text-xs text-muted-foreground flex-[2]">{fw.name}</div>
                       <svg
-                        className={`w-3.5 h-3.5 text-muted-foreground/50 transition-transform duration-200 ${isFwOpen ? "rotate-90" : ""}`}
+                        className={`w-3 h-3 text-muted-foreground/40 transition-transform duration-150 ${isFwOpen ? "rotate-90" : ""}`}
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -124,9 +119,9 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
                       </svg>
                     </div>
 
-                    <div className={`${isFwOpen ? "block" : "hidden"} pl-7 p-2.5`}>
+                    <div className={`${isFwOpen ? "block" : "hidden"} pl-5 pb-2.5 pt-1`}>
                       {script && (
-                        <div className="space-y-1.5">
+                        <div className="space-y-px">
                           {script.steps.map((step, si) => {
                             const stepColorMap: Record<string, string> = {
                               problem: "#f43f5e", agitate: "#f59e0b",
@@ -137,9 +132,9 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
                             };
                             const stepColor = stepColorMap[step.type] || "#64748b";
                             return (
-                              <div key={si} className="bg-background/50 border border-border/30 rounded-xl p-4 pl-[42px] relative">
+                              <div key={si} className="flex gap-3 py-2 border-b border-border/10 last:border-b-0">
                                 <span
-                                  className="absolute left-3 top-4 text-[9px] font-extrabold uppercase tracking-[1.5px] writing-vertical"
+                                  className="text-[9px] font-bold uppercase tracking-[1px] w-16 shrink-0 pt-0.5 text-right"
                                   style={{ color: stepColor }}
                                 >
                                   {step.label}
@@ -157,21 +152,19 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
 
               {/* Hooks Section */}
               {scripts.length > 0 && scripts[0]?.hooks?.length > 0 && (
-                <div className="px-2 pt-2">
-                  <div className="bg-secondary/30 border border-border/30 rounded-xl p-4">
-                    <div className="text-[10px] uppercase tracking-[2px] text-muted-foreground/50 font-bold mb-2.5">
-                      Hook Variations ({angle.name})
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {scripts[0].hooks.map((hook, hi) => (
-                        <span
-                          key={hi}
-                          className="inline-block bg-background/50 border border-border/30 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:border-violet-500/30 hover:text-foreground transition-all"
-                        >
-                          {hook}
-                        </span>
-                      ))}
-                    </div>
+                <div className="pt-2 pb-1">
+                  <div className="text-[10px] uppercase tracking-[1.5px] text-muted-foreground/40 font-semibold mb-2">
+                    Hook Variations
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {scripts[0].hooks.map((hook, hi) => (
+                      <span
+                        key={hi}
+                        className="inline-block border border-border/30 rounded px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-violet-500/30 transition-colors"
+                      >
+                        {hook}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
@@ -184,27 +177,29 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
 
       {/* Right — Platform Video Formats (sticky) */}
       {data.platformFormats?.length > 0 && (
-        <div className="flex-[2] min-w-[280px]">
+        <div className="flex-[2] min-w-[260px]">
           <div className="sticky top-4">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-indigo-500/20 flex items-center justify-center text-sm shrink-0">
-                📺
+            <div className="mb-3">
+              <div className="flex items-center gap-2 mb-0.5">
+                <svg className="w-3.5 h-3.5 text-muted-foreground/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <path d="M8 21h8" />
+                  <path d="M12 17v4" />
+                </svg>
+                <span className="text-sm font-semibold text-foreground">Video Formats</span>
               </div>
-              <div>
-                <div className="text-sm font-bold">Video Formats</div>
-                <div className="text-[10px] text-muted-foreground">Per platform</div>
-              </div>
+              <p className="text-[10px] text-muted-foreground ml-5.5">Per platform</p>
             </div>
 
-            <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-4">
-              <div className="flex flex-wrap gap-1.5 mb-3">
+            <div className="border border-border/40 rounded-md p-3">
+              <div className="flex gap-1 mb-3 border-b border-border/30 pb-2">
                 {platformKeys.map((pk) => (
                   <button
                     key={pk.key}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold cursor-pointer transition-all ${
+                    className={`px-2 py-0.5 text-[11px] font-medium cursor-pointer transition-colors rounded-sm ${
                       globalPlatform === pk.key
-                        ? "bg-violet-500/15 text-violet-400 border border-violet-500/25"
-                        : "border border-border/30 bg-background/30 text-muted-foreground/60 hover:text-foreground"
+                        ? "text-violet-400 bg-violet-500/10"
+                        : "text-muted-foreground/50 hover:text-foreground"
                     }`}
                     onClick={() => setGlobalPlatform(pk.key)}
                   >
@@ -213,12 +208,14 @@ export function CreativeTreeTab({ data, productName }: CreativeTreeTabProps) {
                 ))}
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-0">
                 {(data.platformFormats.find(
                   (pf) => pf.platform.toLowerCase().replace(/[^a-z]/g, "") === globalPlatform
                 ) || data.platformFormats[0])?.formats.map((fmt, fi) => (
-                  <div key={fi} className="py-2 border-b border-border/20 last:border-b-0">
-                    <span className="inline-block px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wide bg-indigo-500/10 text-indigo-400 border border-indigo-500/15 mb-1">
+                  <div key={fi} className="py-2 border-b border-border/15 last:border-b-0">
+                    <span
+                      className="inline-block text-[9px] font-semibold tracking-wide text-indigo-400/80 uppercase mb-0.5"
+                    >
                       {fmt.type}
                     </span>
                     <div className="text-[11px] text-muted-foreground leading-relaxed">{fmt.description}</div>

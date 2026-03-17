@@ -59,7 +59,7 @@ interface LandingFormProps {
 }
 
 function toSlug(str: string): string {
-  return str.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return str.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 }
 
 export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: LandingFormProps) {
@@ -121,32 +121,32 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
   return (
     <div className="flex flex-col items-center justify-center min-h-[85vh] px-6 py-16">
       {/* Logo / Title */}
-      <div className="mb-2 w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-violet-500/20">
+      <div className="mb-3 w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-base font-bold">
         C
       </div>
-      <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground mb-1.5">
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-1">
         Creative System
       </h1>
-      <p className="text-muted-foreground text-center max-w-lg mb-10 text-sm leading-relaxed">
+      <p className="text-muted-foreground text-center max-w-md mb-10 text-sm leading-relaxed">
         {scenario === "v3"
-          ? "Enter any mobile app feature. Get a full creative workbench - ad blueprints, emotional angles, psychology analysis, and sales mechanics."
-          : "Enter any product. Get ready-to-run ad creatives backed by psychology, sales frameworks, and audience research."}
+          ? "Enter a mobile app feature to generate ad blueprints, psychology analysis, and sales mechanics."
+          : "Enter any product to get ready-to-run ad creatives backed by psychology and research."}
       </p>
 
       {/* Form Card */}
-      <div className="w-full max-w-xl bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 shadow-xl shadow-black/20">
+      <div className="w-full max-w-xl border border-border rounded-lg p-6">
         {/* App Name / Product Name */}
         <div className="mb-4">
-          <label className="block text-xs font-semibold text-foreground mb-1.5 tracking-wide">
+          <label className="block text-xs font-medium text-foreground mb-1.5">
             {isV3 ? "App Name" : "Product Name"}
           </label>
           <input
             type="text"
-            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all"
+            className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors"
             placeholder={
               isV3
-                ? "Your app's name (e.g. BibleChat, Duolingo, Notion)"
-                : "Product name (e.g. Nike Air Max, Shopify, HelloFresh)"
+                ? "e.g. BibleChat, Duolingo, Notion"
+                : "e.g. Nike Air Max, Shopify, HelloFresh"
             }
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
@@ -154,7 +154,7 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
           />
           {isV3 && productName.trim() && (
             <p className="mt-1 text-[10px] text-muted-foreground/60">
-              app_id: <span className="font-mono text-violet-400">{toSlug(productName)}</span>
+              app_id: <span className="font-mono text-primary">{toSlug(productName)}</span>
             </p>
           )}
         </div>
@@ -162,20 +162,20 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
         {/* Feature Name - V3 only */}
         {isV3 && (
           <div className="mb-4">
-            <label className="block text-xs font-semibold text-foreground mb-1.5 tracking-wide">
+            <label className="block text-xs font-medium text-foreground mb-1.5">
               Feature Name
             </label>
             <input
               type="text"
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all"
-              placeholder="The specific feature you're advertising (e.g. Reels, Lock Screen Verses, AI Chat)"
+              className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors"
+              placeholder="e.g. Reels, Lock Screen Verses, AI Chat"
               value={featureName}
               onChange={(e) => setFeatureName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             />
             {featureName.trim() && (
               <p className="mt-1 text-[10px] text-muted-foreground/60">
-                feature_id: <span className="font-mono text-violet-400">{toSlug(featureName)}</span>
+                feature_id: <span className="font-mono text-primary">{toSlug(featureName)}</span>
               </p>
             )}
           </div>
@@ -183,32 +183,32 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
 
         {/* Core Benefit */}
         <div className="mb-5">
-          <label className="block text-xs font-semibold text-foreground mb-1.5 tracking-wide">
+          <label className="block text-xs font-medium text-foreground mb-1.5">
             Core Benefit
           </label>
           <textarea
-            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all resize-y min-h-[100px]"
+            className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors resize-y min-h-[100px]"
             placeholder={
               isV3
-                ? "What does this feature do for the user? What's the real benefit - not the feature itself, but how it changes their life, routine, or emotions?"
-                : "What does this product do for the user? Why would someone buy it?"
+                ? "What does this feature do for the user? How does it change their life?"
+                : "What does this product do? Why would someone buy it?"
             }
             value={productBenefit}
             onChange={(e) => setProductBenefit(e.target.value)}
           />
-          <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-            This is the most important field. Describe the real benefit - not what it does, but why someone would care. The AI uses this to extract related sub-benefits, emotional tangents, and ad scenarios you might overlook. The more specific you are, the better every ad, hook, and script will be.
+          <p className="mt-1.5 text-[11px] text-muted-foreground/60 leading-relaxed">
+            The more specific you are, the better every ad and hook will be.
           </p>
         </div>
 
         <button
-          className="w-full rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-bold py-3.5 px-6 text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30"
+          className="w-full rounded-md bg-primary text-primary-foreground font-medium py-2.5 px-6 text-sm transition-colors hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
           onClick={handleSubmit}
           disabled={isLoading || !productName.trim() || (isV3 && !featureName.trim())}
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="w-3.5 h-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
               Generating...
             </span>
           ) : (
@@ -218,15 +218,15 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
       </div>
 
       {/* Presets */}
-      <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
-        <span className="text-[11px] text-muted-foreground font-medium mr-1">Try:</span>
+      <div className="flex flex-wrap items-center justify-center gap-1.5 mt-6">
+        <span className="text-[11px] text-muted-foreground/50 mr-1">Try:</span>
         {Object.entries(isV3 ? V3_PRESETS : V4_PRESETS).map(([key, preset]) => (
           <button
             key={key}
-            className="rounded-lg border border-border bg-card/50 px-3.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-violet-500/30 hover:bg-violet-500/5 transition-all"
+            className="rounded-md border border-border/50 px-3 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
             onClick={() => loadPreset(key)}
           >
-            {"appName" in preset ? `${preset.appName} - ${preset.featureName}` : preset.name}
+            {"appName" in preset ? `${preset.appName} — ${preset.featureName}` : preset.name}
           </button>
         ))}
       </div>
@@ -234,42 +234,56 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
       {/* History - deduplicated */}
       {uniqueProjects.length > 0 && (
         <div className="mt-8 w-full max-w-xl">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">Previous Generations</span>
-            <div className="h-px flex-1 bg-border" />
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-px flex-1 bg-border/50" />
+            <span className="text-[10px] text-muted-foreground/40 font-medium uppercase tracking-wider">Previous</span>
+            <div className="h-px flex-1 bg-border/50" />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1">
             {uniqueProjects.slice(0, 10).map((p) => {
               const isCompleted = p.status === "completed" && p.generation_result;
               return (
-                <button
+                <div
                   key={p.id}
-                  className="w-full text-left rounded-xl border border-border bg-card/30 px-4 py-3 hover:border-violet-500/30 hover:bg-violet-500/5 transition-all group flex items-center gap-3"
-                  onClick={() => {
-                    if (isCompleted && onLoadProject) {
-                      onLoadProject({ input: p.input_data, result: p.generation_result!, id: p.id });
-                    } else {
-                      loadFromHistory(p);
-                    }
-                  }}
+                  className="w-full rounded-md border border-border/40 px-3.5 py-2.5 hover:border-border transition-colors flex items-center gap-3"
                 >
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${
-                    isCompleted ? "bg-green-400" : p.status === "failed" ? "bg-rose-400" : "bg-muted-foreground/30"
+                  <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    isCompleted ? "bg-green-400" : p.status === "failed" ? "bg-destructive" : "bg-muted-foreground/30"
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-foreground truncate">
+                    <div className="text-xs font-medium text-foreground truncate">
                       {p.product_name}
                       {p.feature_name && <span className="text-muted-foreground font-normal"> — {p.feature_name}</span>}
                     </div>
                     {p.product_description && (
-                      <div className="text-[10px] text-muted-foreground/50 truncate mt-0.5">{p.product_description.slice(0, 80)}</div>
+                      <div className="text-[10px] text-muted-foreground/40 truncate mt-0.5">{p.product_description.slice(0, 80)}</div>
                     )}
                   </div>
-                  <div className="text-[10px] text-muted-foreground/40 shrink-0">
-                    {isCompleted ? "Load" : p.status === "failed" ? "Failed" : "Retry"}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground/40 hover:text-foreground transition-colors"
+                      onClick={() => {
+                        loadFromHistory(p);
+                        if (isV3 && p.feature_name) setFeatureName(p.feature_name);
+                      }}
+                    >
+                      Fill
+                    </button>
+                    {isCompleted && onLoadProject && (
+                      <>
+                        <span className="text-muted-foreground/20">|</span>
+                        <button
+                          type="button"
+                          className="text-[10px] text-muted-foreground/40 hover:text-foreground transition-colors"
+                          onClick={() => onLoadProject({ input: p.input_data, result: p.generation_result!, id: p.id })}
+                        >
+                          Load
+                        </button>
+                      </>
+                    )}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>

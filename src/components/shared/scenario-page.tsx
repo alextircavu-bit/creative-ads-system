@@ -162,26 +162,26 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
   const r = result as Partial<GenerationResult>;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* ===== SIDEBAR ===== */}
-      <aside className="w-[220px] flex-shrink-0 flex flex-col border-r border-border/50" style={{ background: "hsl(var(--sidebar))" }}>
+      <aside className="w-[220px] flex-shrink-0 flex flex-col border-r border-border/40 bg-card/50">
         {/* Logo + back */}
-        <div className="h-[56px] flex items-center gap-2.5 px-4 border-b border-border/30">
+        <div className="h-[52px] flex items-center gap-2.5 px-3 border-b border-border/40">
           <button
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
             onClick={goHome}
             title="Back to home"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-[10px] font-black shadow-sm shadow-violet-500/20">C</div>
-          <span className="text-sm font-bold text-foreground truncate">{input.productName}</span>
+          <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold">C</div>
+          <span className="text-[13px] font-semibold text-foreground truncate">{input.productName}</span>
         </div>
 
         {/* Nav sections */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-5">
           {/* Main */}
           <div>
             {NAV_MAIN.map((item) => (
@@ -196,7 +196,7 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
 
           {/* Deep Dive */}
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-muted-foreground/40 px-3 mb-2">Deep Dive</div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50 px-2.5 mb-1.5">Deep Dive</div>
             {NAV_DEEP_DIVE.map((item) => (
               <SidebarItem
                 key={item.id}
@@ -209,7 +209,7 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
 
           {/* Tools */}
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-muted-foreground/40 px-3 mb-2">Tools</div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50 px-2.5 mb-1.5">Tools</div>
             {NAV_TOOLS.map((item) => (
               <SidebarItem
                 key={item.id}
@@ -223,21 +223,21 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
           {/* Previous Generations */}
           {completedProjects.length > 0 && (
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-muted-foreground/40 px-3 mb-2">History</div>
-              <div className="space-y-0.5 max-h-[200px] overflow-y-auto">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50 px-2.5 mb-1.5">History</div>
+              <div className="space-y-px max-h-[200px] overflow-y-auto">
                 {completedProjects.map((p) => (
                   <button
                     key={p.id}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+                    className={`w-full text-left px-2.5 py-1.5 rounded-md transition-colors ${
                       activeProjectId === p.id
-                        ? "bg-violet-500/10 text-violet-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
                     }`}
                     onClick={() => loadProject(p)}
                     title={p.product_name}
                   >
                     <div className="text-[12px] font-medium truncate">{p.product_name}</div>
-                    <div className="text-[10px] text-muted-foreground/50 truncate">{formatRelativeDate(p.created_at)}</div>
+                    <div className="text-[10px] text-muted-foreground/40 truncate">{formatRelativeDate(p.created_at)}</div>
                   </button>
                 ))}
               </div>
@@ -246,15 +246,15 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
         </nav>
 
         {/* Bottom: theme toggle */}
-        <div className="p-3 border-t border-border/30">
-          <div className="flex items-center gap-1 bg-secondary/50 rounded-lg p-1">
+        <div className="p-2.5 border-t border-border/40">
+          <div className="flex items-center gap-0.5 bg-secondary/30 rounded-md p-0.5">
             {(["light", "medium", "dark"] as Theme[]).map((t) => (
               <button
                 key={t}
-                className={`flex-1 text-[10px] font-semibold py-1.5 rounded-md transition-all capitalize ${
+                className={`flex-1 text-[10px] font-medium py-1 rounded transition-colors capitalize ${
                   theme === t
-                    ? "bg-primary/15 text-primary shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground/60 hover:text-muted-foreground"
                 }`}
                 onClick={() => setTheme(t)}
               >
@@ -268,49 +268,49 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
       {/* ===== MAIN AREA ===== */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <div className="h-[56px] flex items-center gap-3 px-5 border-b border-border/50 bg-card/50 backdrop-blur-sm flex-shrink-0">
-          <div className="flex-1">
-            <h1 className="text-base font-bold text-foreground">
-              {activeView === "dashboard" && "Your Ad Creatives"}
-              {activeView === "templates" && "Template Library"}
-              {activeView === "research" && "Research - Shadow Avatar Technique"}
+        <div className="h-[52px] flex items-center gap-3 px-5 border-b border-border/40 bg-background flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-sm font-semibold text-foreground">
+              {activeView === "dashboard" && "Ad Creatives"}
+              {activeView === "templates" && "Templates"}
+              {activeView === "research" && "Research"}
               {activeView === "psyche" && "Psychology"}
               {activeView === "sales" && "Sales Strategy"}
               {activeView === "creative" && "Scripts"}
               {activeView === "copycheck" && "Copy Check"}
             </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">{input.productName} - {input.productDescription.slice(0, 80)}{input.productDescription.length > 80 ? "..." : ""}</p>
+            <p className="text-xs text-muted-foreground/60 truncate">{input.productName} — {input.productDescription.slice(0, 80)}{input.productDescription.length > 80 ? "..." : ""}</p>
           </div>
 
           <button
             onClick={handleRefresh}
             disabled={isGenerating}
             title="Regenerate"
-            className="w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-violet-400 hover:bg-violet-500/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <svg className={`w-4 h-4 ${isGenerating ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <svg className={`w-3.5 h-3.5 ${isGenerating ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 12a9 9 0 1 1-6.22-8.56" />
               <polyline points="21 3 21 9 15 9" />
             </svg>
           </button>
 
-          <div className="w-px h-7 bg-border/30" />
+          <div className="w-px h-6 bg-border/30" />
 
           <button
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
               apiKey
-                ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                : "bg-secondary/50 text-muted-foreground hover:text-foreground border border-border/50"
+                ? "text-green-400 border border-green-500/20"
+                : "text-muted-foreground hover:text-foreground border border-border/40"
             }`}
             onClick={() => setShowApiInput(!showApiInput)}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${apiKey ? "bg-green-400 shadow-sm shadow-green-400/50" : "bg-muted-foreground"}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${apiKey ? "bg-green-400" : "bg-muted-foreground/40"}`} />
             <span>{apiKey ? "Connected" : "API Key"}</span>
           </button>
           {showApiInput && (
             <input
               type="password"
-              className="h-8 px-3 text-xs bg-background/50 border border-border/50 rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all w-[200px]"
+              className="h-7 px-2.5 text-xs bg-background border border-border/50 rounded-md text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors w-[200px]"
               placeholder="sk-..."
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
@@ -326,10 +326,14 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
 
         {/* Error banner */}
         {error && !isGenerating && (
-          <div className="mx-5 mt-3 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium flex items-center gap-2.5">
-            <span>!</span>
-            <span>{error}</span>
-            <button onClick={handleRefresh} className="ml-auto px-3 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-[11px] font-semibold transition-all">
+          <div className="mx-5 mt-3 px-4 py-2.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium flex items-center gap-2">
+            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            <span className="flex-1">{error}</span>
+            <button onClick={handleRefresh} className="px-2.5 py-1 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-[11px] font-medium transition-colors">
               Retry
             </button>
           </div>
@@ -351,42 +355,46 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
                     isGeneratingMore={isGeneratingMore}
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-24 rounded-2xl border border-border/30 bg-card/20">
-                    <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-5">
-                      <div className="w-5 h-5 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
-                    </div>
-                    <div className="text-lg font-semibold text-foreground mb-1">Generating your ads...</div>
-                    <div className="text-sm text-muted-foreground/60">Your top creatives will appear here shortly</div>
+                  <div className="flex flex-col items-center justify-center py-24">
+                    <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30 border-t-primary animate-spin mb-5" />
+                    <div className="text-sm font-medium text-foreground mb-1">Generating your ads</div>
+                    <div className="text-xs text-muted-foreground/50">Your top creatives will appear here shortly</div>
                   </div>
                 )}
 
                 {/* Quick insight cards */}
                 {(r.research || r.psycheMap || r.salesPlaybook) && (
                   <div>
-                    <h2 className="text-lg font-bold text-foreground mb-4">Quick Insights</h2>
-                    <div className="grid grid-cols-3 gap-4">
+                    <h2 className="text-sm font-semibold text-foreground mb-3">Quick Insights</h2>
+                    <div className="grid grid-cols-3 gap-3">
                       {r.research && r.research.audienceSegments?.length > 0 && (
-                        <button onClick={() => setActiveView("research")} className="text-left p-4 rounded-xl border border-border/30 bg-card/30 hover:border-violet-500/30 transition-all group">
-                          <div className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-2">Top Audience</div>
-                          <div className="text-sm font-semibold text-foreground mb-1">{r.research.audienceSegments[0].name}</div>
-                          <div className="text-xs text-muted-foreground leading-relaxed">{r.research.audienceSegments[0].demographics}</div>
-                          <div className="text-[10px] text-violet-400 font-semibold mt-3 group-hover:underline">View Research →</div>
+                        <button onClick={() => setActiveView("research")} className="text-left p-4 rounded-md border-l-2 border-l-violet-500/60 border border-border/30 bg-card/40 hover:bg-card/70 transition-colors group">
+                          <div className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wide mb-1.5">Top Audience</div>
+                          <div className="text-sm font-medium text-foreground mb-1">{r.research.audienceSegments[0].name}</div>
+                          <div className="text-xs text-muted-foreground/70 leading-relaxed">{r.research.audienceSegments[0].demographics}</div>
+                          <div className="text-[11px] text-muted-foreground/50 font-medium mt-2.5 group-hover:text-foreground transition-colors">View Research
+                            <svg className="w-3 h-3 inline ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                          </div>
                         </button>
                       )}
                       {r.psycheMap && (
-                        <button onClick={() => setActiveView("psyche")} className="text-left p-4 rounded-xl border border-border/30 bg-card/30 hover:border-violet-500/30 transition-all group">
-                          <div className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-2">Psychology</div>
-                          <div className="text-sm font-semibold text-foreground mb-1">{r.psycheMap.cognitiveProfile.name}</div>
-                          <div className="text-xs text-muted-foreground leading-relaxed">Strongest angle: {[...r.psycheMap.biases].sort((a, b) => b.strength - a.strength)[0]?.name}</div>
-                          <div className="text-[10px] text-violet-400 font-semibold mt-3 group-hover:underline">View Psychology →</div>
+                        <button onClick={() => setActiveView("psyche")} className="text-left p-4 rounded-md border-l-2 border-l-blue-500/60 border border-border/30 bg-card/40 hover:bg-card/70 transition-colors group">
+                          <div className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wide mb-1.5">Psychology</div>
+                          <div className="text-sm font-medium text-foreground mb-1">{r.psycheMap.cognitiveProfile.name}</div>
+                          <div className="text-xs text-muted-foreground/70 leading-relaxed">Strongest angle: {[...r.psycheMap.biases].sort((a, b) => b.strength - a.strength)[0]?.name}</div>
+                          <div className="text-[11px] text-muted-foreground/50 font-medium mt-2.5 group-hover:text-foreground transition-colors">View Psychology
+                            <svg className="w-3 h-3 inline ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                          </div>
                         </button>
                       )}
                       {r.salesPlaybook && (
-                        <button onClick={() => setActiveView("sales")} className="text-left p-4 rounded-xl border border-border/30 bg-card/30 hover:border-violet-500/30 transition-all group">
-                          <div className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wider mb-2">Sales Lever</div>
-                          <div className="text-sm font-semibold text-foreground mb-1">{[...r.salesPlaybook.cialdiniWeapons].sort((a, b) => b.power - a.power)[0]?.name}</div>
-                          <div className="text-xs text-muted-foreground leading-relaxed">{r.salesPlaybook.valueEquation.dreamOutcome.text.slice(0, 60)}...</div>
-                          <div className="text-[10px] text-violet-400 font-semibold mt-3 group-hover:underline">View Sales Strategy →</div>
+                        <button onClick={() => setActiveView("sales")} className="text-left p-4 rounded-md border-l-2 border-l-emerald-500/60 border border-border/30 bg-card/40 hover:bg-card/70 transition-colors group">
+                          <div className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wide mb-1.5">Sales Lever</div>
+                          <div className="text-sm font-medium text-foreground mb-1">{[...r.salesPlaybook.cialdiniWeapons].sort((a, b) => b.power - a.power)[0]?.name}</div>
+                          <div className="text-xs text-muted-foreground/70 leading-relaxed">{r.salesPlaybook.valueEquation.dreamOutcome.text.slice(0, 60)}...</div>
+                          <div className="text-[11px] text-muted-foreground/50 font-medium mt-2.5 group-hover:text-foreground transition-colors">View Sales Strategy
+                            <svg className="w-3 h-3 inline ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                          </div>
                         </button>
                       )}
                     </div>
@@ -394,10 +402,10 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
                 )}
 
                 {/* Canvas coming soon */}
-                <div className="flex items-center justify-center py-10 rounded-2xl border border-dashed border-border/30 bg-card/10">
+                <div className="flex items-center justify-center py-8 rounded-md border border-dashed border-border/30">
                   <div className="text-center">
-                    <div className="text-sm font-semibold text-muted-foreground/50 mb-0.5">Creative Canvas</div>
-                    <div className="text-xs text-muted-foreground/30">AI Video Creator - Coming Soon</div>
+                    <div className="text-xs font-medium text-muted-foreground/40 mb-0.5">Creative Canvas</div>
+                    <div className="text-[11px] text-muted-foreground/25">AI Video Creator - Coming Soon</div>
                   </div>
                 </div>
               </div>
@@ -475,14 +483,14 @@ function SidebarItem({
 }) {
   return (
     <button
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all mb-0.5 ${
+      className={`w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-md text-left transition-colors mb-px ${
         active
-          ? "bg-violet-500/10 text-violet-400"
-          : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+          ? "bg-primary/10 text-foreground"
+          : "text-muted-foreground/70 hover:text-foreground hover:bg-secondary/40"
       }`}
       onClick={onClick}
     >
-      <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <svg className={`w-4 h-4 shrink-0 ${active ? "text-primary" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
         <path d={item.icon} />
       </svg>
       <span className="text-[13px] font-medium">{item.label}</span>
@@ -524,39 +532,40 @@ function GenerationProgress({
   const etaMs = avgTime > 0 ? avgTime * remaining.length : 0;
 
   return (
-    <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm flex-shrink-0">
-      <div className="h-1 bg-border/30">
+    <div className="border-b border-border/40 bg-background flex-shrink-0">
+      {/* Thin progress bar */}
+      <div className="h-[2px] bg-border/20">
         <div
-          className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-700 ease-out shadow-sm shadow-violet-500/30"
+          className="h-full bg-primary transition-all duration-700 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
 
-      <div className="px-5 py-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse shadow-sm shadow-violet-500/50" />
-            <span className="text-xs font-bold text-foreground">Generating ad creative strategy</span>
-            <span className="text-[11px] text-muted-foreground/70 bg-violet-500/10 px-2 py-0.5 rounded-full">
+      <div className="px-5 py-3">
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-medium text-foreground">Generating</span>
+            <span className="text-[11px] text-muted-foreground/60 tabular-nums">
               {Math.round(progress)}%
             </span>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground/60">
-            <span>Elapsed: {formatDuration(liveElapsed)}</span>
-            {etaMs > 0 && <span>ETA: ~{formatDuration(etaMs)}</span>}
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground/50 tabular-nums">
+            <span>{formatDuration(liveElapsed)}</span>
+            {etaMs > 0 && <span>~{formatDuration(etaMs)} left</span>}
           </div>
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-0.5">
           {steps.map((step, i) => (
             <StepRow key={step.key} step={step} index={i} />
           ))}
         </div>
 
         {generatingStep && (
-          <div className="mt-3 flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-violet-500/5 border border-violet-500/10">
+          <div className="mt-2.5 flex items-center gap-2 px-3 py-2 rounded-md bg-secondary/30">
             <LoadingDots />
-            <span className="text-[11px] text-muted-foreground">{generatingStep.description}</span>
+            <span className="text-[11px] text-muted-foreground/70">{generatingStep.description}</span>
           </div>
         )}
       </div>
@@ -566,51 +575,47 @@ function GenerationProgress({
 
 function StepRow({ step, index }: { step: SectionStep; index: number }) {
   return (
-    <div className={`flex items-center gap-2.5 py-1.5 px-2 rounded-lg transition-all ${
-      step.status === "generating" ? "bg-violet-500/5" : ""
+    <div className={`flex items-center gap-2 py-1 px-2 rounded-md transition-colors ${
+      step.status === "generating" ? "bg-secondary/20" : ""
     }`}>
-      <div className="w-5 h-5 flex items-center justify-center shrink-0">
+      <div className="w-4 h-4 flex items-center justify-center shrink-0">
         {step.status === "done" && (
-          <div className="w-4 h-4 rounded-full bg-green-500/15 flex items-center justify-center">
-            <svg className="w-2.5 h-2.5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          </div>
+          <svg className="w-3.5 h-3.5 text-green-400/80" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
         )}
         {step.status === "generating" && (
-          <div className="w-4 h-4 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+          <div className="w-3 h-3 rounded-full border-[1.5px] border-primary border-t-transparent animate-spin" />
         )}
         {step.status === "pending" && (
-          <div className="w-2 h-2 rounded-full bg-border/60" />
+          <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/20" />
         )}
         {step.status === "error" && (
-          <div className="w-4 h-4 rounded-full bg-rose-500/15 flex items-center justify-center">
-            <svg className="w-2.5 h-2.5 text-rose-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </div>
+          <svg className="w-3.5 h-3.5 text-rose-400/80" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
         )}
       </div>
 
-      <span className={`text-[10px] font-bold w-4 text-center ${
-        step.status === "done" ? "text-green-400"
-        : step.status === "generating" ? "text-violet-400"
-        : step.status === "error" ? "text-rose-400"
-        : "text-muted-foreground/40"
+      <span className={`text-[10px] font-medium w-3 text-center tabular-nums ${
+        step.status === "done" ? "text-green-400/70"
+        : step.status === "generating" ? "text-primary"
+        : step.status === "error" ? "text-rose-400/70"
+        : "text-muted-foreground/30"
       }`}>
         {index + 1}
       </span>
 
-      <span className={`text-xs font-semibold flex-1 ${
-        step.status === "done" ? "text-foreground"
+      <span className={`text-xs font-medium flex-1 ${
+        step.status === "done" ? "text-foreground/80"
         : step.status === "generating" ? "text-foreground"
         : step.status === "error" ? "text-rose-400"
-        : "text-muted-foreground/40"
+        : "text-muted-foreground/30"
       }`}>
         {step.label}
       </span>
 
-      <span className="text-[10px] text-muted-foreground/50 tabular-nums w-12 text-right">
+      <span className="text-[10px] text-muted-foreground/40 tabular-nums w-12 text-right">
         {step.status === "done" && step.elapsed != null
           ? formatDuration(step.elapsed)
           : step.status === "generating"
@@ -634,15 +639,15 @@ function ElapsedTimer() {
     return () => clearInterval(interval);
   }, []);
 
-  return <span className="text-primary">{formatDuration(elapsed)}</span>;
+  return <span className="text-primary/70">{formatDuration(elapsed)}</span>;
 }
 
 function LoadingDots() {
   return (
     <div className="flex gap-0.5">
-      <div className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-      <div className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-      <div className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+      <div className="w-1 h-1 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+      <div className="w-1 h-1 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+      <div className="w-1 h-1 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
     </div>
   );
 }
@@ -674,11 +679,9 @@ function LoadingSection({ label }: { label: string }) {
   return (
     <div className="flex items-center justify-center py-24">
       <div className="text-center">
-        <div className="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-4">
-          <div className="w-4 h-4 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
-        </div>
-        <div className="text-base font-semibold text-foreground mb-1">Waiting for {label}</div>
-        <div className="text-xs text-muted-foreground/50">This section will appear once generated</div>
+        <div className="w-4 h-4 rounded-full border-[1.5px] border-muted-foreground/30 border-t-primary animate-spin mx-auto mb-4" />
+        <div className="text-sm font-medium text-foreground mb-1">Waiting for {label}</div>
+        <div className="text-xs text-muted-foreground/40">This section will appear once generated</div>
       </div>
     </div>
   );

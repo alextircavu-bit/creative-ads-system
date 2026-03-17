@@ -402,3 +402,52 @@ export const NLP_STACK_STRATEGY: NLPStackStrategyDef[] = [
 ];
 
 export const NLP_KEY_PRINCIPLE = "NLP doesn't use willpower. It dismantles the belief system that makes the old behavior feel rational. By the time the reader reaches your CTA, they don't need convincing - they've already changed their mind.";
+
+// --- Sora2 Style Tags Catalog ---
+// Claude picks 3-6 tags per visual suggestion from this catalog.
+// Tags drive the visual treatment in the Sora2 prompt filter.
+// Add new tags here anytime — they'll automatically be available to Claude.
+
+export interface StyleTagCategory {
+  category: string;
+  tags: string[];
+}
+
+export const SORA2_STYLE_TAGS: StyleTagCategory[] = [
+  {
+    category: "capture device",
+    tags: ["iphone 15 pro", "iphone 13", "dslr", "gopro", "webcam"],
+  },
+  {
+    category: "camera behavior",
+    tags: ["handheld", "static tripod", "slow pan", "locked off", "POV first person", "selfie angle", "slightly shaky"],
+  },
+  {
+    category: "lighting",
+    tags: ["natural lighting", "golden hour", "warm studio lighting", "harsh overhead", "overcast soft", "ring light", "low light", "lamp light", "window light"],
+  },
+  {
+    category: "production style",
+    tags: ["ugc", "podcast setup", "vlog", "interview", "documentary", "livestream"],
+  },
+  {
+    category: "mood / tone",
+    tags: ["raw", "authentic", "casual", "intimate", "contemplative", "tense", "nostalgic", "quiet", "vulnerable"],
+  },
+  {
+    category: "visual treatment",
+    tags: ["shallow depth of field", "film grain", "clean digital", "slightly overexposed", "desaturated", "warm tones", "cool tones"],
+  },
+  {
+    category: "audio character",
+    tags: ["phone mic quality", "studio audio", "ambient only", "room tone", "slightly compressed"],
+  },
+  {
+    category: "environment",
+    tags: ["indoor domestic", "outdoor urban", "outdoor nature", "studio / set", "car interior", "office", "gym", "bedroom", "kitchen", "street", "coffee shop", "church", "park bench"],
+  },
+  {
+    category: "realism cues",
+    tags: ["imperfect framing", "not perfectly lit", "real skin texture", "background clutter", "ambient noise", "natural pauses", "micro-expressions"],
+  },
+];

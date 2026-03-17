@@ -1,6 +1,22 @@
 import { supabase } from "@/lib/supabase";
 import type { ProjectInput, ProjectRow, GenerationResult } from "@/types/creative";
 
+/** Stamp sora2Prompts on each hook, 1:1 with its visualSuggestions */
+function stampSora2Prompts(result: GenerationResult): void {
+  const creatives = result.topCreatives?.creatives || [];
+  for (const creative of creatives) {
+    for (const hook of creative.hooks || []) {
+      const hasSora2Speech = hook.audioSource === "sora2" && !!hook.voiceoverScript;
+      hook.sora2Prompts = (hook.visualSuggestions || []).map((v) => ({
+        description: v.prompt || v.idea,
+        voiceline_script: hasSora2Speech ? (hook.voiceoverScript ?? null) : null,
+        duration_seconds: parseInt(v.clipDuration) || 8,
+        style_tags: v.styleTags || [],
+      }));
+    }
+  }
+}
+
 export const projectRepository = {
   async getAll(): Promise<ProjectRow[]> {
     const { data, error } = await supabase
@@ -86,6 +102,9 @@ export const projectRepository = {
         }
       }
     }
+
+    // Stamp sora2Prompts on each hook (1:1 with visualSuggestions)
+    stampSora2Prompts(result);
 
     const { error } = await supabase
       .from("projects")

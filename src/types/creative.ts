@@ -360,9 +360,40 @@ export interface CopyCheckResult {
 
 export type DeliveryMode =
   | "text-overlay"        // Text on screen only, no voice
-  | "voiceover"           // Voice narration, no on-screen text
-  | "voiceover-caption"   // Voice + summary caption on screen
-  | "vo-caption-subs";    // Voice + caption up top + word-for-word subtitles
+  | "voiceover-caption";  // Voice narration + summary caption on screen
+
+// Visual hook styles — known archetypes + "dynamic" for Claude-generated ones
+export type VisualHookType =
+  | "authority-staging"     // Borrow credibility from a recognizable context (podcast set, news desk, lecture hall)
+  | "scenic-interrupt"      // Beautiful/captivating vista that stops the scroll while text lands
+  | "category-anchor"       // Show the thing the viewer already has feelings about (bible, food, gym, etc.)
+  | "routine-window"        // Place product in a daily moment the viewer recognizes (waking up, commuting, bedtime)
+  | "social-curiosity"      // Street interviews, reactions, "what did this person say?" format
+  | "narrative-animation"   // Animated/illustrated storytelling that signals "this is a story, not an ad"
+  | "ugc-reaction"          // Raw user-generated reaction/testimonial footage
+  | "dramatic-reenactment"  // Acted-out relatable scenario (skit, POV, mini-drama)
+  | "product-in-context"    // Product being used in its natural environment
+  | "dynamic";              // Claude-generated style that doesn't fit known archetypes
+
+export interface VisualStyle {
+  type: VisualHookType;
+  name: string;            // Short human-readable name (e.g. "Podcast Set Authority", "Morning Routine Window")
+  description: string;     // What footage to source/film — specific enough for a media buyer
+}
+
+export type SoraClipDuration = "4s" | "8s" | "12s";
+
+// Where the hook audio comes from — determines Sora2 prompt structure
+export type HookAudioSource =
+  | "sora2"       // Person speaks on camera — Sora2 generates voice. Prompt INCLUDES dialogue.
+  | "elevenlabs"; // No person speaking — ElevenLabs VO laid over silent/ambient Sora2 footage.
+
+export interface VisualSuggestion {
+  idea: string;            // The visual concept (what the viewer sees)
+  prompt: string;          // Scene description for Sora2. If audioSource="sora2": INCLUDE dialogue/speech. If "elevenlabs": visual-only.
+  clipDuration: SoraClipDuration; // Sora2 clip length: "4s" | "8s" | "12s". Multiple clips stitch to cover hook duration.
+  styleTags: string[];     // Sora2 style/mood tags. Drive the visual treatment. E.g. ["ugc", "iphone", "handheld"] or ["cinematic", "sci-fi", "VFX"].
+}
 
 export interface AdSection {
   time: string;
@@ -372,15 +403,31 @@ export interface AdSection {
 }
 
 export interface HookVariation {
-  text: string;           // The hook text overlay (5-15 words)
-  angle: string;          // What psychological angle this pulls
-  visualSuggestions?: string[]; // 2-3 ambiguous video scene ideas behind the text
+  // --- TEXT LAYER ---
+  text: string;           // On-screen caption. Full hook for text-overlay, short summary for VO+caption.
+  // --- AUDIO ---
+  audioSource?: HookAudioSource; // "sora2" = person speaks in clip. "elevenlabs" = separate VO over footage.
+  voiceoverScript?: string; // The spoken words. If sora2: baked into Sora2 prompt. If elevenlabs: separate audio track.
+  // --- VISUAL LAYER (Sora2 clips) ---
+  visualStyle: VisualStyle;              // What type of footage (podcast, scenic, street, etc.)
+  visualSuggestions: VisualSuggestion[]; // 2-3 Sora2 clips. Each has clipDuration (4s/8s/12s). Stitched to cover hook duration.
+  sora2Prompts?: Sora2Prompt[];         // Extracted Sora2 prompt payloads, 1:1 with visualSuggestions. Stamped on save.
+  // --- TIMING ---
+  duration: string;       // Total hook duration. Sum of stitched clips.
+  // --- METADATA ---
+  angle: string;          // Which psychological lever this pulls
   hidden?: true;
 }
 
 export interface BodyVariation {
-  text: string;           // Short description of product experience moment
-  visual: string;         // What the viewer sees during this part
+  // --- TEXT LAYER ---
+  text: string;           // On-screen text: plain feature description
+  // --- AUDIO LAYER (ElevenLabs — always separate, never Sora2) ---
+  voiceoverScript?: string; // 10-20 words. If hook audioSource="sora2": this is a NEW voice (or none). If "elevenlabs": continues from hook VO.
+  // --- VISUAL LAYER (screen recording — NOT Sora2) ---
+  visual: string;         // What the screen recording / product footage shows. Always real footage.
+  // --- TIMING ---
+  duration?: string;      // Total body duration.
 }
 
 export interface AdCreativeBlueprint {
@@ -396,7 +443,8 @@ export interface AdCreativeBlueprint {
   scenario: string;
   experienceType: string;
   productionStyle: string;
-  // Text overlay: multiple variations for swipeable cards
+  deliveryMode: DeliveryMode;
+  // Multiple variations for swipeable cards
   hooks: HookVariation[];
   bodies: BodyVariation[];
   // Single CTA (overlay bar, not a video section)
@@ -416,6 +464,13 @@ export interface CreativeFeedback {
   segmentIssues?: string[]; // "over-segmented for broad identity product"
   ctaIssues?: string[];     // "CTAs are slogans not actions"
   generalNotes?: string[];  // freeform feedback
+}
+
+export interface Sora2Prompt {
+  description: string;
+  voiceline_script: string | null;
+  duration_seconds: number;
+  style_tags: string[];
 }
 
 export interface TopCreativesData {
