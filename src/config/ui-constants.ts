@@ -233,6 +233,35 @@ export const UI_PLATFORMS = {
 } as const;
 
 /**
+ * UGC archetype labels for display
+ */
+export const UI_UGC_ARCHETYPES = {
+  "shock-excited": "Shock Excited",
+  "rant-passionate": "Rant Passionate",
+  "chaotic-interrupt": "Chaotic Interrupt",
+  "playing-coy": "Playing Coy",
+  "skeptic-converted": "Skeptic Converted",
+  "bestie-conspiratorial": "Bestie Conspiratorial",
+  "curious-intrigued": "Curious Intrigued",
+  "quiet-confidence": "Quiet Confidence",
+  "vulnerable-soft": "Vulnerable Soft",
+  "caught-guilty": "Caught Guilty",
+  "exhausted-done": "Exhausted Done",
+  "casual-unbothered": "Casual Unbothered",
+  "fomo-left-behind": "FOMO Left Behind",
+  "nostalgic-remembering": "Nostalgic Remembering",
+} as const;
+
+/**
+ * UGC arousal tier labels for display
+ */
+export const UI_UGC_AROUSAL_LABELS = {
+  high: "High Arousal",
+  medium: "Medium Arousal",
+  low: "Low Arousal",
+} as const;
+
+/**
  * Psychological territory names for display
  */
 export const UI_PSYCHOLOGICAL_TERRITORIES = {

@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creative Ads System — Framework Overview</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3a;
+    --text: #e4e4ef;
+    --text-dim: #8888a0;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-orange: #f97316;
+    --accent-green: #22c55e;
+    --accent-red: #ef4444;
+    --accent-yellow: #eab308;
+    --accent-teal: #14b8a6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    padding: 40px 60px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  h1 + p { color: var(--text-dim); margin-bottom: 48px; font-size: 14px; }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  h2 .badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  section { margin-bottom: 64px; }
+
+  /* Pipeline Flow */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .step-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .step-row {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .step-connector {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+  }
+
+  .step-connector svg { display: block; }
+
+  .section-card {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .section-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .section-card .card-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .section-card .card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-sonnet { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); }
+  .tag-opus { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); }
+  .tag-tokens { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+  .tag-parallel { background: rgba(34, 197, 94, 0.15); color: var(--accent-green); }
+  .tag-sequential { background: rgba(249, 115, 22, 0.15); color: var(--accent-orange); }
+
+  .card-body { font-size: 13px; color: var(--text-dim); }
+  .card-body strong { color: var(--text); font-weight: 500; }
+
+  .output-list {
+    list-style: none;
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .output-list li {
+    font-size: 11px;
+    padding: 3px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    color: var(--text-dim);
+  }
+
+  .output-list li.key { border-color: rgba(139, 92, 246, 0.3); color: var(--accent-purple); }
+
+  /* Hardcoded vs AI */
+  .data-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  .data-col {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .data-col h4 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .data-col ul {
+    list-style: none;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .data-col ul li {
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .data-col ul li:last-child { border: none; }
+
+  /* Template Section */
+  .template-flow {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .template-part {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .template-part:first-child { border-radius: 12px 0 0 12px; }
+  .template-part:last-child { border-radius: 0 12px 12px 0; }
+
+  .template-part .part-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+
+  .template-part .part-nature {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+
+  .template-part p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .template-part .layer {
+    font-size: 11px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    margin-top: 4px;
+    color: var(--text-dim);
+  }
+
+  .template-part .layer span { color: var(--text); font-weight: 500; }
+
+  .arrow-connector {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    color: var(--text-dim);
+    padding: 0 2px;
+  }
+
+  /* Delivery Modes */
+  .modes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .mode-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .mode-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .mode-card .mode-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .mode-card p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .mode-card .timing {
+    font-size: 11px;
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  .mode-card .timing div {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    color: var(--text-dim);
+  }
+
+  .mode-card .timing div span:last-child { color: var(--text); font-weight: 500; }
+
+  /* Visual Styles Grid */
+  .styles-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .style-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .style-chip .style-icon { font-size: 24px; margin-bottom: 6px; }
+
+  .style-chip .style-name {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .style-chip .style-desc {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* UGC Archetypes */
+  .archetype-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .archetype-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .archetype-chip::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .archetype-chip .arch-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .archetype-chip .arch-arousal {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+
+  .archetype-chip .arch-desc {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .arousal-high { color: var(--accent-red); }
+  .arousal-medium { color: var(--accent-purple); }
+  .arousal-low { color: var(--accent-cyan); }
+
+  /* Context Flow Diagram */
+  .context-flow {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    position: relative;
+  }
+
+  .flow-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 8px;
+  }
+
+  .flow-node {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 160px;
+    position: relative;
+  }
+
+  .flow-arrow {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 18px;
+    padding: 4px 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .flow-arrow.split {
+    display: flex;
+    justify-content: center;
+    gap: 200px;
+  }
+
+  .flow-context {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    margin: 2px 0 6px;
+    font-style: italic;
+  }
+
+  .node-input { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent-blue); }
+  .node-psyche { background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.3); color: var(--accent-pink); }
+  .node-sales { background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.3); color: var(--accent-orange); }
+  .node-research { background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: var(--accent-green); }
+  .node-tree { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); color: var(--accent-purple); }
+  .node-creatives { background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); color: var(--accent-cyan); }
+  .node-ugc { background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); color: var(--accent-yellow); }
+
+  /* Principles */
+  .principles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .principle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .principle .p-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .principle .p-body {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .principle .p-bad {
+    color: var(--accent-red);
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .principle .p-good {
+    color: var(--accent-green);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* Hardcoded Framework */
+  .framework-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .fw-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .fw-card h4 {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fw-card .fw-count {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    color: var(--text-dim);
+  }
+
+  .fw-card ul {
+    list-style: none;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .fw-card ul li { padding: 2px 0; }
+
+  /* Section Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .styles-grid { grid-template-columns: repeat(3, 1fr); }
+    .archetype-grid { grid-template-columns: repeat(3, 1fr); }
+    .framework-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Ad Example */
+  .ad-example {
+    display: flex;
+    gap: 4px;
+    align-items: stretch;
+    margin-top: 16px;
+    max-width: 700px;
+  }
+
+  .ad-part {
+    flex: 1;
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .ad-part-hook {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(139, 92, 246, 0.12));
+    border: 1px solid rgba(236, 72, 153, 0.25);
+  }
+
+  .ad-part-body {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(59, 130, 246, 0.12));
+    border: 1px solid rgba(6, 182, 212, 0.25);
+  }
+
+  .ad-part-cta {
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    flex: 0.4;
+  }
+
+  .ad-part .ad-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+
+  .ad-part .ad-text {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .ad-part .ad-note {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .ad-arrow {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    color: var(--text-dim);
+    padding: 0 4px;
+  }
+
+  /* Known Issues */
+  .issues-list {
+    list-style: none;
+    margin-top: 12px;
+  }
+
+  .issues-list li {
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-red);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .issues-list li strong { color: var(--text); }
+
+  .issues-list li.fixed {
+    border-left-color: var(--accent-green);
+    opacity: 0.5;
+  }
+
+  .issues-list li .issue-status {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .status-open { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+  .status-fixed { background: rgba(34, 197, 94, 0.15); color: var(--accent-green); }
+</style>
+</head>
+<body>
+
+<h1>Creative Ads System</h1>
+<p>Hybrid Architecture — Framework is HARDCODED (user's IP). Claude ONLY personalizes content within that framework.</p>
+
+<!-- ========== GENERATION PIPELINE ========== -->
+<section>
+  <h2>Generation Pipeline</h2>
+
+  <div class="context-flow">
+    <!-- Input -->
+    <div class="flow-row">
+      <div class="flow-node node-input">Product Input</div>
+    </div>
+    <div class="flow-context">productName, productDescription, scenario (v3/v4), featureName, targetAudience...</div>
+    <div class="flow-arrow">↓</div>
+
+    <!-- Step 1 -->
+    <div style="text-align:center; margin-bottom: 6px;">
+      <span class="tag tag-parallel" style="font-size:11px;">STEP 1 — PARALLEL</span>
+    </div>
+    <div class="flow-row">
+      <div class="flow-node node-psyche">
+        Psyche Map
+        <div style="font-size:10px; font-weight:400; margin-top:4px; opacity:0.7;">Sonnet · 6K tokens</div>
+      </div>
+      <div class="flow-node node-sales">
+        Sales Playbook
+        <div style="font-size:10px; font-weight:400; margin-top:4px; opacity:0.7;">Sonnet · 8K tokens</div>
+      </div>
+      <div class="flow-node node-research">
+        Research
+        <div style="font-size:10px; font-weight:400; margin-top:4px; opacity:0.7;">Opus · 5K tokens</div>
+      </div>
+    </div>
+    <div class="flow-context">Psychology intelligence + Sales intelligence + Audience intelligence all feed forward</div>
+    <div class="flow-arrow">↓ ↓ ↓ (all three)</div>
+
+    <!-- Step 2 -->
+    <div style="text-align:center; margin-bottom: 6px;">
+      <span class="tag tag-sequential" style="font-size:11px;">STEP 2 — SEQUENTIAL</span>
+    </div>
+    <div class="flow-row">
+      <div class="flow-node node-tree">
+        Creative Tree
+        <div style="font-size:10px; font-weight:400; margin-top:4px; opacity:0.7;">Opus · 12K tokens</div>
+      </div>
+    </div>
+    <div class="flow-context">8 territories scored by relevance · 18 scripts (frameworks × territories) · phase 1 native copy → phase 2 distilled hooks</div>
+    <div class="flow-arrow">↓</div>
+
+    <!-- Step 3 -->
+    <div style="text-align:center; margin-bottom: 6px;">
+      <span class="tag tag-parallel" style="font-size:11px;">STEP 3a — 3 PARALLEL CALLS</span>
+    </div>
+    <div class="flow-row">
+      <div class="flow-node node-creatives">
+        Top Creatives (2+2+1)
+        <div style="font-size:10px; font-weight:400; margin-top:4px; opacity:0.7;">Opus · 10K tokens × 3</div>
+      </div>
+    </div>
+    <div class="flow-context">5 regular creatives — mixed delivery modes, mixed visual styles</div>
+    <div class="flow-arrow">then ↓</div>
+
+    <div style="text-align:center; margin-bottom: 6px;">
+      <span class="tag tag-parallel" style="font-size:11px;">STEP 3b — 3 PARALLEL CALLS (sequenced after 3a)</span>
+    </div>
+    <div class="flow-row">
+      <div class="flow-node node-ugc">
+        UGC Creatives (2+2+1)
+        <div style="font-size:10px; font-weight:400; margin-top:4px; opacity:0.7;">Opus · 10K tokens × 3</div>
+      </div>
+    </div>
+    <div class="flow-context">5 UGC text-overlay creatives — all ugc-reaction, all with performance archetypes</div>
+    <div class="flow-arrow">↓</div>
+
+    <div class="flow-row">
+      <div class="flow-node" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); min-width: 300px;">
+        10 Production-Ready Ad Blueprints
+        <div style="font-size:10px; font-weight:400; margin-top:4px; opacity:0.7;">5 regular + 5 UGC · each with 5-6 hooks, 2-3 bodies, CTA, Sora2 prompts</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ========== WHAT EACH SECTION PRODUCES ========== -->
+<section>
+  <h2>What Each Section Produces</h2>
+
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <!-- Psyche Map -->
+    <div class="section-card" style="border-left: 3px solid var(--accent-pink);">
+      <div class="card-header">
+        <span class="card-title" style="color: var(--accent-pink);">Psyche Map</span>
+        <div class="card-meta">
+          <span class="tag tag-sonnet">SONNET</span>
+          <span class="tag tag-tokens">6K tokens</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <strong>Purpose:</strong> Map the buyer's psychological landscape for this specific product.
+        <div class="data-split">
+          <div class="data-col">
+            <h4 style="color: var(--accent-orange);">Hardcoded (sent to Claude)</h4>
+            <ul>
+              <li>10 brain regions (positions, roles, colors)</li>
+              <li>9 cognitive profiles</li>
+              <li>15 cognitive biases</li>
+              <li>Dopamine templates</li>
+              <li>5-layer persuasion stack</li>
+              <li>Pain/pleasure category references</li>
+            </ul>
+          </div>
+          <div class="data-col">
+            <h4 style="color: var(--accent-cyan);">Claude decides</h4>
+            <ul>
+              <li>Which brain regions are ACTIVE (true/false)</li>
+              <li>Best-fit cognitive profile + deep explanation</li>
+              <li>Top biases with strength scores (0-100)</li>
+              <li>Product-specific pain/pleasure points</li>
+              <li>Dopamine trigger type + schedule</li>
+              <li>Habit loop (cue → routine → reward)</li>
+            </ul>
+          </div>
+        </div>
+        <h4 style="margin-top: 14px; font-size: 11px; color: var(--text-dim);">KEY OUTPUTS PASSED FORWARD:</h4>
+        <ul class="output-list">
+          <li class="key">Cognitive Profile</li>
+          <li class="key">Top 7 Biases + Strengths</li>
+          <li class="key">Pain Points</li>
+          <li class="key">Pleasure Points</li>
+          <li>Dopamine Trigger</li>
+          <li>Habit Loop</li>
+          <li>Active Brain Regions</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Sales Playbook -->
+    <div class="section-card" style="border-left: 3px solid var(--accent-orange);">
+      <div class="card-header">
+        <span class="card-title" style="color: var(--accent-orange);">Sales Playbook</span>
+        <div class="card-meta">
+          <span class="tag tag-sonnet">SONNET</span>
+          <span class="tag tag-tokens">8K tokens</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <strong>Purpose:</strong> Map the persuasion landscape — how to sell this product to this psychology.
+        <div class="data-split">
+          <div class="data-col">
+            <h4 style="color: var(--accent-orange);">Hardcoded</h4>
+            <ul>
+              <li>Hormozi Value Equation framework</li>
+              <li>5 Awareness Levels (Schwartz)</li>
+              <li>6 Cialdini Weapons</li>
+              <li>Belfort Straight Line (3 certainties)</li>
+              <li>5 NLP Techniques</li>
+              <li>Retargeting Funnel (3 stages)</li>
+              <li>Market Sophistication scale (1-5)</li>
+            </ul>
+          </div>
+          <div class="data-col">
+            <h4 style="color: var(--accent-cyan);">Claude decides</h4>
+            <ul>
+              <li>Value equation scores per dimension</li>
+              <li>Awareness level relevance ranking</li>
+              <li>Cialdini weapon power scores (0-100)</li>
+              <li>NLP product-specific copy examples</li>
+              <li>Market sophistication level + hook strategy</li>
+              <li>Purchase context (impulse/considered, intensity)</li>
+              <li>Demand temperature + bridge weight</li>
+              <li>3-5 buyer objections + counter hooks</li>
+            </ul>
+          </div>
+        </div>
+        <h4 style="margin-top: 14px; font-size: 11px; color: var(--text-dim);">KEY OUTPUTS PASSED FORWARD:</h4>
+        <ul class="output-list">
+          <li class="key">Market Sophistication Level</li>
+          <li class="key">Demand Temperature</li>
+          <li class="key">Top Cialdini Weapons</li>
+          <li class="key">Buyer Objections</li>
+          <li>NLP Applications</li>
+          <li>Awareness Level Strategy</li>
+          <li>Purchase Context / Ad Intensity</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Research -->
+    <div class="section-card" style="border-left: 3px solid var(--accent-green);">
+      <div class="card-header">
+        <span class="card-title" style="color: var(--accent-green);">Research</span>
+        <div class="card-meta">
+          <span class="tag tag-opus">OPUS</span>
+          <span class="tag tag-tokens">5K tokens</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <strong>Purpose:</strong> Become the avatar. Understand who buys this and why, from the inside out.
+        <div class="data-split">
+          <div class="data-col">
+            <h4 style="color: var(--accent-orange);">Hardcoded</h4>
+            <ul>
+              <li>5 Shadow Avatar Steps</li>
+              <li>5 Research Techniques</li>
+              <li>6 Avatar Trait Labels</li>
+              <li>Benefit Expansion framework</li>
+              <li>Segment hierarchy template (5 tiers)</li>
+            </ul>
+          </div>
+          <div class="data-col">
+            <h4 style="color: var(--accent-cyan);">Claude decides</h4>
+            <ul>
+              <li>Avatar traits (ranges across segments)</li>
+              <li>5 audience segments ranked by ROI</li>
+              <li>Benefit expansion threads + identity shift</li>
+              <li>12-16 real search queries across platforms</li>
+              <li>Pre-creative checklist (10 items)</li>
+            </ul>
+          </div>
+        </div>
+        <h4 style="margin-top: 14px; font-size: 11px; color: var(--text-dim);">KEY OUTPUTS PASSED FORWARD:</h4>
+        <ul class="output-list">
+          <li class="key">5 Audience Segments + Best Angles</li>
+          <li class="key">Benefit Expansion Threads</li>
+          <li class="key">Identity Shift (before → after)</li>
+          <li>Avatar Traits</li>
+          <li>Search Queries</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Creative Tree -->
+    <div class="section-card" style="border-left: 3px solid var(--accent-purple);">
+      <div class="card-header">
+        <span class="card-title" style="color: var(--accent-purple);">Creative Tree</span>
+        <div class="card-meta">
+          <span class="tag tag-opus">OPUS</span>
+          <span class="tag tag-tokens">12K tokens</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <strong>Purpose:</strong> Territory exploration engine. Score 8 psychological territories, generate 18 scripts across 5 frameworks. Two-phase: native copywriting first, then distill to hook+body.
+        <div class="data-split">
+          <div class="data-col">
+            <h4 style="color: var(--accent-orange);">Hardcoded</h4>
+            <ul>
+              <li>8 Psychological Territories (definitions)</li>
+              <li>5 Copywriting Frameworks (PAS, AIDA, BAB, 4Ps, STAR)</li>
+              <li>4 Platforms</li>
+            </ul>
+          </div>
+          <div class="data-col">
+            <h4 style="color: var(--accent-cyan);">Claude decides</h4>
+            <ul>
+              <li>Territory relevance scores (0-100)</li>
+              <li>Top 3 territories → 5 scripts each (15)</li>
+              <li>Next 3 territories → 1 script each (3)</li>
+              <li>Phase 1: Full native copy per framework</li>
+              <li>Phase 2: Distilled hook + mechanism</li>
+              <li>5 alt hooks per script</li>
+            </ul>
+          </div>
+        </div>
+        <h4 style="margin-top: 14px; font-size: 11px; color: var(--text-dim);">KEY OUTPUTS PASSED FORWARD:</h4>
+        <ul class="output-list">
+          <li class="key">8 Territories with Relevance Scores</li>
+          <li>18 Scripts (inspiration, not to copy)</li>
+          <li>Platform Format Strategies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ========== AD TEMPLATE STRUCTURE ========== -->
+<section>
+  <h2>Ad Template Structure</h2>
+  <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 20px;">Every ad follows this structure. The hook is the variable (unlimited angles). The body video is the constant (product feature). The text on the body resolves the hook's premise.</p>
+
+  <div class="template-flow">
+    <div class="template-part" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.06), rgba(139, 92, 246, 0.06));">
+      <div class="part-label" style="color: var(--accent-pink);">Hook</div>
+      <div class="part-nature" style="background: rgba(249, 115, 22, 0.15); color: var(--accent-orange);">VARIABLE</div>
+      <p>Creates emotional tension. The viewer thinks "wait, that's me" or "wait, what?"</p>
+      <div class="layer"><span>Visual:</span> Person, scene, setting — NOT the product yet</div>
+      <div class="layer"><span>Text:</span> 5-20 words. Creates the PREMISE — an unresolved tension</div>
+      <div class="layer"><span>Duration:</span> 3-5s (text-overlay) / 7-14s (VO)</div>
+      <p style="margin-top: 10px; color: var(--accent-pink); font-size: 11px; font-weight: 500;">This is where ALL creative variety lives. Unlimited angles, emotions, patterns.</p>
+    </div>
+
+    <div class="arrow-connector">→</div>
+
+    <div class="template-part" style="background: rgba(139, 92, 246, 0.04);">
+      <div class="part-label" style="color: var(--accent-purple);">Bridge</div>
+      <div class="part-nature" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">IMPLICIT</div>
+      <p>The psychological WHY connecting hook tension to product resolution.</p>
+      <div class="layer"><span>Text-overlay:</span> Lives in the body text — MUST answer WHY the product resolves the hook</div>
+      <div class="layer"><span>VO+caption:</span> Lives in the voiceover — last hook sentence + first body sentence</div>
+      <p style="margin-top: 10px; color: var(--accent-purple); font-size: 11px; font-weight: 500;">Without a bridge, hook and body feel like two unrelated ads stitched together.</p>
+    </div>
+
+    <div class="arrow-connector">→</div>
+
+    <div class="template-part" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(59, 130, 246, 0.06));">
+      <div class="part-label" style="color: var(--accent-cyan);">Body</div>
+      <div class="part-nature" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">CONSTANT VIDEO · VARIABLE TEXT</div>
+      <p>Resolves the hook's tension through the product. The viewer sees the feature working.</p>
+      <div class="layer"><span>Visual:</span> Screen recording / product demo (ALWAYS real footage, reusable)</div>
+      <div class="layer"><span>Text:</span> Resolves the hook's premise — product reveals itself through the resolution</div>
+      <div class="layer"><span>Duration:</span> 5s</div>
+      <p style="margin-top: 10px; color: var(--accent-red); font-size: 11px; font-weight: 500;">NOT a product description. NOT "Netflix for Bible content." The text completes the hook's thought.</p>
+    </div>
+
+    <div class="arrow-connector">→</div>
+
+    <div class="template-part" style="background: rgba(34, 197, 94, 0.04); flex: 0.4;">
+      <div class="part-label" style="color: var(--accent-green);">CTA</div>
+      <div class="part-nature" style="background: rgba(34, 197, 94, 0.15); color: var(--accent-green);">FIXED</div>
+      <p>Action verb only.</p>
+      <div class="layer"><span>Examples:</span> "Download Free" / "Try It Free" / "Tap Below"</div>
+      <div class="layer"><span>Duration:</span> 2-3s</div>
+    </div>
+  </div>
+
+  <!-- Good vs Bad Example -->
+  <h3 style="margin-top: 32px; color: var(--accent-red);">How it goes wrong (TV Commercial style)</h3>
+  <div class="ad-example">
+    <div class="ad-part ad-part-hook">
+      <div class="ad-label" style="color: var(--accent-pink);">Hook</div>
+      <div class="ad-text">"VBS prep used to take 20 hours. this year? 2 hours. done."</div>
+      <div class="ad-note">Creates tension: HOW?</div>
+    </div>
+    <div class="ad-arrow">→</div>
+    <div class="ad-part ad-part-body" style="border-color: rgba(239, 68, 68, 0.4);">
+      <div class="ad-label" style="color: var(--accent-red);">Body (BAD)</div>
+      <div class="ad-text">"Bible Netflix that kids beg to watch. Works on any device."</div>
+      <div class="ad-note">Generic product description. Doesn't answer HOW. Disconnected.</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 20px; color: var(--accent-green);">How it should work (Copywriting)</h3>
+  <div class="ad-example">
+    <div class="ad-part ad-part-hook">
+      <div class="ad-label" style="color: var(--accent-pink);">Hook</div>
+      <div class="ad-text">"VBS prep used to take 20 hours. this year? 2 hours. done."</div>
+      <div class="ad-note">Creates tension: HOW?</div>
+    </div>
+    <div class="ad-arrow">→</div>
+    <div class="ad-part ad-part-body">
+      <div class="ad-label" style="color: var(--accent-cyan);">Body (GOOD)</div>
+      <div class="ad-text">"One app. Every VBS episode queued up. Kids sit down, hit play."</div>
+      <div class="ad-note">Resolves the premise. Product emerges through the answer.</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 20px; color: var(--accent-green);">Another example</h3>
+  <div class="ad-example">
+    <div class="ad-part ad-part-hook">
+      <div class="ad-label" style="color: var(--accent-pink);">Hook</div>
+      <div class="ad-text">"my kids know every Marvel character but can't name a single apostle"</div>
+      <div class="ad-note">Identity tension: I'm failing as a parent</div>
+    </div>
+    <div class="ad-arrow">→</div>
+    <div class="ad-part ad-part-body">
+      <div class="ad-label" style="color: var(--accent-cyan);">Body (GOOD)</div>
+      <div class="ad-text">"now they binge Bible stories the same way — and actually remember them"</div>
+      <div class="ad-note">Resolves: kids engage with faith content like they do entertainment</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ========== DELIVERY MODES ========== -->
+<section>
+  <h2>Delivery Modes</h2>
+
+  <div class="modes-grid">
+    <div class="mode-card">
+      <h4>Text Overlay</h4>
+      <div class="mode-sub">Silent video · text on screen only</div>
+      <p>The text IS the entire ad. Copywriting carries everything — the visual sets emotional context, the text does the selling.</p>
+      <p><strong>Best for:</strong> scenic visuals, screen recordings, dramatic footage, category anchors, UGC reactions</p>
+      <p><strong>Hook text:</strong> Full hook (5-20 words) — creates unresolved tension</p>
+      <p><strong>Body text:</strong> Resolves the hook's premise through the product</p>
+      <div class="timing">
+        <div><span>Hook</span><span>3s</span></div>
+        <div><span>Body</span><span>5s</span></div>
+        <div><span>CTA</span><span>2s</span></div>
+        <div style="border-top: 1px solid var(--border); margin-top: 4px; padding-top: 4px;"><span>Total</span><span>~10s</span></div>
+      </div>
+    </div>
+
+    <div class="mode-card">
+      <h4>Voiceover + Caption</h4>
+      <div class="mode-sub">Person speaks · short caption on screen</div>
+      <p>ONE CONTINUOUS NARRATION across hook + body. The bridge lives in the voiceover flow — last hook sentence connects to first body sentence.</p>
+      <p><strong>Best for:</strong> UGC talking head, street interviews, confessions, authority staging, story-driven hooks</p>
+      <p><strong>Hook text:</strong> Short caption summary (5-15 words)</p>
+      <p><strong>Hook VO:</strong> What the person says (15-30 words)</p>
+      <p><strong>Body VO:</strong> Continues narrating over product footage (10-20 words)</p>
+      <div class="timing">
+        <div><span>Speaking pace</span><span>~2.2 words/sec</span></div>
+        <div><span>Hook VO (15-30 words)</span><span>7-14s</span></div>
+        <div><span>Body VO (10-20 words)</span><span>5-9s</span></div>
+        <div><span>CTA</span><span>2-3s</span></div>
+        <div style="border-top: 1px solid var(--border); margin-top: 4px; padding-top: 4px;"><span>Total VO words</span><span>25-50 max</span></div>
+        <div><span>Total duration</span><span>15-30s (never exceed)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ========== VISUAL HOOK STYLES ========== -->
+<section>
+  <h2>10 Visual Hook Styles</h2>
+  <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 16px;">The visual is what STOPS THE SCROLL before the text even registers. Choose the style that makes the hook text MORE believable.</p>
+
+  <div class="styles-grid">
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--accent-purple);">Authority Staging</div>
+      <div class="style-desc">Podcast set, news desk, lecture hall. Borrow credibility from context.</div>
+    </div>
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--accent-cyan);">Scenic Interrupt</div>
+      <div class="style-desc">Beautiful vista that stops the thumb while text lands.</div>
+    </div>
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--accent-orange);">Category Anchor</div>
+      <div class="style-desc">Show the THING they have feelings about. Bible, food, gym.</div>
+    </div>
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--accent-green);">Routine Window</div>
+      <div class="style-desc">Daily moment the viewer recognizes. Waking up, commuting, bedtime.</div>
+    </div>
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--accent-pink);">Social Curiosity</div>
+      <div class="style-desc">Street interviews, reactions. "What did this person say?"</div>
+    </div>
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--accent-yellow);">Narrative Animation</div>
+      <div class="style-desc">Animated storytelling. Signals "story, not ad." Lowers resistance.</div>
+    </div>
+    <div class="style-chip" style="border-color: rgba(234, 179, 8, 0.4);">
+      <div class="style-name" style="color: var(--accent-yellow);">UGC Reaction</div>
+      <div class="style-desc">Real person on camera. Their face IS the hook. See 14 archetypes below.</div>
+    </div>
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--accent-red);">Dramatic Reenactment</div>
+      <div class="style-desc">Acted-out scenario. Skit, POV, mini-drama.</div>
+    </div>
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--accent-teal);">Product in Context</div>
+      <div class="style-desc">Product being used in natural environment.</div>
+    </div>
+    <div class="style-chip">
+      <div class="style-name" style="color: var(--text-dim);">Dynamic</div>
+      <div class="style-desc">Claude-invented style that doesn't fit archetypes.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ========== UGC ARCHETYPES ========== -->
+<section>
+  <h2>14 UGC Performance Archetypes</h2>
+  <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 16px;">Each archetype = specific behavioral energy for Sora2. Not just "UGC reaction" — a precise emotional state + physical behavior. Pick emotion + action from arrays, appearance from global pool.</p>
+
+  <div class="archetype-grid">
+    <!-- HIGH -->
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-red);">
+      <div class="arch-name">Shock Excited</div>
+      <div class="arch-arousal arousal-high">HIGH AROUSAL</div>
+      <div class="arch-desc">Eyes wide, natural "oh shit" moment. Body reacts before brain catches up.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-red);">
+      <div class="arch-name">Rant Passionate</div>
+      <div class="arch-arousal arousal-high">HIGH AROUSAL</div>
+      <div class="arch-desc">Fired up, can't hold back. Speaking fast, gesturing, conviction energy.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-orange);">
+      <div class="arch-name">Chaotic Interrupt</div>
+      <div class="arch-arousal arousal-high">HIGH AROUSAL</div>
+      <div class="arch-desc">Unexpected behavior that breaks scroll pattern. Visually jarring.</div>
+    </div>
+
+    <!-- MEDIUM -->
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-pink);">
+      <div class="arch-name">Playing Coy</div>
+      <div class="arch-arousal arousal-medium">MEDIUM AROUSAL</div>
+      <div class="arch-desc">Slight smirk, knows something you don't. "I've got a secret."</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-purple);">
+      <div class="arch-name">Skeptic Converted</div>
+      <div class="arch-arousal arousal-medium">MEDIUM AROUSAL</div>
+      <div class="arch-desc">Reluctant admission. "Ok fine, it actually works." Instant credibility.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid #d946ef;">
+      <div class="arch-name">Bestie Conspiratorial</div>
+      <div class="arch-arousal arousal-medium">MEDIUM AROUSAL</div>
+      <div class="arch-desc">Close to camera, whispering a secret. Intimate, trust-building.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-cyan);">
+      <div class="arch-name">Curious Intrigued</div>
+      <div class="arch-arousal arousal-medium">MEDIUM AROUSAL</div>
+      <div class="arch-desc">Head tilt, eyebrows up. Discovering something in real time.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-green);">
+      <div class="arch-name">Quiet Confidence</div>
+      <div class="arch-arousal arousal-medium">MEDIUM AROUSAL</div>
+      <div class="arch-desc">Slight smile, direct look. Calm energy of someone who found the answer.</div>
+    </div>
+
+    <!-- LOW -->
+    <div class="archetype-chip" style="border-top: 2px solid #a855f7;">
+      <div class="arch-name">Vulnerable Soft</div>
+      <div class="arch-arousal arousal-low">LOW AROUSAL</div>
+      <div class="arch-desc">Looking down, quiet, small. Real vulnerability that creates instant empathy.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid #64748b;">
+      <div class="arch-name">Caught Guilty</div>
+      <div class="arch-arousal arousal-low">LOW AROUSAL</div>
+      <div class="arch-desc">Phone glow, pause. The moment of private guilt everyone recognizes.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid #94a3b8;">
+      <div class="arch-name">Exhausted Done</div>
+      <div class="arch-arousal arousal-low">LOW AROUSAL</div>
+      <div class="arch-desc">Tired eyes, rubs face. Not dramatic — genuinely depleted.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid #78716c;">
+      <div class="arch-name">Casual Unbothered</div>
+      <div class="arch-arousal arousal-low">LOW AROUSAL</div>
+      <div class="arch-desc">Just existing. Scrolling, sipping coffee. Person anchors, text sells.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-blue);">
+      <div class="arch-name">FOMO Left Behind</div>
+      <div class="arch-arousal arousal-low">LOW AROUSAL</div>
+      <div class="arch-desc">Looking at phone seeing others succeed. "Why not me" energy.</div>
+    </div>
+    <div class="archetype-chip" style="border-top: 2px solid var(--accent-yellow);">
+      <div class="arch-name">Nostalgic Remembering</div>
+      <div class="arch-arousal arousal-low">LOW AROUSAL</div>
+      <div class="arch-desc">Distant gaze, lost in memory. The ache of something that used to be.</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+    <div class="data-col">
+      <h4 style="color: var(--accent-cyan);">Appearance Pool (global)</h4>
+      <ul>
+        <li><strong>Age:</strong> 18-24, 25-34, 35-44, 45-54</li>
+        <li><strong>Gender:</strong> female, male</li>
+        <li><strong>Ethnicity:</strong> caucasian, african-american, hispanic, asian, middle-eastern, mixed</li>
+        <li><strong>Build:</strong> slim, average, athletic, curvy, stocky</li>
+        <li><strong>Style:</strong> oversized tee, casual hoodie, fitted tank, work blouse, gym clothes</li>
+        <li><strong>Hair:</strong> messy bun, short crop, loose natural, braids, buzz cut</li>
+        <li><strong>Details:</strong> no makeup, minimal makeup, tired eyes, glasses, stubble, freckles</li>
+      </ul>
+    </div>
+    <div class="data-col">
+      <h4 style="color: var(--accent-cyan);">Environment Pool (10)</h4>
+      <ul>
+        <li>Parked car with phone on dashboard</li>
+        <li>Bedroom with unmade bed, lamp light</li>
+        <li>Couch with blanket, living room clutter</li>
+        <li>Kitchen counter, morning light</li>
+        <li>Bathroom mirror, harsh overhead light</li>
+        <li>Office desk, monitor glow</li>
+        <li>Park bench, overcast</li>
+        <li>Coffee shop table, ambient noise</li>
+        <li>Bed at night, phone screen glow only</li>
+        <li>Gym locker room bench</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="data-col" style="margin-top: 12px;">
+    <h4 style="color: var(--accent-red);">Sora2 Face Clip Rules</h4>
+    <ul>
+      <li><strong>MAX 4s per face clip</strong> — Sora2 can't maintain facial coherence beyond 4 seconds</li>
+      <li><strong>ONE expression per clip</strong> — single emotional state, not a transition</li>
+      <li><strong>ONE gaze direction</strong> + one micro-variation (anchor + one small movement)</li>
+      <li><strong>Phone glow NEVER sole light source</strong> — always describe stronger ambient</li>
+      <li><strong>No phone screen in frame</strong> — angled away, face-down, below frame</li>
+      <li><strong>Camera = real TikTok creator</strong> — propped on nightstand, dashboard mount, handheld at arm's length</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ========== HARDCODED FRAMEWORK ========== -->
+<section>
+  <h2>Hardcoded Framework Data <span class="badge" style="background: rgba(249, 115, 22, 0.15); color: var(--accent-orange);">USER'S IP</span></h2>
+
+  <div class="framework-grid">
+    <div class="fw-card">
+      <h4>Psychological Territories <span class="fw-count">8</span></h4>
+      <ul>
+        <li>Identity Tension</li>
+        <li>Displacement Anxiety</li>
+        <li>Loss & Decay</li>
+        <li>Social Positioning</li>
+        <li>Aspiration Gap</li>
+        <li>Habit Architecture</li>
+        <li>Discovery & Revelation</li>
+        <li>Relief & Surrender</li>
+      </ul>
+    </div>
+    <div class="fw-card">
+      <h4>Copywriting Frameworks <span class="fw-count">5</span></h4>
+      <ul>
+        <li>PAS (Problem-Agitate-Solution)</li>
+        <li>AIDA (Attention-Interest-Desire-Action)</li>
+        <li>BAB (Before-After-Bridge)</li>
+        <li>4Ps (Problem-Promise-Proof-Push)</li>
+        <li>STAR (Situation-Task-Action-Result)</li>
+      </ul>
+    </div>
+    <div class="fw-card">
+      <h4>Brain Regions <span class="fw-count">10</span></h4>
+      <ul>
+        <li>Prefrontal Cortex · Anterior Cingulate</li>
+        <li>Nucleus Accumbens · Amygdala</li>
+        <li>Hippocampus · Insula</li>
+        <li>TPJ · vmPFC</li>
+        <li>Motor Cortex · Visual Cortex</li>
+      </ul>
+    </div>
+    <div class="fw-card">
+      <h4>Cognitive Profiles <span class="fw-count">9</span></h4>
+      <ul>
+        <li>Habit Hijack · Mirror Effect</li>
+        <li>Ambient Integration · Investment Escalation</li>
+        <li>Tribal Gravity · Variable Reward</li>
+        <li>Competence Drive · Relief Architecture</li>
+        <li>Value Proposition</li>
+      </ul>
+    </div>
+    <div class="fw-card">
+      <h4>Cognitive Biases <span class="fw-count">15</span></h4>
+      <ul>
+        <li>Loss Aversion · Curiosity Gap · Framing</li>
+        <li>Anchoring · Social Proof · Confirmation</li>
+        <li>Default Effect · Bandwagon</li>
+        <li>Hyperbolic Discounting · Endowment</li>
+        <li>Status Quo · Authority · Commitment</li>
+        <li>IKEA Effect · Scarcity</li>
+      </ul>
+    </div>
+    <div class="fw-card">
+      <h4>Sales Frameworks</h4>
+      <ul>
+        <li>Hormozi Value Equation</li>
+        <li>5 Awareness Levels (Schwartz)</li>
+        <li>6 Cialdini Weapons</li>
+        <li>Belfort Straight Line (3 certainties)</li>
+        <li>5 NLP Techniques</li>
+        <li>Market Sophistication (1-5)</li>
+        <li>3-Stage Retargeting Funnel</li>
+      </ul>
+    </div>
+    <div class="fw-card">
+      <h4>Persuasion Stack <span class="fw-count">5 layers</span></h4>
+      <ul>
+        <li>L1: Attention Capture (0-3s)</li>
+        <li>L2: Emotional Engagement (3-10s)</li>
+        <li>L3: Rational Justification (10-20s)</li>
+        <li>L4: Behavioral Trigger (20-30s)</li>
+        <li>L5: Habit Formation (Day 1-30)</li>
+      </ul>
+    </div>
+    <div class="fw-card">
+      <h4>Research Framework</h4>
+      <ul>
+        <li>5 Shadow Avatar Steps</li>
+        <li>5 Research Techniques</li>
+        <li>6 Avatar Trait Labels</li>
+        <li>Benefit Expansion Framework</li>
+        <li>5-Tier Segment Hierarchy</li>
+      </ul>
+    </div>
+    <div class="fw-card">
+      <h4>Production</h4>
+      <ul>
+        <li>14 UGC Archetypes (3 arousal tiers)</li>
+        <li>Appearance Pool (7 dimensions)</li>
+        <li>Environment Pool (10 locations)</li>
+        <li>Sora2 Style Tags (9 categories)</li>
+        <li>Face Clip Rules (4s max, etc.)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ========== COPY QUALITY RULES ========== -->
+<section>
+  <h2>Copy Quality Rules</h2>
+
+  <div class="principles-grid">
+    <div class="principle">
+      <div class="p-title">Hooks create TENSION, not resolution</div>
+      <div class="p-body">The hook must leave something unresolved — guilt, curiosity, identity gap. If the tension is already resolved in the hook, there's no reason to keep watching.</div>
+      <div class="p-bad">BAD: "screen time guilt is gone when they're watching this" (already resolved)</div>
+      <div class="p-good">GOOD: "my kids know every Marvel character but can't name a single apostle" (tension: I'm failing)</div>
+    </div>
+    <div class="principle">
+      <div class="p-title">Body resolves the hook's SPECIFIC premise</div>
+      <div class="p-body">The body text is the second beat of the copy, not a product card. It answers the question the hook created.</div>
+      <div class="p-bad">BAD: "Bible Netflix - unlimited shows" (TV commercial product announcement)</div>
+      <div class="p-good">GOOD: "now they binge Bible stories the same way — and actually remember them"</div>
+    </div>
+    <div class="principle">
+      <div class="p-title">Natural flowing sentences ONLY</div>
+      <div class="p-body">How a person talks, texts, or thinks internally. Must pass the "would a real person say this to a friend?" test.</div>
+      <div class="p-bad">BAD: "No fluff. No filler. Just results." (AI staccato — ChatGPT signature)</div>
+      <div class="p-good">GOOD: "I have every Bible app on my phone and I still don't read Scripture"</div>
+    </div>
+    <div class="principle">
+      <div class="p-title">NO metaphors, NO poetry, NO literary language</div>
+      <div class="p-body">Real people don't talk in literary constructs. Specific, concrete, plain language.</div>
+      <div class="p-bad">BAD: "spiritually starving while sitting in front of a feast"</div>
+      <div class="p-good">GOOD: "I scroll for two hours every night and then wonder why I feel empty"</div>
+    </div>
+    <div class="principle">
+      <div class="p-title">Emotion follows the product</div>
+      <div class="p-body">Don't force negative or positive. Faith app = guilt, longing. Candy = craving, nostalgia. Book app = curiosity, intellectual ego. Follow the product's emotional world.</div>
+    </div>
+    <div class="principle">
+      <div class="p-title">Platform voice matters</div>
+      <div class="p-body"><strong>TikTok:</strong> "ok but why did no one tell me about this" — casual, confessional, lowercase energy.<br><strong>Meta/IG:</strong> "I kept saying I'd start reading my Bible again. It's been two years." — composed but concrete.</div>
+    </div>
+    <div class="principle">
+      <div class="p-title">NO proxy embarrassment</div>
+      <div class="p-body">Never use children, family, friends as the source of shame/guilt. The emotion must come from WITHIN the viewer.</div>
+    </div>
+    <div class="principle">
+      <div class="p-title">Hook text + visual = ONE UNIT</div>
+      <div class="p-body">The visual sets the emotional context, the text articulates it. They must convey the SAME emotion. Never text on a disconnected background.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ========== KNOWN AI BLINDSPOTS ========== -->
+<section>
+  <h2>Known AI Blindspots</h2>
+  <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 16px;">Patterns where Claude consistently fails without explicit correction.</p>
+
+  <ul class="issues-list">
+    <li><strong>Sanitizes by default</strong> — skips shame, temptation, guilt, lust-adjacent audiences. These are the highest-intent segments. Use implication, not banned words.</li>
+    <li><strong>Thinks in abstract categories</strong> — outputs "guilt" as a label instead of a specific visceral moment like "I set my alarm to pray and hit snooze every single time."</li>
+    <li><strong>Avoids negative emotion</strong> — leans aspirational when pain converts harder. Jumps to the AFTER state instead of sitting in the BEFORE.</li>
+    <li><strong>Hooks resolve tension instead of creating it</strong> — "screen time guilt is gone" states the resolution in the hook. Nothing left for the body. Hooks should be the BEFORE, not the AFTER.</li>
+    <li><strong>Body text defaults to product description</strong> — produces "Netflix for Bible content - unlimited shows" (TV commercial) instead of resolving the hook's premise through the product.</li>
+    <li><strong>Staccato AI fragment pattern</strong> — "No fluff. No filler. Just results." / "Simple. Clean. Done." Most recognizable AI writing pattern. Instantly breaks authenticity.</li>
+    <li><strong>Over-intellectualizes</strong> — adds framework complexity where raw simplicity wins. A hook doesn't need to be clever, it needs to be true.</li>
+  </ul>
+</section>
+
+<hr class="divider">
+
+<!-- ========== TECH ========== -->
+<section>
+  <h2>Technical Details</h2>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+    <div class="data-col">
+      <h4 style="color: var(--accent-cyan);">Stack</h4>
+      <ul>
+        <li>Next.js 15.1 App Router + TypeScript</li>
+        <li>@anthropic-ai/sdk (claude-opus-4-20250514)</li>
+        <li>Supabase for persistence</li>
+        <li>SWR + useSWRMutation for data fetching</li>
+        <li>Tailwind CSS + ShadCN tokens</li>
+        <li>Repository pattern (src/repositories/)</li>
+      </ul>
+    </div>
+    <div class="data-col">
+      <h4 style="color: var(--accent-cyan);">Generation Config</h4>
+      <ul>
+        <li>Psyche Map: Sonnet · 6K tokens</li>
+        <li>Sales Playbook: Sonnet · 8K tokens</li>
+        <li>Research: Opus · 5K tokens</li>
+        <li>Creative Tree: Opus · 12K tokens</li>
+        <li>Top Creatives: Opus · 10K tokens × 3 batches</li>
+        <li>UGC Creatives: Opus · 10K tokens × 3 batches</li>
+        <li>Temperature: 0.4 (all sections)</li>
+        <li>Retry: 3 attempts, exponential backoff (1s, 2s, 4s)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

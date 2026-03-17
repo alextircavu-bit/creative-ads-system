@@ -35,6 +35,17 @@ export default function HomePage() {
           </p>
         </Link>
       </div>
+
+      <Link
+        href="/framework"
+        className="mt-8 block p-6 rounded-2xl border border-border bg-card hover:border-cyan-500/50 transition-all w-full max-w-2xl"
+      >
+        <div className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-2">Reference</div>
+        <div className="text-lg font-bold mb-1">Framework Overview</div>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Visual map of the entire generation pipeline, ad template, copy rules, UGC archetypes, and version history.
+        </p>
+      </Link>
     </div>
   );
 }

@@ -124,6 +124,26 @@ export enum ETemplateCategory {
 }
 
 /**
+ * UGC Performance Archetypes
+ */
+export enum EUGCArchetype {
+  ShockExcited = "shock-excited",
+  RantPassionate = "rant-passionate",
+  ChaoticInterrupt = "chaotic-interrupt",
+  PlayingCoy = "playing-coy",
+  SkepticConverted = "skeptic-converted",
+  BestieConspiratorial = "bestie-conspiratorial",
+  CuriousIntrigued = "curious-intrigued",
+  QuietConfidence = "quiet-confidence",
+  VulnerableSoft = "vulnerable-soft",
+  CaughtGuilty = "caught-guilty",
+  ExhaustedDone = "exhausted-done",
+  CasualUnbothered = "casual-unbothered",
+  FomoLeftBehind = "fomo-left-behind",
+  NostalgicRemembering = "nostalgic-remembering",
+}
+
+/**
  * Experience types for product categorization
  */
 export enum EExperienceType {

@@ -6,6 +6,7 @@ import {
   researchPrompt,
   creativeTreePrompt,
   topCreativesPrompt,
+  ugcCreativesPrompt,
 } from "@/config/prompts";
 import type { IProjectInput, IGenerationResult, IPsycheMapData, ISalesPlaybookData, IResearchData, ICreativeTreeData, ICreativeFeedback } from "@/types/creative";
 import { ESectionType } from "@/config/enums";
@@ -50,23 +51,44 @@ function repairJSON(raw: string): string {
 }
 
 async function callClaude(prompt: string, maxTokens: number, model?: string): Promise<unknown> {
-  const message = await anthropic.messages.create({
-    model: model || CLAUDE_MODELS.OPUS,
-    max_tokens: maxTokens,
-    messages: [
-      { role: "user", content: prompt },
-    ],
-    system: SYSTEM_PROMPTS.GENERATION,
-    temperature: 0.4,
-  });
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const message = await anthropic.messages.create({
+        model: model || CLAUDE_MODELS.OPUS,
+        max_tokens: maxTokens,
+        messages: [
+          { role: "user", content: prompt },
+        ],
+        system: SYSTEM_PROMPTS.GENERATION,
+        temperature: 0.4,
+      });
 
-  const block = message.content[0];
-  if (block.type !== "text") throw new Error("Unexpected response type from Claude");
-  const text = block.text;
-  if (!text) throw new Error("Empty response from Claude");
+      const block = message.content[0];
+      if (block.type !== "text") throw new Error("Unexpected response type from Claude");
+      const text = block.text;
+      if (!text) throw new Error("Empty response from Claude");
 
-  const repaired = repairJSON(text);
-  return JSON.parse(repaired);
+      const repaired = repairJSON(text);
+      return JSON.parse(repaired);
+    } catch (err: unknown) {
+      const isRetryable =
+        err instanceof Error &&
+        (err.message.includes("Internal server error") ||
+         err.message.includes("overloaded") ||
+         err.message.includes("rate_limit") ||
+         err.message.includes("529") ||
+         err.message.includes("500"));
+
+      if (isRetryable && attempt < maxRetries) {
+        const delay = 1000 * Math.pow(2, attempt - 1); // 1s, 2s, 4s
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error("callClaude: max retries exceeded");
 }
 
 export async function POST(request: NextRequest) {
@@ -105,8 +127,7 @@ export async function POST(request: NextRequest) {
         SECTION_CONFIGS[ESectionType.CreativeTree].model,
       ) as ICreativeTreeData;
 
-      // Step 3: Top Creatives — split into 3 parallel Opus calls (2+2+1 creatives)
-      // Each batch generates a subset, then we merge
+      // Step 3a: Top Creatives — 3 parallel Opus calls (2+2+1)
       const batchPrompt = (batchNum: number, batchSize: number, startRank: number) =>
         topCreativesPrompt(input, psycheMap, salesPlaybook, research, creativeTree)
           .replace(
@@ -120,14 +141,33 @@ export async function POST(request: NextRequest) {
         callClaude(batchPrompt(3, 1, 5), SECTION_CONFIGS[ESectionType.TopCreatives].tokens, SECTION_CONFIGS[ESectionType.TopCreatives].model) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
       ]);
 
-      // Merge batches and re-rank
-      const allCreatives = [
+      const regularCreatives = [
         ...(batch1.creatives || []),
         ...(batch2.creatives || []),
         ...(batch3.creatives || []),
       ].map((c, i) => ({ ...c, rank: i + 1 }));
 
-      const topCreatives = { creatives: allCreatives };
+      // Step 3b: UGC Creatives — 3 parallel Opus calls (2+2+1), sequenced after regular to avoid overload
+      const ugcBatchPrompt = (batchNum: number, batchSize: number, startRank: number) =>
+        ugcCreativesPrompt(input, psycheMap, salesPlaybook, research, creativeTree)
+          .replace(
+            "Generate 5 UGC text-overlay ad creative blueprints.",
+            `Generate exactly ${batchSize} UGC text-overlay ad creative blueprints. Start ranking from ${startRank}. This is batch ${batchNum} of 3 — ensure DIFFERENT emotional territories than other batches would pick. ${batchNum === 1 ? "Pick the 2 strongest angles." : batchNum === 2 ? "Pick 2 unexpected/niche angles." : "Pick 1 bold, unconventional angle."}`
+          );
+
+      const [ugcBatch1, ugcBatch2, ugcBatch3] = await Promise.all([
+        callClaude(ugcBatchPrompt(1, 2, 1), SECTION_CONFIGS[ESectionType.TopCreatives].tokens, SECTION_CONFIGS[ESectionType.TopCreatives].model) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        callClaude(ugcBatchPrompt(2, 2, 3), SECTION_CONFIGS[ESectionType.TopCreatives].tokens, SECTION_CONFIGS[ESectionType.TopCreatives].model) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        callClaude(ugcBatchPrompt(3, 1, 5), SECTION_CONFIGS[ESectionType.TopCreatives].tokens, SECTION_CONFIGS[ESectionType.TopCreatives].model) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+      ]);
+
+      const ugcCreatives = [
+        ...(ugcBatch1.creatives || []),
+        ...(ugcBatch2.creatives || []),
+        ...(ugcBatch3.creatives || []),
+      ].map((c, i) => ({ ...c, rank: regularCreatives.length + i + 1, isUgcBatch: true as const }));
+
+      const topCreatives = { creatives: [...regularCreatives, ...ugcCreatives] };
 
       const fullResult: IGenerationResult = {
         id: crypto.randomUUID(),
@@ -161,28 +201,50 @@ export async function POST(request: NextRequest) {
         prompt = creativeTreePrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research);
         break;
       case ESectionType.TopCreatives: {
-        // "Generate 5 more" — also split into parallel batches for speed
+        // "Generate 5 more" — regular (2+2+1) + UGC (2+2+1) in parallel
         const basePrompt = topCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research, context?.creativeTree, context?.feedback, context?.existingCreatives);
-        const batchPrompt = (batchNum: number, batchSize: number, startRank: number) =>
+        const tcBatchPrompt = (batchNum: number, batchSize: number, startRank: number) =>
           basePrompt.replace(
             "Generate 5 ad creative blueprints.",
             `Generate exactly ${batchSize} ad creative blueprints. Start ranking from ${startRank}. This is batch ${batchNum} of 3 — ensure DIFFERENT emotional territories than other batches would pick. ${batchNum === 1 ? "Pick the 2 strongest angles." : batchNum === 2 ? "Pick 2 unexpected/niche angles." : "Pick 1 bold, unconventional angle."}`
           );
 
+        const ugcBasePrompt = ugcCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research, context?.creativeTree, context?.feedback, context?.existingCreatives);
+        const ugcBatchPromptFn = (batchNum: number, batchSize: number, startRank: number) =>
+          ugcBasePrompt.replace(
+            "Generate 5 UGC text-overlay ad creative blueprints.",
+            `Generate exactly ${batchSize} UGC text-overlay ad creative blueprints. Start ranking from ${startRank}. This is batch ${batchNum} of 3 — ensure DIFFERENT emotional territories than other batches would pick. ${batchNum === 1 ? "Pick the 2 strongest angles." : batchNum === 2 ? "Pick 2 unexpected/niche angles." : "Pick 1 bold, unconventional angle."}`
+          );
+
         const existingCount = context?.existingCreatives?.length || 0;
+
+        // Regular batches first
         const [b1, b2, b3] = await Promise.all([
-          callClaude(batchPrompt(1, 2, existingCount + 1), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
-          callClaude(batchPrompt(2, 2, existingCount + 3), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
-          callClaude(batchPrompt(3, 1, existingCount + 5), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
+          callClaude(tcBatchPrompt(1, 2, existingCount + 1), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
+          callClaude(tcBatchPrompt(2, 2, existingCount + 3), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
+          callClaude(tcBatchPrompt(3, 1, existingCount + 5), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
         ]);
 
-        const merged = [
+        const regularMerged = [
           ...(b1.creatives || []),
           ...(b2.creatives || []),
           ...(b3.creatives || []),
         ].map((c, i) => ({ ...(c as Record<string, unknown>), rank: existingCount + i + 1 }));
 
-        return NextResponse.json({ creatives: merged });
+        // UGC batches after regular to avoid overload
+        const [ub1, ub2, ub3] = await Promise.all([
+          callClaude(ugcBatchPromptFn(1, 2, existingCount + 1), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
+          callClaude(ugcBatchPromptFn(2, 2, existingCount + 3), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
+          callClaude(ugcBatchPromptFn(3, 1, existingCount + 5), config.tokens, config.model) as Promise<{ creatives: unknown[] }>,
+        ]);
+
+        const ugcMerged = [
+          ...(ub1.creatives || []),
+          ...(ub2.creatives || []),
+          ...(ub3.creatives || []),
+        ].map((c, i) => ({ ...(c as Record<string, unknown>), rank: existingCount + regularMerged.length + i + 1, isUgcBatch: true }));
+
+        return NextResponse.json({ creatives: [...regularMerged, ...ugcMerged] });
       }
       default:
         return NextResponse.json({ error: "Invalid section" }, { status: 400 });

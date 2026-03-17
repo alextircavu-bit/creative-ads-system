@@ -27,6 +27,7 @@ import {
   NLP_KEY_PRINCIPLE,
   SORA2_STYLE_TAGS,
 } from "@/config/framework-data";
+import { UGC_ARCHETYPES, UGC_APPEARANCE_POOL, UGC_ENVIRONMENT_POOL } from "@/config/ugc-archetypes";
 
 function buildContext(input: ProjectInput): string {
   const base = `Product: ${input.productName}\nDescription: ${input.productDescription}`;
@@ -766,7 +767,11 @@ KNOWN VISUAL HOOK TYPES:
 - "routine-window": Place the product in a daily moment the viewer recognizes as theirs. Waking up and checking phone. Commuting on the train. Getting into bed. Lunch break scroll. The viewer sees their own life. Works for: habit-forming products, low-demand products that need to CREATE need by showing integration.
 - "social-curiosity": Street interviews, reactions, "what did this person say?" format. The viewer wants to hear the answer. Works for: products with social proof, surprising benefits, or polarizing hooks.
 - "narrative-animation": Animated or illustrated storytelling. Signals "this is a story, not an ad." Lowers ad resistance. Works for: complex products, story-driven hooks, abstract concepts.
-- "ugc-reaction": Raw user-generated reaction footage. Person genuinely reacting to the product. Works for: products with "wow" moments, discovery hooks, social proof.
+- "ugc-reaction": A real person on camera with a specific behavioral energy. The person IS the hook — their face, their reaction, their moment.
+  HOW TO THINK ABOUT UGC: Take the product's core benefit or feature → imagine the MOMENT a real person experiences it → what does their face do? What do they say? That reaction IS the ad.
+  Examples: Calorie tracker → person scans their work lunch, eyes widen: "wait, there's 40g of protein in this?" (shock-excited). Bible app → person caught scrolling at 2am, pauses, sees a verse appear on lockscreen (caught-guilty → relief). Fitness app → person steps on scale after 2 weeks, slow nod, quiet smile (skeptic-converted).
+  UGC is NOT limited to "wow" products. Every product has a moment where the user FEELS something — surprise, guilt, relief, curiosity, calm. That feeling is the archetype. See UGC PERFORMANCE ARCHETYPES below for 14 specific behavioral energies.
+  Works for: literally any product. The question is never "does UGC fit?" — it's "which human moment fits?"
 - "dramatic-reenactment": Acted-out relatable scenario. Skit, POV, mini-drama. Person in the situation the hook describes. Works for: relatable pain points, confession hooks, challenge hooks.
 - "product-in-context": Product being used in its natural environment. Works for: physical products, consumables, utility products.
 - "dynamic": A style you invented that doesn't fit the above. Name it and describe it.
@@ -908,6 +913,21 @@ THE GOAL IS REALISM. Every clip must look indistinguishable from real footage �
 The video DESCRIPTION is king — it conveys the emotion and message. The style tags just ensure the rendering looks real and matches how this scene would actually be captured in the real world.
 ${SORA2_STYLE_TAGS.map(c => `${c.category.toUpperCase()}: ${c.tags.join(", ")}`).join("\n")}
 
+=== UGC PERFORMANCE ARCHETYPES ===
+
+For ugc-reaction hooks, you MUST select a performance archetype. Each defines specific behavioral energy — not just "UGC reaction" but a precise emotional state + physical behavior for Sora2.
+
+ARCHETYPES (pick one per UGC hook, select one emotion + one action from its arrays):
+${UGC_ARCHETYPES.map(a => `${a.id} [${a.arousal}] — ${a.description} | emotions: ${a.emotion.join(", ")} | actions: ${a.action.join(", ")}${a.environmentOverrides ? ` | env-override: ${a.environmentOverrides.join("; ")}` : ""}`).join("\n")}
+
+APPEARANCE (match to Research audience DNA when available, otherwise vary):
+${Object.entries(UGC_APPEARANCE_POOL).map(([k, v]) => `${k}: ${v.join(", ")}`).join(" | ")}
+
+ENVIRONMENTS (random from pool, or use archetype env-override if listed):
+${UGC_ENVIRONMENT_POOL.join(" | ")}
+
+For each UGC hook, output "ugcArchetype" (the ID) and "ugcPromptParams": { archetype, emotion, action, environment, appearance: { ageRange, gender, ethnicity, build, style, hair, details } }. Use these params to write the rich Sora2 scene description below.
+
 === VISUAL PROMPT DEPTH ===
 
 The "prompt" field on each visualSuggestion is the most important field. It becomes the direct input to Sora2 video generation. BLAND PROMPTS = BLAND VIDEO.
@@ -923,10 +943,18 @@ Think like a cinematographer writing shot notes. Every prompt must answer:
 If audioSource is "sora2" (person speaks on camera): INCLUDE the dialogue in the prompt. Describe vocal delivery (tone, pace, emotion). Time visual action to dialogue.
 If audioSource is "elevenlabs": NO dialogue in the prompt. Visual only. The footage is SILENT — ElevenLabs VO is laid over in post.
 
+UGC FACE CLIP RULES (critical for Sora2 realism):
+- MAXIMUM 4s per clip with a SILENT face (text-overlay UGC where the person is NOT speaking). Sora2 cannot maintain a static expression beyond 4 seconds — it morphs, eyes drift, looks AI-generated. If the person SPEAKS on camera (audioSource="sora2"), 8s and 12s are fine — continuous speech movement anchors facial coherence.
+- ONE expression per clip. Describe a single emotional state, not a transition. "She looks guilty" not "she shifts from guilt to relief." Expression transitions cause uncanny morphing.
+- ONE gaze direction with one natural micro-variation. Describe a primary eye anchor with one organic break: "eyes on camera, briefly glances down." NOT fixed robot stare, NOT random wandering. One anchor + one small movement.
+- Phone glow is NEVER the sole light source. Even in dark/night environments, always describe a stronger ambient source (bedside lamp, window moonlight, hallway light). Phone glow can exist but must be secondary. Without ambient fill, faces light from below = horror movie.
+- Do NOT show the phone screen display in frame. Phone can be in hand but angled away, face-down, below frame, or just out of shot. Visible screens cause hand and display artifacts.
+- Camera setup = how a real TikTok creator would film this. Think from the creator's perspective: propped on a nightstand for a bedroom confession, dashboard mount in the car, handheld at arm's length walking, on a tripod for a planned reaction. The setup should feel natural for the scenario — not always handheld, not always tripod. Whatever a real person would do.
+
 PROMPT LENGTH: 3-6 sentences minimum. Each sentence adds a layer of visual specificity.
 
 BAD prompt: "A woman sitting in bed looking at her phone at night"
-GOOD prompt: "A woman in her late 20s, dark hair pulled into a loose bun, wearing an oversized faded grey t-shirt, sitting cross-legged on an unmade bed with crumpled white sheets. Soft warm light from a bedside lamp casts uneven shadows across her face. She holds her phone close, the screen glow illuminating tired eyes with visible dark circles. Shot on iPhone 13 front camera, slightly grainy low-light sensor noise, shallow depth of field blurring the cluttered nightstand behind her. She scrolls slowly, then pauses — a subtle shift in expression, something between recognition and guilt."
+GOOD prompt: "A woman in her late 20s, dark hair in a loose bun, wearing an oversized faded grey t-shirt, sitting cross-legged on an unmade bed with crumpled white sheets. Warm light from a bedside lamp on the nightstand, soft shadows across her face. Phone propped on the nightstand filming her — she looks up from her lap toward the camera with tired eyes, slight pause, a quiet look of recognition. Shot on iPhone 13 propped at eye level, slightly grainy low-light sensor noise, shallow depth of field blurring the cluttered background."
 
 BAD prompt: "Person on a podcast set talking"
 GOOD prompt: "A man in his mid-30s, short beard, wearing a navy crewneck sweater, sits behind a podcast desk with a Shure SM7B microphone on a boom arm. Warm studio lighting from a key light camera-left, soft fill from an LED panel behind. Background shows acoustic foam panels, a bookshelf with worn spines, and a half-empty coffee mug. Shot on Sony FX3 with 35mm f/1.4, shallow depth of field softening the background. He leans slightly forward, speaking directly to camera with quiet intensity — measured pace, occasional pauses between thoughts."
@@ -971,6 +999,8 @@ JSON:
           "voiceoverScript": "VO+caption ONLY (15-30 words). If sora2: what the person SAYS on camera (include in Sora2 prompt too). If elevenlabs: separate VO track. Omit for text-overlay.",
           "duration": "realistic duration. Text-overlay: '3s'. VO+caption: calculate at ~2.2 words/sec with pauses (15 words = '7s', 25 words = '11s'). Must match word count.",
           "angle": "which psychological lever this pulls",
+          "ugcArchetype": "REQUIRED for ugc-reaction hooks. The archetype ID from the UGC PERFORMANCE ARCHETYPES catalog (e.g. 'shock-excited', 'caught-guilty'). Omit for non-UGC hooks.",
+          "ugcPromptParams": "REQUIRED for ugc-reaction hooks. { archetype, emotion, action, environment, appearance: { ageRange, gender, ethnicity, build, style, hair, details } } — all selected from the archetype's arrays and global pools. Omit for non-UGC hooks.",
           "visualStyle": {
             "type": "authority-staging | scenic-interrupt | category-anchor | routine-window | social-curiosity | narrative-animation | ugc-reaction | dramatic-reenactment | product-in-context | dynamic",
             "name": "short human-readable name (e.g. 'Podcast Set Authority', 'Morning Routine Window')",
@@ -980,7 +1010,7 @@ JSON:
             {
               "idea": "what the viewer sees in this clip segment",
               "prompt": "RICH scene description for Sora2 (3-6 sentences). Follow VISUAL PROMPT DEPTH rules above. Must include: specific person details, environment with lived-in texture, exact camera/device, lighting sources with imperfections, physical micro-behaviors, mood. If audioSource='sora2': INCLUDE dialogue and vocal delivery. If 'elevenlabs': visual only, no speech.",
-              "clipDuration": "4s | 8s | 12s (Sora2 lengths only). Clips stitch to cover hook duration.",
+              "clipDuration": "4s | 8s | 12s (Sora2 lengths only). Clips stitch to cover hook duration. FACE RULE: If this is a SILENT face clip (text-overlay UGC where person is NOT speaking), clipDuration MUST be '4s'. If the person SPEAKS on camera (audioSource='sora2'), 8s and 12s are fine — speech anchors facial coherence.",
               "styleTags": ["Pick 3-6 tags from the SORA2 STYLE TAG CATALOG below. Choose tags that match THIS specific clip's creative intent."]
             }
           ]
@@ -1009,6 +1039,262 @@ CRITICAL:
 6. The body is the SAME product feature across all creatives. Only the hook changes.
 7. EVERY creative MUST include: hooks (5-6), bodies (2-3), and cta. Do NOT skip bodies — they are required.
 8. Return ONLY valid JSON. No markdown, no code fences.`;
+}
+
+// ============================================================
+// 5b. UGC TEXT-OVERLAY CREATIVES
+// Dedicated batch: ALL text-overlay, ALL ugc-reaction visual style,
+// ALL must pick a performance archetype. Same deep-dive intelligence.
+// ============================================================
+
+export function ugcCreativesPrompt(
+  input: ProjectInput,
+  psycheMapData?: PsycheMapData,
+  salesData?: SalesPlaybookData,
+  researchData?: ResearchData,
+  creativeTreeData?: CreativeTreeData,
+  feedback?: CreativeFeedback,
+  existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+): string {
+  // === DEEP DIVE INTELLIGENCE (reuse same context builder as topCreativesPrompt) ===
+  const contextParts: string[] = [];
+
+  if (psycheMapData) {
+    contextParts.push(`=== PSYCHOLOGY ===
+Profile: ${psycheMapData.cognitiveProfile.name} — ${psycheMapData.cognitiveProfile.description || psycheMapData.cognitiveProfile.mechanism}
+Biases (ranked): ${psycheMapData.biases.slice(0, 7).map((b) => `${b.name} [${b.strength}]${b.description ? ` — ${b.description}` : ""}`).join("\n  ")}
+Pain points: ${psycheMapData.painPleasure.pains.join(" | ")}
+Pleasure points: ${psycheMapData.painPleasure.pleasures.join(" | ")}
+Dopamine: ${psycheMapData.dopamine.trigger} (${psycheMapData.dopamine.triggerPct}%) → ${psycheMapData.dopamine.schedule}
+Habit loop: ${psycheMapData.habitLoop.cue} → ${psycheMapData.habitLoop.routine} → ${psycheMapData.habitLoop.reward}`);
+  }
+
+  if (salesData) {
+    const topCialdini = salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 3);
+    const topAwareness = salesData.awarenessLevels.sort((a, b) => b.relevance - a.relevance).slice(0, 2);
+    const objections = salesData.objectionMap?.map((o) => `"${o.objection}" → counter: ${o.hookCounter}`).join("\n  ") || "N/A";
+    const sophLevel = salesData.marketSophistication;
+    const purchCtx = salesData.purchaseContext;
+    contextParts.push(`=== SALES INTELLIGENCE ===
+Value Equation: Dream ${salesData.valueEquation.dreamOutcome.score} | Likelihood ${salesData.valueEquation.perceivedLikelihood.score} | Speed ${salesData.valueEquation.timeDelay.score} | Effort ${salesData.valueEquation.effortSacrifice.score}
+Top Cialdini: ${topCialdini.map((w) => `${w.name} [${w.power}] — ${w.application || ""}`).join("\n  ")}
+Best awareness levels: ${topAwareness.map((l) => `${l.name}: ${l.adStrategy}`).join("\n  ")}
+HSO hooks: ${salesData.hso.hooks.join(" | ")}
+System 1 triggers: ${salesData.system1Triggers.map((t) => t.trigger).join(", ")}
+NLP techniques: ${salesData.nlp?.techniques?.map((t) => `${t.name} [${t.power}] — ${t.productExample || t.adApplication}`).join("\n  ") || "N/A"}
+${sophLevel ? `Market Sophistication: Level ${sophLevel.level} "${sophLevel.name}" — ${sophLevel.hookStrategy}\n  Avoid: ${sophLevel.avoidance}` : ""}
+${purchCtx ? `Purchase Context: ${purchCtx.priceModel} (${purchCtx.pricePoint}) | ${purchCtx.purchaseType} purchase | Ad intensity: ${purchCtx.adIntensity}\n  ${purchCtx.reasoning}` : ""}
+${salesData.demandTemperature ? `Demand Temperature: ${salesData.demandTemperature.level.toUpperCase()} — ${salesData.demandTemperature.hookApproach}\n  Bridge weight: ${salesData.demandTemperature.bridgeWeight}` : ""}
+${salesData.objectionMap?.length ? `Buyer Objections to Neutralize:\n  ${objections}` : ""}`);
+  }
+
+  if (researchData) {
+    const segments = researchData.audienceSegments?.slice(0, 5) || [];
+    contextParts.push(`=== RESEARCH ===
+Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}
+${segments.length > 0 ? `Segments (ranked):\n${segments.map((s, i) => `  ${i + 1}. "${s.name}" — ${s.description}\n     Best angle: ${s.bestAngle} | ROI: ${s.predictedROI} | Conv: ${s.conversionLikelihood}%`).join("\n")}` : ""}
+${researchData.benefitExpansion ? `Benefit expansion:\n  Surface: ${researchData.benefitExpansion.surfaceBenefit}\n  Threads: ${researchData.benefitExpansion.expandedThreads.join("\n  ")}\n  Identity shift: ${researchData.benefitExpansion.identityShift}` : ""}`);
+  }
+
+  if (creativeTreeData) {
+    const sortedAngles = [...creativeTreeData.emotionalAngles].sort((a, b) => b.relevanceScore - a.relevanceScore);
+    const topAngles = sortedAngles.slice(0, 8);
+    contextParts.push(`=== CREATIVE TREE INTELLIGENCE ===
+Top emotional angles (by relevance):
+${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).join("\n")}
+Use these angles as INSPIRATION. You are NOT limited to them — if you see a stronger angle from the psychology/research data, use it.`);
+  }
+
+  return `You are an elite UGC performance creative strategist. You create text-overlay ads featuring raw, authentic UGC-reaction footage. Every creative you produce uses a real person's face and reaction as the scroll-stopper.
+
+${buildContext(input)}
+
+${contextParts.join("\n\n")}
+
+=== UGC-ONLY BATCH CONSTRAINTS ===
+
+This is a DEDICATED UGC batch. Every creative MUST follow these rules:
+1. deliveryMode = "text-overlay" (NO voiceover-caption in this batch)
+2. ALL hooks MUST use visualStyle.type = "ugc-reaction" (NO scenic, authority, etc.)
+3. EVERY hook MUST select a performance archetype and output ugcArchetype + ugcPromptParams
+4. audioSource is NEVER needed (text-overlay = silent footage + text on screen)
+5. voiceoverScript fields should be omitted
+
+=== AD STRUCTURE (UGC TEXT-OVERLAY) ===
+
+HOOK: A person on camera in a specific emotional state. Text overlaid on their footage.
+- VISUAL: UGC face clip. The person IS the hook — their expression, posture, micro-behavior.
+- COPY: Text on screen (5-20 words). The text and the person's expression convey the SAME emotion.
+- PURPOSE: Stop the scroll. The viewer sees a real person feeling something they recognize.
+
+BRIDGE: Lives in the body text. Must connect hook emotion to product resolution.
+
+BODY: Screen recording of the product feature. Text overlay describes what it does.
+- Always real footage. NOT Sora2 generated.
+- Body text must bridge from the hook's emotional tension to the product.
+
+CTA: Action verb only. "Tap below to get it" / "Download Free" / "Try It Free"
+
+=== UGC PERFORMANCE ARCHETYPES ===
+
+For EVERY hook, pick one archetype. Select one emotion + one action from its arrays. Vary archetypes across hooks and creatives.
+
+ARCHETYPES:
+${UGC_ARCHETYPES.map(a => `${a.id} [${a.arousal}] — ${a.description} | emotions: ${a.emotion.join(", ")} | actions: ${a.action.join(", ")}${a.environmentOverrides ? ` | env-override: ${a.environmentOverrides.join("; ")}` : ""}`).join("\n")}
+
+APPEARANCE (match to Research audience DNA when available, otherwise vary):
+${Object.entries(UGC_APPEARANCE_POOL).map(([k, v]) => `${k}: ${v.join(", ")}`).join(" | ")}
+
+ENVIRONMENTS (random from pool, or use archetype env-override if listed):
+${UGC_ENVIRONMENT_POOL.join(" | ")}
+
+=== SORA2 STYLE TAG CATALOG ===
+Pick 3-6 tags per visual suggestion. Goal is REALISM — indistinguishable from real phone footage.
+${SORA2_STYLE_TAGS.map(c => `${c.category.toUpperCase()}: ${c.tags.join(", ")}`).join("\n")}
+
+=== UGC FACE CLIP RULES (critical for Sora2 realism) ===
+- MAXIMUM 4s per clip with a face. Sora2 cannot maintain facial coherence beyond 4 seconds.
+- ONE expression per clip. Single emotional state, not a transition.
+- ONE gaze direction with one natural micro-variation. One anchor + one small movement.
+- Phone glow is NEVER the sole light source. Always describe a stronger ambient source.
+- Do NOT show the phone screen display in frame. Phone can be in hand but angled away.
+- Camera setup = how a real TikTok creator would film this. Propped on nightstand, dashboard mount, handheld at arm's length.
+
+=== VISUAL PROMPT DEPTH ===
+
+The "prompt" field is the direct input to Sora2. BLAND PROMPTS = BLAND VIDEO.
+Every prompt must answer:
+1. WHO — specific person (age, build, skin tone, hair, expression, wardrobe). Real people, not models.
+2. WHERE — specific environment with LIVED-IN details (clutter, worn surfaces, mixed lighting).
+3. HOW IT'S CAPTURED — exact camera/device, camera behavior, focus behavior.
+4. LIGHT — primary source, secondary source, imperfections.
+5. MOTION — physical micro-behaviors. Subtle, realistic. Not posed.
+6. MOOD — the emotional register.
+No dialogue in prompts (text-overlay = silent footage).
+
+PROMPT LENGTH: 3-6 sentences minimum.
+
+=== PLATFORM VOICE ===
+
+TikTok: "ok but why did no one tell me about this" — short, confessional, lowercase energy.
+Meta/IG: "I kept saying I'd start reading my Bible again. It's been two years." — composed but concrete.
+
+=== EMOTIONAL DEPTH ===
+
+Hook emotions must RELATE to the product and be TRIGGERING enough to stop the scroll. Follow the product's emotional world — don't force negative or positive.
+
+DEPTH matters:
+- SHALLOW (bad): "Want to read more books?" — generic
+- DEEP (good): "I used to be the person who always had something interesting to say" — identity loss
+
+=== NLP IN COPY ===
+
+Weave naturally: presupposition, reframing, pattern interrupt, anchoring, dissociation.
+
+${(() => {
+    if (!feedback) return "";
+    const parts: string[] = ["=== FEEDBACK (do NOT repeat these issues) ==="];
+    if (feedback.hookIssues?.length) parts.push(`Hooks: ${feedback.hookIssues.join("; ")}`);
+    if (feedback.bodyIssues?.length) parts.push(`Bodies: ${feedback.bodyIssues.join("; ")}`);
+    if (feedback.segmentIssues?.length) parts.push(`Segments: ${feedback.segmentIssues.join("; ")}`);
+    if (feedback.ctaIssues?.length) parts.push(`CTAs: ${feedback.ctaIssues.join("; ")}`);
+    if (feedback.generalNotes?.length) parts.push(`General: ${feedback.generalNotes.join("; ")}`);
+    return parts.join("\n") + "\n";
+  })()}
+${(() => {
+    if (!existingCreatives?.length) return "";
+    const lines = existingCreatives.map((c, i) =>
+      `${i + 1}. "${c.name}" — ${c.emotion}, ${c.targetSegment || "n/a"}: ${c.hookTexts.slice(0, 2).map((h) => `"${h}"`).join(", ")}`
+    );
+    return `=== ALREADY GENERATED (create DIFFERENT ones) ===
+${lines.join("\n")}
+Use different angles, emotions, and archetypes than those listed above.
+`;
+  })()}
+=== YOUR TASK ===
+
+Generate 5 UGC text-overlay ad creative blueprints. Each is a COMPLETE, production-ready ad concept.
+
+FOR EACH CREATIVE:
+1. Choose an emotional angle informed by the intelligence above.
+2. deliveryMode is ALWAYS "text-overlay". productionStyle is ALWAYS "ugc-text-overlay".
+3. Write 5-6 HOOK VARIATIONS — same emotional territory, different archetypes, expressions, and text angles.
+   - EVERY hook: visualStyle.type = "ugc-reaction"
+   - EVERY hook: ugcArchetype (archetype ID) + ugcPromptParams (full params object)
+   - EVERY hook: 2-3 visualSuggestions with clipDuration "4s" ONLY (face clips)
+   - EVERY hook: rich Sora2 prompts following VISUAL PROMPT DEPTH + FACE CLIP RULES
+   - VARY archetypes across hooks. Don't use the same archetype for every hook.
+4. Write 2-3 BODY VARIATIONS — different ways to plainly describe the SAME product feature.
+   - Body visual is ALWAYS real screen recording. NOT Sora2.
+   - No voiceoverScript (text-overlay mode).
+5. One CTA — action verb only.
+
+JSON:
+{
+  "creatives": [
+    {
+      "rank": 1,
+      "name": "short concept name (2-4 words)",
+      "sourceAngle": "emotional territory this targets",
+      "sourceFramework": "primary psychological mechanism used",
+      "emotion": "primary emotion",
+      "platform": "TikTok or Meta/IG",
+      "format": "9:16 vertical",
+      "deliveryMode": "text-overlay",
+      "scenario": "the specific daily moment this ad intercepts",
+      "productionStyle": "ugc-text-overlay",
+      "targetSegment": "emotional angle name for broad products, segment name for specific buyers",
+      "hooks": [
+        {
+          "text": "on-screen text (5-20 words)",
+          "duration": "3s (text-overlay timing)",
+          "angle": "which psychological lever this pulls",
+          "ugcArchetype": "archetype ID from catalog (REQUIRED)",
+          "ugcPromptParams": {
+            "archetype": "archetype ID",
+            "emotion": "selected emotion from archetype array",
+            "action": "selected action from archetype array",
+            "environment": "from pool or archetype override",
+            "appearance": { "ageRange": "", "gender": "", "ethnicity": "", "build": "", "style": "", "hair": "", "details": "" }
+          },
+          "visualStyle": {
+            "type": "ugc-reaction",
+            "name": "short name describing the UGC moment",
+            "description": "what the UGC footage shows — specific enough for production"
+          },
+          "visualSuggestions": [
+            {
+              "idea": "what the viewer sees",
+              "prompt": "RICH Sora2 scene description (3-6 sentences). NO dialogue. Follow face clip rules.",
+              "clipDuration": "4s",
+              "styleTags": ["3-6 tags from catalog"]
+            }
+          ]
+        }
+      ],
+      "bodies": [
+        {
+          "text": "on-screen text: plain feature description",
+          "duration": "5s",
+          "visual": "what the screen recording shows"
+        }
+      ],
+      "cta": { "text": "Tap Below to Get It" },
+      "whyThisScript": "1-2 sentences: why this angle + archetype + emotion will convert"
+    }
+  ]
+}
+
+CRITICAL:
+1. EVERY creative is text-overlay + ugc-reaction. No exceptions.
+2. EVERY hook has ugcArchetype + ugcPromptParams. No exceptions.
+3. Each creative must explore a DIFFERENT emotional territory.
+4. Hooks must feel like real human thoughts. TikTok = casual native voice. Meta = composed but human.
+5. VARY archetypes across the 5 creatives. Use at least 4 different archetypes.
+6. The body is the SAME product feature across all creatives. Only the hook changes.
+7. ALL Sora2 clips are 4s (face clip rule). No 8s or 12s.
+8. NO metaphors, NO poetry, NO literary language. Real talk only.
+9. Return ONLY valid JSON. No markdown, no code fences.`;
 }
 
 // ============================================================

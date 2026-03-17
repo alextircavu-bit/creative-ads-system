@@ -50,7 +50,7 @@ export const SECTION_CONFIGS: Record<ESectionType, ISectionConfig> = {
     temperature: 0.4,
   },
   [ESectionType.TopCreatives]: {
-    tokens: 8000,
+    tokens: 10000,
     model: CLAUDE_MODELS.OPUS,
     temperature: 0.4,
   },

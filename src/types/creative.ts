@@ -402,6 +402,22 @@ export interface IAdSection {
   deliveryMode?: DeliveryMode;
 }
 
+export interface IUGCPromptParams {
+  archetype: string;
+  emotion: string;
+  action: string;
+  environment: string;
+  appearance: {
+    ageRange: string;
+    gender: string;
+    ethnicity: string;
+    build: string;
+    style: string;
+    hair: string;
+    details: string;
+  };
+}
+
 export interface IHookVariation {
   // --- TEXT LAYER ---
   text: string;           // On-screen caption. Full hook for text-overlay, short summary for VO+caption.
@@ -416,6 +432,9 @@ export interface IHookVariation {
   duration: string;       // Total hook duration. Sum of stitched clips.
   // --- METADATA ---
   angle: string;          // Which psychological lever this pulls
+  // --- UGC ARCHETYPE (when visual style is UGC-type) ---
+  ugcArchetype?: string;              // Which performance archetype was used
+  ugcPromptParams?: IUGCPromptParams; // The selected values from each pool
   hidden?: true;
 }
 
@@ -455,6 +474,7 @@ export interface IAdCreativeBlueprint {
   targetSegment?: string;
   whyThisTemplate?: string;
   whyThisScript?: string;
+  isUgcBatch?: boolean;
   hidden?: true;
 }
 
