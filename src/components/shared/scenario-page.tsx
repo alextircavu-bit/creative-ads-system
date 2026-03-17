@@ -13,6 +13,7 @@ import { useProgressiveGeneration } from "@/hooks/use-generation";
 import type { SectionStep } from "@/hooks/use-generation";
 import { useCreateProject, useProjectsByScenario } from "@/hooks/use-projects";
 import { generationRepository } from "@/repositories/generation.repository";
+import { projectRepository } from "@/repositories/project.repository";
 import type { ProjectInput, ScenarioType, GenerationResult, AdCreativeBlueprint, ProjectRow } from "@/types/creative";
 
 // Sidebar navigation items
@@ -92,7 +93,15 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
           ...c,
           rank: allCreatives.length + i + 1,
         }));
-        setAllCreatives((prev) => [...prev, ...reranked]);
+        const merged = [...allCreatives, ...reranked];
+        setAllCreatives(merged);
+
+        // Save merged creatives back to DB
+        const updatedResult = { ...r, topCreatives: { creatives: merged } } as GenerationResult;
+        setGenerationResult(updatedResult);
+        if (activeProjectId) {
+          await projectRepository.saveResult(activeProjectId, updatedResult).catch(() => {});
+        }
       }
     } catch (err) {
       console.error("Generate more failed:", err);
