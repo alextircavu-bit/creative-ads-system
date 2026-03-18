@@ -364,6 +364,12 @@ export type DeliveryMode =
   | "text-overlay"        // Text on screen only, no voice
   | "voiceover-caption";  // Voice narration + summary caption on screen
 
+export type AudioMode =
+  | "sora2-bleed"              // Person speaks in hook, voice carries over into body
+  | "elevenlabs-full-vo"       // Silent person, ElevenLabs narrates everything
+  | "sora2-elevenlabs-handoff" // Person speaks in hook, ElevenLabs narrator takes body
+  | "sora2-silence";           // Person speaks in hook, body is silent text-only
+
 // Visual hook styles — known archetypes + "dynamic" for Claude-generated ones
 export type VisualHookType =
   | "authority-staging"     // Borrow credibility from a recognizable context (podcast set, news desk, lecture hall)
@@ -425,6 +431,7 @@ export interface IHookVariation {
   text: string;           // On-screen caption. Full hook for text-overlay, short summary for VO+caption.
   // --- AUDIO ---
   audioSource?: HookAudioSource; // "sora2" = person speaks in clip. "elevenlabs" = separate VO over footage.
+  voiceGender?: "female" | "male"; // Voice gender for ElevenLabs or Sora2 speech
   voiceoverScript?: string; // The spoken words. If sora2: baked into Sora2 prompt. If elevenlabs: separate audio track.
   // --- VISUAL LAYER (Sora2 clips) ---
   visualStyle: IVisualStyle;              // What type of footage (podcast, scenic, street, etc.)
@@ -432,6 +439,8 @@ export interface IHookVariation {
   sora2Prompts?: ISora2Prompt[];         // Extracted Sora2 prompt payloads, 1:1 with visualSuggestions. Stamped on save.
   // --- TIMING ---
   duration: string;       // Total hook duration. Sum of stitched clips.
+  // --- MUSIC ---
+  songPath?: string;      // Song file name from SONGS catalog, matched by hook emotion/mood
   // --- METADATA ---
   angle: string;          // Which psychological lever this pulls
   // --- UGC ARCHETYPE (when visual style is UGC-type) ---
@@ -465,6 +474,7 @@ export interface IAdCreativeBlueprint {
   experienceType: string;
   productionStyle: string;
   deliveryMode: DeliveryMode;
+  audioMode?: AudioMode;
   // Multiple variations for swipeable cards
   hooks: IHookVariation[];
   bodies: IBodyVariation[];

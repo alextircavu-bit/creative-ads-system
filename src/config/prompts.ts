@@ -28,6 +28,7 @@ import {
   SORA2_STYLE_TAGS,
 } from "@/config/framework-data";
 import { UGC_ARCHETYPES, UGC_APPEARANCE_POOL, UGC_ENVIRONMENT_POOL } from "@/config/ugc-archetypes";
+import { SONGS } from "@/config/songs";
 
 function buildContext(input: ProjectInput): string {
   const base = `Product: ${input.productName}\nDescription: ${input.productDescription}`;
@@ -597,6 +598,141 @@ CRITICAL RULES:
 }
 
 // ============================================================
+// SHARED PROMPT HELPERS
+// Extracted to avoid duplication across creative prompt functions.
+// ============================================================
+
+function buildDeepDiveContext(
+  psycheMapData?: PsycheMapData,
+  salesData?: SalesPlaybookData,
+  researchData?: ResearchData,
+  creativeTreeData?: CreativeTreeData,
+): string {
+  const parts: string[] = [];
+
+  if (psycheMapData) {
+    parts.push(`=== PSYCHOLOGY ===
+Profile: ${psycheMapData.cognitiveProfile.name} — ${psycheMapData.cognitiveProfile.description || psycheMapData.cognitiveProfile.mechanism}
+Biases (ranked): ${psycheMapData.biases.slice(0, 7).map((b) => `${b.name} [${b.strength}]${b.description ? ` — ${b.description}` : ""}`).join("\n  ")}
+Pain points: ${psycheMapData.painPleasure.pains.join(" | ")}
+Pleasure points: ${psycheMapData.painPleasure.pleasures.join(" | ")}
+Dopamine: ${psycheMapData.dopamine.trigger} (${psycheMapData.dopamine.triggerPct}%) → ${psycheMapData.dopamine.schedule}
+Habit loop: ${psycheMapData.habitLoop.cue} → ${psycheMapData.habitLoop.routine} → ${psycheMapData.habitLoop.reward}`);
+  }
+
+  if (salesData) {
+    const topCialdini = salesData.cialdiniWeapons.sort((a, b) => b.power - a.power).slice(0, 3);
+    const topAwareness = salesData.awarenessLevels.sort((a, b) => b.relevance - a.relevance).slice(0, 2);
+    const objections = salesData.objectionMap?.map((o) => `"${o.objection}" → counter: ${o.hookCounter}`).join("\n  ") || "N/A";
+    const sophLevel = salesData.marketSophistication;
+    const purchCtx = salesData.purchaseContext;
+    parts.push(`=== SALES INTELLIGENCE ===
+Value Equation: Dream ${salesData.valueEquation.dreamOutcome.score} | Likelihood ${salesData.valueEquation.perceivedLikelihood.score} | Speed ${salesData.valueEquation.timeDelay.score} | Effort ${salesData.valueEquation.effortSacrifice.score}
+Top Cialdini: ${topCialdini.map((w) => `${w.name} [${w.power}] — ${w.application || ""}`).join("\n  ")}
+Best awareness levels: ${topAwareness.map((l) => `${l.name}: ${l.adStrategy}`).join("\n  ")}
+HSO hooks: ${salesData.hso.hooks.join(" | ")}
+System 1 triggers: ${salesData.system1Triggers.map((t) => t.trigger).join(", ")}
+NLP techniques: ${salesData.nlp?.techniques?.map((t) => `${t.name} [${t.power}] — ${t.productExample || t.adApplication}`).join("\n  ") || "N/A"}
+${sophLevel ? `Market Sophistication: Level ${sophLevel.level} "${sophLevel.name}" — ${sophLevel.hookStrategy}\n  Avoid: ${sophLevel.avoidance}` : ""}
+${purchCtx ? `Purchase Context: ${purchCtx.priceModel} (${purchCtx.pricePoint}) | ${purchCtx.purchaseType} purchase | Ad intensity: ${purchCtx.adIntensity}\n  ${purchCtx.reasoning}` : ""}
+${salesData.demandTemperature ? `Demand Temperature: ${salesData.demandTemperature.level.toUpperCase()} — ${salesData.demandTemperature.hookApproach}\n  Bridge weight: ${salesData.demandTemperature.bridgeWeight}` : ""}
+${salesData.objectionMap?.length ? `Buyer Objections to Neutralize:\n  ${objections}` : ""}`);
+  }
+
+  if (researchData) {
+    const segments = researchData.audienceSegments?.slice(0, 5) || [];
+    parts.push(`=== RESEARCH ===
+Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}
+${segments.length > 0 ? `Segments (ranked):\n${segments.map((s, i) => `  ${i + 1}. "${s.name}" — ${s.description}\n     Best angle: ${s.bestAngle} | ROI: ${s.predictedROI} | Conv: ${s.conversionLikelihood}%`).join("\n")}` : ""}
+${researchData.benefitExpansion ? `Benefit expansion:\n  Surface: ${researchData.benefitExpansion.surfaceBenefit}\n  Threads: ${researchData.benefitExpansion.expandedThreads.join("\n  ")}\n  Identity shift: ${researchData.benefitExpansion.identityShift}` : ""}`);
+  }
+
+  if (creativeTreeData) {
+    const sortedAngles = [...creativeTreeData.emotionalAngles].sort((a, b) => b.relevanceScore - a.relevanceScore);
+    const topAngles = sortedAngles.slice(0, 8);
+    parts.push(`=== CREATIVE TREE INTELLIGENCE ===
+Top emotional angles (by relevance):
+${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).join("\n")}
+Use these angles as INSPIRATION. You are NOT limited to them.`);
+  }
+
+  return parts.join("\n\n");
+}
+
+function buildUGCSection(): string {
+  return `=== UGC PERFORMANCE ARCHETYPES ===
+
+IMPORTANT — shock-excited is one of the MOST POWERFUL archetypes for app features. The "wait, it does THAT?" moment. Use it frequently.
+
+ARCHETYPES (pick one per UGC hook, select one emotion + one action from its arrays):
+${UGC_ARCHETYPES.map(a => `${a.id} [${a.arousal}] — ${a.description} | emotions: ${a.emotion.join(", ")} | actions: ${a.action.join(", ")}${a.environmentOverrides ? ` | env-override: ${a.environmentOverrides.join("; ")}` : ""}`).join("\n")}
+
+APPEARANCE — AUDIENCE DNA RULES (critical):
+- 80% WHITE, ATTRACTIVE (real attractive, person next door). Young women 18-34 convert best.
+- 20% Christian minorities: african-american, hispanic.
+- NEVER: asian, indian, middle-eastern.
+- Default when unsure: white, female, 22-30, natural (messy bun, minimal makeup, oversized tee).
+${Object.entries(UGC_APPEARANCE_POOL).map(([k, v]) => `${k}: ${v.join(", ")}`).join(" | ")}
+
+ENVIRONMENTS:
+${UGC_ENVIRONMENT_POOL.join(" | ")}`;
+}
+
+function buildSongsSection(): string {
+  return `=== BACKGROUND MUSIC (songPath) ===
+
+Every hook MUST select a background song. Match the hook's emotion to the song's emotion tag.
+SONG CATALOG:
+${SONGS.map(s => `${s.path} [${s.emotion}] (drop at ${s.drop_out_second}s) — ${s.description}`).join("\n")}`;
+}
+
+function buildCommonCopyRules(): string {
+  return `=== COPY QUALITY RULES ===
+- Each creative must target a DIFFERENT emotional territory.
+- ALL copy (hooks, body text, voiceover scripts) must be NATURAL FLOWING SENTENCES. How a real person talks.
+  BANNED PATTERNS:
+  - Staccato fragments: "Skip devotions. Feel guilty. Promise tomorrow. Repeat." → say "I keep telling myself I'll read my Bible tomorrow and I never do"
+  - "No X. No Y. Just Z." — the #1 ChatGPT cadence. NEVER.
+  - Manufactured numbers: "deleted my history 47 times" — nobody counted. Only numbers a person would actually know.
+  - News headline format: "Study shows 87%..." — fake statistics.
+  - Voiceover scripts have the SAME rule: write how a person actually TALKS OUT LOUD, not how a copywriter writes.
+  TEST: Read it out loud. Does it sound like a person talking to a friend? If it sounds like a copywriter, rewrite.
+- NO METAPHORS. NO POETRY. NO LITERARY LANGUAGE. Write how the TARGET AUDIENCE actually talks.
+- NEVER undermine the product: no "no app needed", "without opening anything." User MUST download the app.
+- NEVER mention "AI" unless AI is the core value prop.
+
+=== NLP IN COPY ===
+Weave naturally: presupposition, reframing, pattern interrupt, anchoring, dissociation.
+
+=== PLATFORM VOICE ===
+TikTok: casual, confessional, lowercase energy. How people actually talk on TikTok.
+Meta/IG: composed but concrete, specific details. Still human.`;
+}
+
+function buildFeedbackSection(
+  feedback?: CreativeFeedback,
+  existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+): string {
+  const parts: string[] = [];
+  if (feedback) {
+    const fb: string[] = ["=== FEEDBACK (do NOT repeat these issues) ==="];
+    if (feedback.hookIssues?.length) fb.push(`Hooks: ${feedback.hookIssues.join("; ")}`);
+    if (feedback.bodyIssues?.length) fb.push(`Bodies: ${feedback.bodyIssues.join("; ")}`);
+    if (feedback.segmentIssues?.length) fb.push(`Segments: ${feedback.segmentIssues.join("; ")}`);
+    if (feedback.ctaIssues?.length) fb.push(`CTAs: ${feedback.ctaIssues.join("; ")}`);
+    if (feedback.generalNotes?.length) fb.push(`General: ${feedback.generalNotes.join("; ")}`);
+    parts.push(fb.join("\n"));
+  }
+  if (existingCreatives?.length) {
+    const lines = existingCreatives.map((c, i) =>
+      `${i + 1}. "${c.name}" — ${c.emotion}, ${c.targetSegment || "n/a"}: ${c.hookTexts.slice(0, 2).map((h) => `"${h}"`).join(", ")}`
+    );
+    parts.push(`=== ALREADY GENERATED (create DIFFERENT ones) ===\n${lines.join("\n")}\nUse different angles, emotions, and hook structures.`);
+  }
+  return parts.join("\n\n");
+}
+
+// ============================================================
 // 5. TOP CREATIVES - Creative Engine
 // Uses ALL deep dive data as intelligence. Creative Tree provides
 // angle relevance scores and psychological mapping, but Top Creatives
@@ -743,8 +879,10 @@ Each creative must specify ONE delivery mode. MIX these across the 5 creatives:
 
   Hook "voiceoverScript" = what the person says during the hook (15-30 words). Short, punchy, conversational. Every word earns its place.
   Hook "text" = short caption summary on screen (5-15 words, the distilled punch).
-  Body "voiceoverScript" = what the narrator says over the product demo (10-20 words). Continues naturally from hook VO.
+  Body "voiceoverScript" = what the narrator says over the product demo (10-20 words). Continues naturally from hook VO. MUST end with a spoken CTA: "tap below to get it" or similar (3-5 words). The CTA is part of the body VO, never the hook.
   Body "text" = short on-screen text describing the feature.
+
+  VOICEOVER CTA RULE: When a creative uses voiceover-caption delivery mode, the body voiceoverScript ALWAYS ends with a short spoken CTA ("tap below to get it", "link in bio", "try it free"). This is the last thing the viewer hears. Keep it 3-5 words. The CTA lives in the BODY voiceover only — never in the hook voiceover.
 
   Example (BibleChat, confession framework, ~32 words total = ~15s):
     Hook voiceoverScript: "I used to set my alarm early to read my Bible. Every morning I'd scroll instead. Then I found something that meets me where I already am." (bridge: "meets me where I already am" connects failure→effortless solution)
@@ -904,6 +1042,15 @@ FOR EACH CREATIVE:
    - VARY visual styles across hooks. Don't use the same visual style for every hook.
 5. One CTA — action verb only.
 
+=== BACKGROUND MUSIC (songPath) ===
+
+Every hook MUST select a background song from the catalog below. The song sets the MOOD — it must match the hook's emotional register. Don't pick randomly. A guilt/shame hook needs a sad or nostalgic track. A shock-excited discovery hook needs an excited or happy track. A reflective confession needs nostalgic or neutral.
+
+SONG CATALOG:
+${SONGS.map(s => `${s.path} [${s.emotion}] (drop at ${s.drop_out_second}s) — ${s.description}`).join("\n")}
+
+HOW TO PICK: Match the hook's primary emotion to the song's emotion tag. If the hook is somber/guilty/reflective → sad or nostalgic. If the hook is discovery/excitement/surprise → excited or happy. If the hook is matter-of-fact/observational → neutral.
+
 === PRODUCTION PIPELINE ===
 
 Every ad is assembled from 3 layers: visual, audio, text.
@@ -1040,6 +1187,8 @@ JSON:
         {
           "text": "on-screen text: full hook for text-overlay (5-20 words), OR short caption for VO+caption (5-15 words)",
           "audioSource": "sora2 | elevenlabs — see PRODUCTION PIPELINE above. Determines how Sora2 prompt is structured.",
+          "voiceGender": "female | male — the voice gender for this hook's audio. Must match the person in the visual if ugc-reaction.",
+          "songPath": "REQUIRED. Pick from SONG CATALOG above. Must match this hook's emotion. Guilt/shame → sad/nostalgic. Discovery/surprise → excited/happy. Observational → neutral.",
           "voiceoverScript": "VO+caption ONLY (15-30 words). If sora2: what the person SAYS on camera (include in Sora2 prompt too). If elevenlabs: separate VO track. Omit for text-overlay.",
           "duration": "realistic duration. Text-overlay: '3s'. VO+caption: calculate at ~2.2 words/sec with pauses (15 words = '7s', 25 words = '11s'). Must match word count.",
           "angle": "which psychological lever this pulls",
@@ -1063,7 +1212,7 @@ JSON:
       "bodies": [
         {
           "text": "5-15 words. Narrative resolution — how the feature resolves the emotional tension from ALL hooks in this creative. NOT a product spec. NOT 'Bible verses on your lockscreen every hour.' Instead: the narrative that bridges the hook's tension to the feature experience. Must work with EVERY hook above.",
-          "voiceoverScript": "VO+caption ONLY (10-20 words). Continues from hook VO — narrates what the viewer sees. Omit for text-overlay.",
+          "voiceoverScript": "VO+caption ONLY (10-20 words). Continues from hook VO — narrates what the viewer sees. MUST end with spoken CTA ('tap below to get it' or similar, 3-5 words). Omit for text-overlay.",
           "duration": "realistic duration. Text-overlay: '5s'. VO+caption: calculate at ~2.2 words/sec.",
           "visual": "what the screen recording / product footage shows"
         }
@@ -1201,6 +1350,12 @@ ${Object.entries(UGC_APPEARANCE_POOL).map(([k, v]) => `${k}: ${v.join(", ")}`).j
 ENVIRONMENTS (random from pool, or use archetype env-override if listed):
 ${UGC_ENVIRONMENT_POOL.join(" | ")}
 
+=== BACKGROUND MUSIC (songPath) ===
+
+Every hook MUST select a background song. Match the hook's emotion to the song's emotion tag.
+SONG CATALOG:
+${SONGS.map(s => `${s.path} [${s.emotion}] (drop at ${s.drop_out_second}s) — ${s.description}`).join("\n")}
+
 === SORA2 STYLE TAG CATALOG ===
 Pick 3-6 tags per visual suggestion. Goal is RAW PHONE FOOTAGE — looks like a TikTok creator filmed it on their iPhone. NOT cinematic. NOT studio-lit. NOT professional.
 ALWAYS: iPhone front camera, handheld or propped, natural ambient light, imperfect framing.
@@ -1337,6 +1492,8 @@ JSON:
       "hooks": [
         {
           "text": "on-screen text (5-20 words)",
+          "voiceGender": "female | male — voice gender for this hook. Must match the person in the UGC visual.",
+          "songPath": "REQUIRED. Pick from SONG CATALOG. Match hook emotion: guilt/shame → sad/nostalgic. Discovery → excited/happy. Observational → neutral.",
           "duration": "3s (text-overlay timing)",
           "angle": "which psychological lever this pulls",
           "ugcArchetype": "archetype ID from catalog (REQUIRED)",
@@ -1387,6 +1544,363 @@ CRITICAL:
 9. NO metaphors, NO poetry, NO literary language. Real talk only.
 10. NEVER undermine the product: no "no app needed", "without opening anything." User MUST download the app.
 11. Return ONLY valid JSON. No markdown, no code fences.`;
+}
+
+// ============================================================
+// 5c. AUDIO MODE PROMPTS — 4 dedicated UGC audio pipeline modes
+// Each produces 3 creatives with a specific audio architecture.
+// ============================================================
+
+const AUDIO_MODE_SIGNATURE = (input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData) =>
+  `${buildContext(input)}\n\n${buildDeepDiveContext(psycheMap, sales, research, tree)}`;
+
+const AUDIO_MODE_SHARED_SECTIONS = `
+${buildUGCSection()}
+
+${buildSongsSection()}
+
+${buildCommonCopyRules()}
+
+=== PRODUCT-HOOK FIT CHECK ===
+For EVERY hook: "Does this feature ACTUALLY solve the tension I'm creating?" If not, drop the hook.
+
+=== HOOK-BODY BRIDGE ===
+Write bodies FIRST. Every hook must bridge naturally to every body. Any hook + any body = one coherent ad.
+Body text is a NARRATIVE resolution (5-15 words), NOT a product spec.
+`;
+
+// --- Mode 1: Sora2 Bleed ---
+export function sora2BleedPrompt(
+  input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
+  feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+): string {
+  return `You are a UGC ad creative strategist specializing in spoken-to-camera hooks where the voice carries over into the product demo.
+
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
+
+=== AUDIO MODE: SORA2 BLEED ===
+
+In this mode, a real person SPEAKS on camera during the hook. Their voice CONTINUES playing as the visual cuts to the body (screen recording). The person finishes their thought over the product demo footage. The video ends shortly after the voice stops — a brief visual tail, not an abrupt cut.
+
+RULES:
+- All hooks: audioSource="sora2", person speaks on camera
+- Hook voiceover script: 15-26 words MAX (must fit in one 8s or 12s Sora2 clip at 2.2 words/sec)
+- The hook VO + body VO is ONE CONTINUOUS SCRIPT. Write the full spoken script first, then split at the visual cut point.
+- The Sora2 prompt MUST include the dialogue (what the person says, tone, pace)
+- Body voiceover is the CONTINUATION — the person finishes their thought over the screen recording
+- Body VO MUST end with a spoken CTA ("tap below to get it" or similar, 3-5 words)
+- Sora2 clips: 8s or 12s (person is speaking, so longer clips are fine)
+- UGC archetypes apply — pick archetype, emotion, action, appearance, environment per hook
+
+VISUAL PROMPT RULES (UGC = RAW iPHONE):
+- iPhone front camera ONLY. Propped, handheld, leaning. NOT cinematic.
+- Sora2 prompt INCLUDES dialogue + vocal delivery description
+- Real environments, real mess, natural light. Never studio.
+- 5-8 sentences per prompt.
+
+${AUDIO_MODE_SHARED_SECTIONS}
+
+${buildFeedbackSection(feedback, existingCreatives)}
+
+=== YOUR TASK ===
+
+Generate 3 UGC creatives. audioMode="sora2-bleed" on each.
+
+FOR EACH CREATIVE:
+1. Choose an emotional territory.
+2. Write 1-2 BODY VARIATIONS FIRST — narrative resolution (5-15 words). Body VO continues from hook, ends with spoken CTA.
+3. Write UP TO 5 HOOKS — each bridges to all bodies. Person speaks on camera.
+   - voiceoverScript: what they say (15-26 words, includes hook + bleed into body)
+   - text: short on-screen caption (5-15 words)
+   - audioSource: always "sora2"
+   - voiceGender, songPath, ugcArchetype, ugcPromptParams: all REQUIRED
+   - visualSuggestions: 1-2 Sora2 clips (8s or 12s), dialogue in prompt
+4. deliveryMode: "voiceover-caption"
+5. One CTA.
+
+JSON:
+{
+  "creatives": [{
+    "rank": 1, "name": "concept name", "sourceAngle": "", "sourceFramework": "",
+    "emotion": "", "platform": "TikTok or Meta/IG", "format": "9:16 vertical",
+    "deliveryMode": "voiceover-caption", "audioMode": "sora2-bleed",
+    "scenario": "", "productionStyle": "ugc", "targetSegment": "",
+    "hooks": [{
+      "text": "caption (5-15 words)",
+      "audioSource": "sora2",
+      "voiceGender": "female | male",
+      "songPath": "from catalog",
+      "voiceoverScript": "what the person says (15-26 words)",
+      "duration": "calculated from word count",
+      "angle": "",
+      "ugcArchetype": "archetype ID",
+      "ugcPromptParams": { "archetype": "", "emotion": "", "action": "", "environment": "", "appearance": {} },
+      "visualStyle": { "type": "ugc-reaction", "name": "", "description": "" },
+      "visualSuggestions": [{ "idea": "", "prompt": "5-8 sentences, INCLUDES dialogue", "clipDuration": "8s or 12s", "styleTags": [] }]
+    }],
+    "bodies": [{
+      "text": "narrative resolution (5-15 words)",
+      "voiceoverScript": "continuation from hook VO + spoken CTA at end (10-20 words)",
+      "duration": "", "visual": "screen recording description"
+    }],
+    "cta": { "text": "Tap Below to Get It" },
+    "whyThisScript": ""
+  }]
+}
+
+Return ONLY valid JSON.`;
+}
+
+// --- Mode 2: ElevenLabs Full VO ---
+export function elevenlabsFullVOPrompt(
+  input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
+  feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+): string {
+  return `You are a UGC ad creative strategist specializing in silent UGC footage with full AI voiceover narration.
+
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
+
+=== AUDIO MODE: ELEVENLABS FULL VO ===
+
+In this mode, the footage is SILENT — no one speaks on camera. An ElevenLabs AI voice narrates over EVERYTHING (hook + body) as one continuous voiceover. The visual can be ANYTHING that stops the scroll:
+
+- A person on camera (UGC face, frozen emotion — 4s clips)
+- A person DOING something (chopping wood, cooking, walking, working out — natural activity filmed on iPhone, 4s/8s/12s clips)
+- A scene or object (Bible on nightstand, phone on table, rain on window — 4s/8s/12s)
+- Any visual style: ugc-reaction, routine-window, category-anchor, scenic-interrupt, dramatic-reenactment, product-in-context, dynamic
+
+The visual sets the MOOD. The VO tells the STORY. They must convey the same emotion but the visual is NOT limited to face clips.
+
+RULES:
+- All hooks: audioSource="elevenlabs", NO dialogue in Sora2 prompt
+- The footage is always SILENT — VO is a separate audio layer
+- The VO script is one continuous narration: hook portion + body portion
+- Hook VO: 15-30 words. Sets the emotional scene.
+- Body VO: 10-20 words. Resolves through the feature. MUST end with spoken CTA.
+- Total VO: 25-50 words across hook+body
+- Think: a friend telling a story over the footage. Conversational, not announcer-voice.
+- The visual and the VO must convey the SAME emotion
+- If the visual is a person, they NEVER speak — their body language carries emotion
+- If the visual is a scene/object/activity, it must be scroll-stopping and emotionally relevant
+
+VISUAL PROMPT RULES:
+- iPhone filmed. Real environments. Natural light. NOT cinematic.
+- NO dialogue in Sora2 prompt ever. Visual only.
+- Face clips: 4s max (frozen expression). Activity/scene clips: 4s/8s/12s all fine.
+- For people doing activities: describe natural behavior, not posed. "Man chopping wood in backyard, pauses to wipe forehead, glances at camera with tired smile" — like someone pulled out their phone and started recording their friend.
+- 5-8 sentences per prompt.
+
+${AUDIO_MODE_SHARED_SECTIONS}
+
+${buildFeedbackSection(feedback, existingCreatives)}
+
+=== YOUR TASK ===
+
+Generate 3 UGC creatives. audioMode="elevenlabs-full-vo" on each.
+
+FOR EACH CREATIVE:
+1. Choose an emotional territory.
+2. Write 1-2 BODY VARIATIONS FIRST — narrative resolution (5-15 words). Body VO ends with spoken CTA.
+3. Write UP TO 5 HOOKS — silent person on camera, ElevenLabs narrates.
+   - voiceoverScript: what the AI voice says during the hook (15-30 words)
+   - text: short on-screen caption (5-15 words)
+   - audioSource: always "elevenlabs"
+   - voiceGender, songPath, ugcArchetype, ugcPromptParams: all REQUIRED
+   - visualSuggestions: 4s clips ONLY, NO dialogue in prompt, frozen emotional state
+4. deliveryMode: "voiceover-caption"
+5. One CTA.
+
+JSON:
+{
+  "creatives": [{
+    "rank": 1, "name": "concept name", "sourceAngle": "", "sourceFramework": "",
+    "emotion": "", "platform": "TikTok or Meta/IG", "format": "9:16 vertical",
+    "deliveryMode": "voiceover-caption", "audioMode": "elevenlabs-full-vo",
+    "scenario": "", "productionStyle": "ugc", "targetSegment": "",
+    "hooks": [{
+      "text": "caption (5-15 words)",
+      "audioSource": "elevenlabs",
+      "voiceGender": "female | male",
+      "songPath": "from catalog",
+      "voiceoverScript": "ElevenLabs VO during hook (15-30 words)",
+      "duration": "calculated from VO word count",
+      "angle": "",
+      "ugcArchetype": "archetype ID",
+      "ugcPromptParams": { "archetype": "", "emotion": "", "action": "", "environment": "", "appearance": {} },
+      "visualStyle": { "type": "ugc-reaction", "name": "", "description": "" },
+      "visualSuggestions": [{ "idea": "", "prompt": "5-8 sentences, NO dialogue, frozen emotion", "clipDuration": "4s", "styleTags": [] }]
+    }],
+    "bodies": [{
+      "text": "narrative resolution (5-15 words)",
+      "voiceoverScript": "ElevenLabs VO continues + spoken CTA at end (10-20 words)",
+      "duration": "", "visual": "screen recording description"
+    }],
+    "cta": { "text": "Tap Below to Get It" },
+    "whyThisScript": ""
+  }]
+}
+
+Return ONLY valid JSON.`;
+}
+
+// --- Mode 3: Sora2 → ElevenLabs Handoff ---
+export function sora2ElevenlabsHandoffPrompt(
+  input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
+  feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+): string {
+  return `You are a UGC ad creative strategist specializing in creator-to-narrator handoff ads where the voice changes at the body.
+
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
+
+=== AUDIO MODE: SORA2 → ELEVENLABS HANDOFF ===
+
+In this mode, a real person SPEAKS on camera during the hook (Sora2 generates voice+video). At the body, a DIFFERENT ElevenLabs narrator takes over. The voice change is intentional — the creator tells their story, the narrator explains the solution.
+
+RULES:
+- Hook: audioSource="sora2", person speaks on camera (8s or 12s clips)
+- Body: different voice (ElevenLabs narrator), can be different gender
+- The HANDOFF must feel intentional: creator shares experience → narrator introduces solution
+- Hook VO: 15-26 words (fits in 12s). Personal, confessional, specific.
+- Body VO: 10-20 words. More composed, explanatory. MUST end with spoken CTA.
+- Hook voiceGender = the creator. Body can specify a different gender implicitly.
+- Sora2 prompt INCLUDES dialogue for the hook
+
+VISUAL PROMPT RULES (UGC = RAW iPHONE):
+- iPhone front camera. Real environments. Not cinematic.
+- Hook Sora2 prompt includes what the person says + vocal delivery
+- 8s or 12s clips (person speaking)
+- 5-8 sentences per prompt.
+
+${AUDIO_MODE_SHARED_SECTIONS}
+
+${buildFeedbackSection(feedback, existingCreatives)}
+
+=== YOUR TASK ===
+
+Generate 3 UGC creatives. audioMode="sora2-elevenlabs-handoff" on each.
+
+FOR EACH CREATIVE:
+1. Choose an emotional territory.
+2. Write 1-2 BODY VARIATIONS FIRST — narrative resolution (5-15 words). Body uses ElevenLabs narrator, ends with spoken CTA.
+3. Write UP TO 5 HOOKS — person speaks on camera, voice hands off to narrator at body.
+   - voiceoverScript: what the creator says (15-26 words)
+   - text: short on-screen caption (5-15 words)
+   - audioSource: always "sora2"
+   - voiceGender, songPath, ugcArchetype, ugcPromptParams: all REQUIRED
+   - visualSuggestions: 8s or 12s, dialogue in prompt
+4. deliveryMode: "voiceover-caption"
+5. One CTA.
+
+JSON:
+{
+  "creatives": [{
+    "rank": 1, "name": "concept name", "sourceAngle": "", "sourceFramework": "",
+    "emotion": "", "platform": "TikTok or Meta/IG", "format": "9:16 vertical",
+    "deliveryMode": "voiceover-caption", "audioMode": "sora2-elevenlabs-handoff",
+    "scenario": "", "productionStyle": "ugc", "targetSegment": "",
+    "hooks": [{
+      "text": "caption (5-15 words)",
+      "audioSource": "sora2",
+      "voiceGender": "female | male",
+      "songPath": "from catalog",
+      "voiceoverScript": "what creator says (15-26 words)",
+      "duration": "calculated",
+      "angle": "",
+      "ugcArchetype": "archetype ID",
+      "ugcPromptParams": { "archetype": "", "emotion": "", "action": "", "environment": "", "appearance": {} },
+      "visualStyle": { "type": "ugc-reaction", "name": "", "description": "" },
+      "visualSuggestions": [{ "idea": "", "prompt": "5-8 sentences, INCLUDES dialogue", "clipDuration": "8s or 12s", "styleTags": [] }]
+    }],
+    "bodies": [{
+      "text": "narrative resolution (5-15 words)",
+      "voiceoverScript": "ElevenLabs narrator + spoken CTA (10-20 words)",
+      "duration": "", "visual": "screen recording description"
+    }],
+    "cta": { "text": "Tap Below to Get It" },
+    "whyThisScript": ""
+  }]
+}
+
+Return ONLY valid JSON.`;
+}
+
+// --- Mode 4: Sora2 → Silence ---
+export function sora2SilencePrompt(
+  input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
+  feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+): string {
+  return `You are a UGC ad creative strategist specializing in spoken hooks that cut to silent product demos.
+
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
+
+=== AUDIO MODE: SORA2 → SILENCE ===
+
+In this mode, a real person SPEAKS on camera during the hook (Sora2). The body is COMPLETELY SILENT — screen recording with text overlay only. The silence after the person stops speaking is intentional and powerful. The body text does all the narrative work.
+
+RULES:
+- Hook: audioSource="sora2", person speaks on camera (8s or 12s clips)
+- Body: NO audio. Text overlay only. No voiceoverScript on body.
+- Hook VO: 15-26 words. Creates tension through speech.
+- Body text: narrative resolution (5-15 words). Resolves visually + with text. No voice.
+- The silence IS the transition. The person stops talking, the product appears. Don't fill it.
+- Sora2 prompt INCLUDES dialogue for the hook
+
+VISUAL PROMPT RULES (UGC = RAW iPHONE):
+- iPhone front camera. Real environments. Not cinematic.
+- Hook Sora2 prompt includes dialogue + vocal delivery
+- 8s or 12s clips (person speaking)
+- 5-8 sentences per prompt.
+
+${AUDIO_MODE_SHARED_SECTIONS}
+
+${buildFeedbackSection(feedback, existingCreatives)}
+
+=== YOUR TASK ===
+
+Generate 3 UGC creatives. audioMode="sora2-silence" on each.
+
+FOR EACH CREATIVE:
+1. Choose an emotional territory.
+2. Write 1-2 BODY VARIATIONS FIRST — narrative resolution (5-15 words). NO voiceover on body.
+3. Write UP TO 5 HOOKS — person speaks on camera, body is silent.
+   - voiceoverScript: what the person says (15-26 words)
+   - text: short on-screen caption (5-15 words)
+   - audioSource: always "sora2"
+   - voiceGender, songPath, ugcArchetype, ugcPromptParams: all REQUIRED
+   - visualSuggestions: 8s or 12s, dialogue in prompt
+4. deliveryMode: "voiceover-caption"
+5. One CTA (text only, no spoken CTA since body is silent).
+
+JSON:
+{
+  "creatives": [{
+    "rank": 1, "name": "concept name", "sourceAngle": "", "sourceFramework": "",
+    "emotion": "", "platform": "TikTok or Meta/IG", "format": "9:16 vertical",
+    "deliveryMode": "voiceover-caption", "audioMode": "sora2-silence",
+    "scenario": "", "productionStyle": "ugc", "targetSegment": "",
+    "hooks": [{
+      "text": "caption (5-15 words)",
+      "audioSource": "sora2",
+      "voiceGender": "female | male",
+      "songPath": "from catalog",
+      "voiceoverScript": "what person says (15-26 words)",
+      "duration": "calculated",
+      "angle": "",
+      "ugcArchetype": "archetype ID",
+      "ugcPromptParams": { "archetype": "", "emotion": "", "action": "", "environment": "", "appearance": {} },
+      "visualStyle": { "type": "ugc-reaction", "name": "", "description": "" },
+      "visualSuggestions": [{ "idea": "", "prompt": "5-8 sentences, INCLUDES dialogue", "clipDuration": "8s or 12s", "styleTags": [] }]
+    }],
+    "bodies": [{
+      "text": "narrative resolution (5-15 words)",
+      "duration": "5s", "visual": "screen recording description"
+    }],
+    "cta": { "text": "Tap Below to Get It" },
+    "whyThisScript": ""
+  }]
+}
+
+Return ONLY valid JSON.`;
 }
 
 // ============================================================

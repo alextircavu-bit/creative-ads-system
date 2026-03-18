@@ -24,6 +24,13 @@ export const CLAUDE_MODELS = {
 } as const;
 
 /**
+ * OpenAI GPT model identifiers
+ */
+export const GPT_MODELS = {
+  GPT4O: "gpt-4o",
+} as const;
+
+/**
  * Database table names
  */
 export const DB_TABLES = {
