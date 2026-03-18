@@ -2,15 +2,17 @@
 // Core Types - All data is AI-generated, these are the shapes
 // ============================================================
 
-export type ScenarioType = "v3" | "v4";
+export type ScenarioType = "v3" | "v4" | "v5";
 
 // V3 = mobile app ads (features, benefits, purpose)
 // V4 = any product ads (generic)
+// V5 = any product ads + GPT for creatives (comparison)
 
 export interface IProjectInput {
   scenario: ScenarioType;
   productName: string;
   productDescription: string;
+  creatorBrief?: string; // Creator's insider knowledge: winning angles, audience insights, what excites them
   // V3-specific
   featureName?: string;
   appId?: string;

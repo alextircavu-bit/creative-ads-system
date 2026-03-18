@@ -20,9 +20,12 @@ export function useProjects() {
 }
 
 export function useProjectsByScenario(scenario: ScenarioType) {
+  // V5 also loads V3 history for comparison (same mobile app form)
+  const fetchScenario = scenario === "v5" ? "v3" : scenario;
   const { data, error, isLoading, mutate } = useSWR(
     `projects-${scenario}`,
-    () => projectRepository.getByScenario(scenario)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    () => projectRepository.getByScenario(fetchScenario as any)
   );
 
   return {

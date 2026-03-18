@@ -56,10 +56,10 @@ export interface IUGCPromptParams {
 export const UGC_APPEARANCE_POOL: IUGCAppearancePool = {
   ageRange: ["18-24", "25-34", "35-44", "45-54"],
   gender: ["female", "male"],
-  ethnicity: ["caucasian", "african-american", "hispanic", "asian", "middle-eastern", "mixed"],
+  ethnicity: ["caucasian", "caucasian", "caucasian", "caucasian", "african-american", "hispanic"],
   build: ["slim", "average", "athletic", "curvy", "stocky"],
   style: ["oversized tee", "casual hoodie", "fitted tank", "work blouse", "gym clothes"],
-  hair: ["messy bun", "short crop", "loose natural", "braids", "buzz cut"],
+  hair: ["messy bun", "short crop", "loose natural", "braids", "buzz cut", "long straight", "shoulder-length wavy"],
   details: ["no makeup", "minimal makeup", "tired eyes", "glasses", "stubble", "freckles"],
 };
 

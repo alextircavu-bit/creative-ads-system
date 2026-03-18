@@ -66,8 +66,9 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
   const [productName, setProductName] = useState("");
   const [featureName, setFeatureName] = useState("");
   const [productBenefit, setProductBenefit] = useState("");
+  const [creatorBrief, setCreatorBrief] = useState("");
   const { projects } = useProjectsByScenario(scenario);
-  const isV3 = scenario === "v3";
+  const isV3 = scenario === "v3" || scenario === "v5";
 
   const handleSubmit = () => {
     if (!productName.trim()) return;
@@ -76,6 +77,7 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
       scenario,
       productName: productName.trim(),
       productDescription: productBenefit.trim(),
+      ...(creatorBrief.trim() ? { creatorBrief: creatorBrief.trim() } : {}),
     };
     if (isV3) {
       onSubmit({
@@ -104,9 +106,10 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
     }
   };
 
-  const loadFromHistory = (project: { product_name: string; product_description: string }) => {
+  const loadFromHistory = (project: { product_name: string; product_description: string; input_data?: ProjectInput }) => {
     setProductName(project.product_name);
     setProductBenefit(project.product_description);
+    setCreatorBrief(project.input_data?.creatorBrief || "");
   };
 
   // Deduplicate history - only show unique name+description combos
@@ -128,7 +131,9 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
         Creative System
       </h1>
       <p className="text-muted-foreground text-center max-w-md mb-10 text-sm leading-relaxed">
-        {scenario === "v3"
+        {scenario === "v5"
+          ? "Mobile app ads with GPT-4o creatives. Same deep dive, different creative engine. Compare with V3."
+          : scenario === "v3"
           ? "Enter a mobile app feature to generate ad blueprints, psychology analysis, and sales mechanics."
           : "Enter any product to get ready-to-run ad creatives backed by psychology and research."}
       </p>
@@ -201,6 +206,22 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
           </p>
         </div>
 
+        {/* Creator Brief - optional */}
+        <div className="mb-5">
+          <label className="block text-xs font-medium text-foreground mb-1.5">
+            Creator Brief <span className="text-muted-foreground/40 font-normal">(optional)</span>
+          </label>
+          <textarea
+            className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors resize-y min-h-[80px]"
+            placeholder="Your insider knowledge — winning angles, audience insights, what excites you about this feature. e.g. 'The guilt angle destroys for this audience' or 'Sunday school teachers are an untapped goldmine'"
+            value={creatorBrief}
+            onChange={(e) => setCreatorBrief(e.target.value)}
+          />
+          <p className="mt-1.5 text-[11px] text-muted-foreground/60 leading-relaxed">
+            What you know that the AI doesn&apos;t. Winning hooks, audience secrets, angles that convert.
+          </p>
+        </div>
+
         <button
           className="w-full rounded-md bg-primary text-primary-foreground font-medium py-2.5 px-6 text-sm transition-colors hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
           onClick={handleSubmit}
@@ -255,9 +276,12 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
                       {p.product_name}
                       {p.feature_name && <span className="text-muted-foreground font-normal"> — {p.feature_name}</span>}
                     </div>
-                    {p.product_description && (
-                      <div className="text-[10px] text-muted-foreground/40 truncate mt-0.5">{p.product_description.slice(0, 80)}</div>
-                    )}
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] text-muted-foreground/30">{new Date(p.created_at).toLocaleDateString()} {new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                      {p.product_description && (
+                        <span className="text-[10px] text-muted-foreground/40 truncate">{p.product_description.slice(0, 60)}</span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button

@@ -110,6 +110,8 @@ function PhoneMockup({
   accentTo: string;
 }) {
   const [current, setCurrent] = useState(0);
+  // Reset to 0 if items shrink below current index
+  const safeIndex = items.length > 0 ? Math.min(current, items.length - 1) : 0;
   const prev = useCallback(() => setCurrent((c) => (c - 1 + items.length) % items.length), [items.length]);
   const next = useCallback(() => setCurrent((c) => (c + 1) % items.length), [items.length]);
 
@@ -128,13 +130,13 @@ function PhoneMockup({
             </span>
             {items.length > 1 && (
               <span className="text-[9px] text-white/20 font-mono">
-                {current + 1}/{items.length}
+                {safeIndex + 1}/{items.length}
               </span>
             )}
           </div>
 
           <div className="flex-1 flex items-center justify-center px-2">
-            {renderOverlay(items[current], current)}
+            {items[safeIndex] && renderOverlay(items[safeIndex], safeIndex)}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -159,7 +161,7 @@ function PhoneMockup({
                       key={i}
                       type="button"
                       onClick={() => setCurrent(i)}
-                      className={`h-1 rounded-full transition-all ${i === current ? "bg-white/60 w-4" : "bg-white/15 w-1.5"}`}
+                      className={`h-1 rounded-full transition-all ${i === safeIndex ? "bg-white/60 w-4" : "bg-white/15 w-1.5"}`}
                     />
                   ))}
                 </div>
@@ -189,16 +191,16 @@ function PhoneMockup({
       </div>
 
       {items.length > 0 && (() => {
-        const timing = calculateSectionTiming(items[current].text, "text-overlay", section);
+        const timing = calculateSectionTiming(items[safeIndex]?.text || "", "text-overlay", section);
         return (
           <div className="flex items-center gap-2 mt-2 text-[9px] text-muted-foreground/30">
             <span className="font-mono">{timing.wordCount}w</span>
             <span className="text-muted-foreground/15">|</span>
             <span className="font-mono">{timing.recommendedSec}s</span>
-            {items[current].sub && (
+            {items[safeIndex]?.sub && (
               <>
                 <span className="text-muted-foreground/15">|</span>
-                <span className="truncate max-w-[120px]">{items[current].sub}</span>
+                <span className="truncate max-w-[120px]">{items[safeIndex]?.sub}</span>
               </>
             )}
           </div>
@@ -207,6 +209,7 @@ function PhoneMockup({
     </div>
   );
 }
+
 
 export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratingMore }: TopCreativesTabProps) {
   const [deliveryFilter, setDeliveryFilter] = useState<string | null>(null);
@@ -360,14 +363,12 @@ export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratin
                   accentFrom="from-black"
                   accentTo="to-neutral-900"
                   renderOverlay={(item, index) => {
-                    // Get the current hook's visual style
                     const currentHook = hooks[index] || hooks[0];
                     const vs = currentHook?.visualStyle;
                     const hasVO = !!item.voiceoverScript;
 
                     return (
                       <div className="text-center px-3 flex flex-col gap-2">
-                        {/* Visual style tag + duration */}
                         <div className="flex justify-center items-center gap-1.5">
                           {vs && vs.name && (
                             <span className={`px-2 py-0.5 rounded-md text-[8px] font-medium border ${VISUAL_STYLE_COLORS[vs.type] || VISUAL_STYLE_COLORS.dynamic}`}>
@@ -380,13 +381,11 @@ export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratin
                             </span>
                           )}
                         </div>
-                        {/* Caption (on-screen text) */}
                         <div className="bg-white/[0.08] backdrop-blur-xl rounded-2xl border border-white/[0.12] px-4 py-5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                           <p className={`text-white leading-tight tracking-tight ${hasVO ? "font-semibold text-sm" : "font-black text-lg"}`}>
                             {item.text}
                           </p>
                         </div>
-                        {/* Voiceover script */}
                         {hasVO && (
                           <div className="bg-white/[0.04] rounded-xl border border-white/[0.06] px-3 py-2.5 text-left">
                             <div className="flex items-center gap-1.5 mb-1.5">
@@ -427,7 +426,6 @@ export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratin
                   accentTo="to-black"
                   renderOverlay={(item) => (
                     <div className="text-center px-2 flex flex-col gap-3">
-                      {/* Duration tag */}
                       {item.duration && (
                         <div className="flex justify-center">
                           <span className="px-1.5 py-0.5 rounded-md text-[8px] font-medium bg-white/[0.06] text-white/40 border border-white/[0.08]">
