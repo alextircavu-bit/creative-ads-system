@@ -5,6 +5,7 @@
 // ============================================================
 
 import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData, CreativeTreeData, CreativeFeedback } from "@/types/creative";
+import type { ICreativeSynthesis } from "@/types/creative";
 import {
   EMOTIONAL_ANGLES,
   FRAMEWORKS,
@@ -29,14 +30,15 @@ import {
 } from "@/config/framework-data";
 import { UGC_ARCHETYPES, UGC_APPEARANCE_POOL, UGC_ENVIRONMENT_POOL } from "@/config/ugc-archetypes";
 import { SONGS } from "@/config/songs";
+import { HOOK_FORMATS } from "@/config/hook-formats";
+import { UGC_VISUAL_ARCHETYPES } from "@/config/ugc-visual-archetypes";
 
 function buildContext(input: ProjectInput): string {
   const base = `Product: ${input.productName}\nDescription: ${input.productDescription}`;
-  const brief = input.creatorBrief ? `\n\n=== CREATOR BRIEF (privileged — this is insider knowledge from the person who knows this product best) ===\n${input.creatorBrief}` : "";
   if (input.scenario === "v3" || input.scenario === "v5") {
-    return `${base}\nType: Mobile App\nFeature Being Marketed: ${input.featureName || "N/A"}\nApp Features: ${input.appFeatures || "N/A"}\nApp Benefits: ${input.appBenefits || "N/A"}\nApp Purpose: ${input.appPurpose || "N/A"}${brief}`;
+    return `${base}\nType: Mobile App\nFeature Being Marketed: ${input.featureName || "N/A"}\nApp Features: ${input.appFeatures || "N/A"}\nApp Benefits: ${input.appBenefits || "N/A"}\nApp Purpose: ${input.appPurpose || "N/A"}`;
   }
-  return `${base}\nTarget Audience: ${input.targetAudience || "N/A"}\nUSP: ${input.uniqueSellingPoint || "N/A"}${brief}`;
+  return `${base}\nTarget Audience: ${input.targetAudience || "N/A"}\nUSP: ${input.uniqueSellingPoint || "N/A"}`;
 }
 
 // ============================================================
@@ -196,9 +198,10 @@ Purchase Context:
 How the product is sold calibrates ad intensity. A free app download needs soft CTAs ("try it"). A $299 course needs hard conviction-building. Impulse purchases need urgency. Considered purchases need trust. This directly affects hook aggression, CTA wording, and body framing.
 
 Demand Temperature:
-How much existing desire/awareness exists for this product in the market. This is NOT about message saturation (that's Market Sophistication) — this is about whether people already WANT what you're selling or if you need to CREATE the want.
-- LOW: Nobody's searching for this. You must manufacture desire through relatable scenarios. Hooks CANNOT lead with the product — they lead with emotion/scenario and let the product reveal itself. Heavy bridge work needed. (e.g., lockscreen Bible verses — nobody wakes up wanting this)
-- MEDIUM: People know the problem but aren't actively shopping for this solution. Bridge from their existing desire to your product. (e.g., calorie tracker — people want to eat better but aren't comparing apps)
+How much existing desire exists for the OUTCOME this product delivers — NOT the specific mechanism/feature. Evaluate demand for what the user GETS, not how the product delivers it.
+- LOW: Nobody wants the outcome. You must create desire from scratch. (e.g., a product solving a problem nobody knows they have)
+- MEDIUM: People want the outcome but aren't actively shopping for solutions. Bridge from their existing desire to your product. (e.g., calorie tracker — people want to eat better but aren't comparing apps)
+IMPORTANT: A lockscreen Bible verse widget is NOT low demand. The OUTCOME (daily Scripture, consistent faith habit) is HIGH demand — millions of Christians want this. The mechanism (lockscreen widget) is new, but you sell the OUTCOME not the mechanism. Evaluate demand for what the user GETS.
 - HIGH: People are actively looking. Product sells itself. Lead with features, social proof, comparisons. Minimal bridge needed. (e.g., iPhone case — people are already searching)
 
 === YOUR TASK ===
@@ -342,7 +345,9 @@ export function researchPrompt(input: ProjectInput, psycheMapData?: PsycheMapDat
     previousContext.push(`Best Awareness Level: ${salesData.awarenessLevels.sort((a, b) => b.relevance - a.relevance)[0]?.name}`);
   }
 
-  return `You are an elite ad researcher. I'm giving you a HARDCODED research methodology framework. Your job is to personalize every step for this specific product. Do NOT change the methodology - only personalize the content.
+  const creatorBrief = input.creatorBrief ? `\n\n=== CREATOR BRIEF (privileged insider knowledge — this person knows the product and audience intimately. Weight this HEAVILY in your research.) ===\n${input.creatorBrief}` : "";
+
+  return `You are an elite ad researcher. I'm giving you a HARDCODED research methodology framework. Your job is to personalize every step for this specific product. Do NOT change the methodology - only personalize the content.${creatorBrief}
 
 ${buildContext(input)}
 
@@ -444,6 +449,15 @@ Generate a JSON object. Keep all framework structure intact. ONLY personalize co
     "identityShift": "PERSONALIZE: In one sentence, who does this person become after adopting this product? The before→after identity transformation."
   },
 
+  "viewerScenarios": [
+    "CRITICAL: Generate 10-15 SPECIFIC real-life moments where the target audience would encounter or need this product. NOT abstract segments. NOT time-of-day patterns. SPECIFIC situations from the viewer's actual life.",
+    "Each scenario = a sentence describing WHERE the person is + WHAT they're doing + WHY this product fits that moment.",
+    "Examples for a food scanner app: 'standing in grocery store aisle trying to pick between two protein bars', 'at restaurant wondering if the salad is actually healthy', 'meal prepping on Sunday and guessing portions'",
+    "Examples for a Bible app: 'phone buzzing with notifications and one of them is a verse', 'opening phone to scroll and seeing Scripture before Instagram loads', 'friend texts a prayer request and you want to respond with a verse but can't think of one'",
+    "These scenarios become the RAW MATERIAL for hooks. The more specific and varied, the better the hooks will be.",
+    "VARY the scenarios: different locations, different emotional states, different triggers. NOT all sad. NOT all guilty. NOT all the same time of day.",
+    "Include at least 2-3 POSITIVE/EXCITING scenarios (discovery, flex, surprise) not just pain/guilt scenarios."
+  ],
   "preCreativeChecklist": ["10 checklist items specific to ${input.productName} that must be verified before creating ads"]
 }
 
@@ -494,8 +508,8 @@ Closing Techniques: ${salesData.closingTechniques.map((t) => t.name).join(", ")}
       : "";
     contextParts.push(`=== RESEARCH DATA ===
 Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}${segmentContext}
-Key Insights: ${researchData.shadowAvatarSteps.map((s) => s.description).join(" → ")}
-Pre-Creative Checklist: ${researchData.preCreativeChecklist.slice(0, 5).join("; ")}`);
+Key Insights: ${(researchData.shadowAvatarSteps || []).map((s) => s.description).join(" → ")}
+Pre-Creative Checklist: ${(researchData.preCreativeChecklist || []).slice(0, 5).join("; ")}`);
   }
 
   const anglesJSON = EMOTIONAL_ANGLES.map((a) => ({
@@ -641,10 +655,11 @@ ${salesData.objectionMap?.length ? `Buyer Objections to Neutralize:\n  ${objecti
 
   if (researchData) {
     const segments = researchData.audienceSegments?.slice(0, 5) || [];
+    const scenarios = researchData.viewerScenarios?.length ? `\nVIEWER SCENARIOS (use these as hook inspiration — these are SPECIFIC moments from the audience's life):\n${researchData.viewerScenarios.map((s, i) => `  ${i + 1}. ${s}`).join("\n")}` : "";
     parts.push(`=== RESEARCH ===
 Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}
 ${segments.length > 0 ? `Segments (ranked):\n${segments.map((s, i) => `  ${i + 1}. "${s.name}" — ${s.description}\n     Best angle: ${s.bestAngle} | ROI: ${s.predictedROI} | Conv: ${s.conversionLikelihood}%`).join("\n")}` : ""}
-${researchData.benefitExpansion ? `Benefit expansion:\n  Surface: ${researchData.benefitExpansion.surfaceBenefit}\n  Threads: ${researchData.benefitExpansion.expandedThreads.join("\n  ")}\n  Identity shift: ${researchData.benefitExpansion.identityShift}` : ""}`);
+${researchData.benefitExpansion ? `Benefit expansion:\n  Surface: ${researchData.benefitExpansion.surfaceBenefit}\n  Threads: ${researchData.benefitExpansion.expandedThreads.join("\n  ")}\n  Identity shift: ${researchData.benefitExpansion.identityShift}` : ""}${scenarios}`);
   }
 
   if (creativeTreeData) {
@@ -653,7 +668,8 @@ ${researchData.benefitExpansion ? `Benefit expansion:\n  Surface: ${researchData
     parts.push(`=== CREATIVE TREE INTELLIGENCE ===
 Top emotional angles (by relevance):
 ${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).join("\n")}
-Use these angles as INSPIRATION. You are NOT limited to them.`);
+Use these angles as INSPIRATION. You are NOT limited to them.
+IMPORTANT: If VIEWER SCENARIOS are listed in the Research section above, build hooks FROM those specific moments. They are real-life situations the audience lives in — much stronger than abstract emotional territories.`);
   }
 
   return parts.join("\n\n");
@@ -678,6 +694,40 @@ ENVIRONMENTS:
 ${UGC_ENVIRONMENT_POOL.join(" | ")}`;
 }
 
+function buildVisualArchetypesSection(): string {
+  return `=== UGC VISUAL ARCHETYPE LIBRARY ===
+
+Select the archetype by WHERE the person naturally IS when they'd have this thought.
+
+ARCHETYPES (use the FULL description template, audio, color, camera, and locked details):
+${UGC_VISUAL_ARCHETYPES.map(a => `${a.id}: ${a.name}
+  Description template: ${a.descriptionTemplate}
+  Audio: ${a.audioPrompt}
+  Color: ${a.colorGrade}
+  Camera: ${a.cameraSummary}
+  Locked details: ${a.lockedDetails}
+  Vibe: ${a.authenticityTagline}`).join("\n\n")}
+
+VOICELINE RULES:
+- Must sound like speech, not copy
+- The person is mid-thought when the clip starts
+- Contractions, filler words, and incomplete sentences are correct
+- Delivery adapts to archetype: whispered in Whispering/Secret, projected in Walking & Talking, intimate in Storytime Closeup, raised in Car Confession, casual in Bed Scroll
+- Punctuation controls TTS delivery: use "..." for pauses, "—" for breaks, "?" for uptick. "an hourly lockscreen widget tap below" reads robotic. "a verse shows up... like, every hour? on your lockscreen. tap below to get it" reads human.`;
+}
+
+function buildHookFormatsSection(): string {
+  return `=== SPEAKING HOOK FORMATS (for voiceover/speaking hooks) ===
+
+For every SPEAKING hook, use one of these proven UGC formats. Each is a scaffold — fill it with the product's content. VARY formats across hooks.
+
+${HOOK_FORMATS.map(f => `${f.id.toUpperCase()}: ${f.structure}
+  Example: "${f.example}"
+  Energy: ${f.energy}`).join("\n\n")}
+
+CRITICAL: The script follows the FORMAT'S structure but the WORDS are messy, natural speech with fillers, pauses, and restarts. The format is the skeleton. The flesh is how a real person on TikTok would say it.`;
+}
+
 function buildSongsSection(): string {
   return `=== BACKGROUND MUSIC (songPath) ===
 
@@ -687,26 +737,98 @@ ${SONGS.map(s => `${s.path} [${s.emotion}] (drop at ${s.drop_out_second}s) — $
 }
 
 function buildCommonCopyRules(): string {
-  return `=== COPY QUALITY RULES ===
-- Each creative must target a DIFFERENT emotional territory.
-- ALL copy (hooks, body text, voiceover scripts) must be NATURAL FLOWING SENTENCES. How a real person talks.
-  BANNED PATTERNS:
-  - Staccato fragments: "Skip devotions. Feel guilty. Promise tomorrow. Repeat." → say "I keep telling myself I'll read my Bible tomorrow and I never do"
-  - "No X. No Y. Just Z." — the #1 ChatGPT cadence. NEVER.
-  - Manufactured numbers: "deleted my history 47 times" — nobody counted. Only numbers a person would actually know.
-  - News headline format: "Study shows 87%..." — fake statistics.
-  - Voiceover scripts have the SAME rule: write how a person actually TALKS OUT LOUD, not how a copywriter writes.
-  TEST: Read it out loud. Does it sound like a person talking to a friend? If it sounds like a copywriter, rewrite.
-- NO METAPHORS. NO POETRY. NO LITERARY LANGUAGE. Write how the TARGET AUDIENCE actually talks.
-- NEVER undermine the product: no "no app needed", "without opening anything." User MUST download the app.
-- NEVER mention "AI" unless AI is the core value prop.
+  return `=== THE 2-3 SECOND TEST ===
+Every hook must grab in 2-3 seconds or it's dead. Before writing any hook, ask: "Would I stop scrolling for this?" If no, don't write it.
 
-=== NLP IN COPY ===
-Weave naturally: presupposition, reframing, pattern interrupt, anchoring, dissociation.
+=== HOOK ENERGY (vary across creatives — NOT just confession) ===
+The hook's energy depends on the PRODUCT and AUDIENCE. Different products trigger different emotions. DO NOT default to quiet confession for everything.
+- DISCOVERY/SHOCK: "ok so I literally just found out you can get Bible verses on your lockscreen" — works for features people don't know exist
+- HYPE/FLEX: "He learned this in just 3 days OMGG" — works for visible results, transformations
+- COMEDIC: "how it feels to skip a day on duolingo" + absurd visual — works for brands with meme culture
+- CONFRONTATIONAL: calling the viewer out directly on a behavior they recognize
+- FOMO: everyone knows about this except you
+- CONFESSION: vulnerable, quiet, personal — VALID but not the only gear. Currently over-produced.
+- PRODUCT-VOICE: the app itself talking — "did you skip your spanish lesson? see you soon"
+The hook is the audience's DOPAMINE TRIGGER. What do they already crave, fear, or obsess over? Put THAT in the hook.
+
+=== WHAT MAKES A HOOK GOOD ===
+- It uses a word that TARGETS the audience: "Bible" targets Christians, "macro" targets gym people, "streak" targets Duolingo users. The targeting is in the vocabulary.
+- It creates CURIOSITY or TENSION that the body resolves.
+- The visual + text + audio work as ONE UNIT. Sometimes the face carries it, sometimes the text, sometimes the sound. Whichever is strongest leads.
+- It sounds like something a real person would POST, not something a copywriter would write.
+
+GOOD HOOKS (real examples):
+- "I literally found out you can get Bible verses on your lockscreen" — native speech, product-specific, curious
+- "He learned this in just 3 days OMGG" — excitement, real number, platform-native energy
+- "how it feels to skip a day on duolingo" — meme format, humor
+- "I hated that I couldn't stay consistent with the Bible" — personal, specific pain, no literary language
+
+=== AI SLOP DETECTION (if it sounds like any of these, REWRITE) ===
+BANNED — these are patterns that make ads feel generic, AI-generated, and unconverting:
+- Banner ad text: "Watch yourself become someone you don't recognize" → rewrite as "I hated that I couldn't stay consistent with the Bible"
+- Church/motivational marketing: "a gentle way back that meets you where you are", "start where you actually are, not where you pretend to be"
+- Netflix narration: parallel structures "Someone who... Someone who... Someone who..."
+- Staccato: "Tomorrow I'll read. Tomorrow I'll pray. Tomorrow never comes."
+- "No X. No Y. Just Z." — the #1 ChatGPT cadence.
+- Therapy vocabulary: "anchored", "grounded", "centered", "aligned", "transformed", "reclaimed", "spiritually"
+- Copywriter before/after: "I used to wake up anxious. Now I wake up anchored."
+- Editorial questions: "How do I raise kids who love God when I barely know Him myself?"
+- Claims/conclusions: "The spiritual routine I actually stick to"
+- Generic excitement: "I can't believe this is free" — could be about anything
+- Manufactured numbers: "deleted my history 47 times" — nobody counted
+- News headlines: "Study shows 87%..."
+THE TEST: If you could paste this into ChatGPT and get the same output, it's slop. Rewrite it.
+
+=== BODY TEXT ===
+Body text is PLAIN. What the feature does, in the audience's own simple words. 5-15 words.
+- GOOD: "a new verse shows up on your lockscreen every hour"
+- BAD: "Scripture on your phone, all day, every day" (tagline, means nothing specific)
+- BAD: "Finally, a gentle way back that meets you where you are" (motivational poster)
+The screen recording SHOWS the feature. The text CONFIRMS it in plain words. That's it.
+
+=== VOICEOVER SCRIPTS (for speaking modes) ===
+VO scripts are how a REAL PERSON TALKS, not how a copywriter writes.
+- Real speech has filler words: "like", "literally", "honestly", "ok so", "I mean"
+- Real speech is messy: starts mid-thought, discovers the idea while talking, pauses, restarts
+- Real speech is NOT: parallel structures, clean arcs, polished sentences, Netflix narration
+- BAD VO: "Every night, same time, same racing thoughts. But now when I check my phone, there's this verse just sitting there."
+- GOOD VO: "ok so like... every night I grab my phone because I literally cannot sleep and last night there was just a verse on my lockscreen and I was like wait what"
 
 === PLATFORM VOICE ===
-TikTok: casual, confessional, lowercase energy. How people actually talk on TikTok.
-Meta/IG: composed but concrete, specific details. Still human.`;
+TikTok: casual, native, filler words, lowercase energy. "ok but why did no one tell me about this"
+Meta/IG: composed but concrete, specific details. Still human, not literary.
+
+=== NLP IN COPY ===
+Weave naturally: presupposition, reframing, pattern interrupt, anchoring, dissociation. The viewer should never notice the technique.
+
+- NEVER undermine the product: no "no app needed", "without opening anything."
+- NEVER mention "AI" unless AI is the core value prop.
+- NEVER repeat the same emotional territory more than twice across creatives. Force variety.
+- NEVER default to "2am/3am/late night" as a scenario. Time of day is not an emotional territory.
+- If the feature is PERSONAL, NEVER write hooks about children/parenting/family/spouse. The user is the only person in the ad.
+- Avoid heavy religious words in hooks: "sin", "sinful", "repent" — use how the audience actually describes the behavior.
+- NEVER use manufactured numbers: "47 apps", "150 times", "96 times a day". Only real numbers a person would know.`;
+}
+
+function buildSynthesisContext(synthesis?: ICreativeSynthesis): string {
+  if (!synthesis) return "";
+  return `=== CREATIVE BRIEF (this is your PRIMARY context — use THIS, not raw data) ===
+
+FEATURE: ${synthesis.feature}
+MECHANIC: ${synthesis.mechanic}
+AUDIENCE: ${synthesis.audience}
+THEIR VOCABULARY: ${synthesis.vocabulary.join(", ")}
+DOPAMINE TRIGGER: ${synthesis.dopamineTrigger}
+
+VIEWER SCENARIOS (build hooks FROM these specific moments):
+${synthesis.viewerScenarios.map((s, i) => `${i + 1}. ${s}`).join("\n")}
+
+HOOK ENERGIES THAT WORK: ${synthesis.hookEnergies.join(" | ")}
+
+ANGLES TO AVOID:
+${synthesis.anglesToAvoid.map(a => `- ${a}`).join("\n")}
+
+BODY TEXT OPTIONS: ${synthesis.bodyTexts.join(" | ")}`;
 }
 
 function buildFeedbackSection(
@@ -733,6 +855,61 @@ function buildFeedbackSection(
 }
 
 // ============================================================
+// 4.5. CREATIVE SYNTHESIS — Distills deep dive into actionable brief
+// This is the BRIDGE between deep dive intelligence and creative generation.
+// Cheap Sonnet call that extracts only what matters for writing hooks.
+// ============================================================
+
+export function creativeSynthesisPrompt(
+  input: ProjectInput,
+  psycheMapData?: PsycheMapData,
+  salesData?: SalesPlaybookData,
+  researchData?: ResearchData,
+  creativeTreeData?: CreativeTreeData,
+): string {
+  const deepDive = buildDeepDiveContext(psycheMapData, salesData, researchData, creativeTreeData);
+
+  return `You are a creative strategist who distills research into actionable briefs for ad copywriters.
+
+${buildContext(input)}
+
+${deepDive}
+
+Your job: Read ALL the deep dive intelligence above and produce a SHORT, FOCUSED creative brief. This brief will be the ONLY context an ad copywriter receives. Everything they need to write great hooks must be in this brief. Nothing else.
+
+RULES:
+- Be SPECIFIC, not abstract. "Christians aged 22-35 who feel guilty about not reading Scripture" not "faith-seeking audience."
+- Vocabulary must be ACTUAL WORDS the audience uses on TikTok/Instagram. Not marketing words. Not therapy words.
+- Viewer scenarios must be SPECIFIC MOMENTS in real life, not emotional categories. "Sitting in car after work, scrolling before going inside" not "moment of reflection."
+- Dopamine trigger = what makes this specific audience stop scrolling for THIS product. One sentence.
+- Angles to avoid = hooks that DON'T connect to what this feature actually does. Be specific about WHY.
+- Body texts = 1-2 plain descriptions of what the feature does, in the audience's simple words. NOT motivational. NOT taglines.
+
+JSON:
+{
+  "feature": "What the feature literally does in one plain sentence",
+  "mechanic": "EXACTLY how it works — frequency, trigger, limitations. e.g. 'A new verse appears on the lockscreen every hour. 24 verses per day. The user sees it when they check the time or pick up their phone. It does NOT change per phone check — only hourly.'",
+  "audience": "Who buys this — specific demographics, psychographics, in plain words",
+  "vocabulary": ["10-15 words/phrases the audience ACTUALLY uses when talking about this topic on TikTok or Instagram — pulled from the research above"],
+  "dopamineTrigger": "One sentence: what makes this audience stop scrolling for this product",
+  "viewerScenarios": [
+    "7-10 SPECIFIC moments from the audience's real life where this feature fits. Different locations, times, emotional states. NOT all guilty. NOT all late-night. Include 2-3 positive/exciting scenarios.",
+    "e.g. 'Picking up phone to scroll Instagram and seeing a verse before the app opens'",
+    "e.g. 'Friend asks for a prayer and you glance at your lockscreen verse for inspiration'"
+  ],
+  "hookEnergies": ["3-5 hook energies that work for this product+audience. e.g. 'discovery — they don't know this exists', 'confession — they feel guilty about phone habits', 'shock — the feature seems too easy'"],
+  "anglesToAvoid": [
+    "Specific angles that DON'T work and WHY. e.g. 'Parenting hooks — this is a personal feature, kids don't interact with it'",
+    "e.g. 'Late-night-only hooks — the feature works all day, not just at night'",
+    "e.g. 'Numbers over 24 — the verse changes hourly, there are only 24 per day'"
+  ],
+  "bodyTexts": ["1-2 plain descriptions of the feature in audience words. e.g. 'a new verse shows up on your lockscreen every hour'"]
+}
+
+Return ONLY valid JSON.`;
+}
+
+// ============================================================
 // 5. TOP CREATIVES - Creative Engine
 // Uses ALL deep dive data as intelligence. Creative Tree provides
 // angle relevance scores and psychological mapping, but Top Creatives
@@ -747,6 +924,7 @@ export function topCreativesPrompt(
   creativeTreeData?: CreativeTreeData,
   feedback?: CreativeFeedback,
   existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+  synthesis?: ICreativeSynthesis,
 ): string {
   // === DEEP DIVE INTELLIGENCE ===
   const contextParts: string[] = [];
@@ -798,11 +976,16 @@ ${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).j
 Use these angles as INSPIRATION. You are NOT limited to them — if you see a stronger angle from the psychology/research data, use it.`);
   }
 
-  return `You are an elite performance creative strategist who creates ads that stop thumbs and convert. You have DEEP psychological intelligence about this product's audience. Use it ALL.
+  // Use synthesis brief as primary context when available, fall back to raw deep dive
+  const intelligenceContext = synthesis
+    ? buildSynthesisContext(synthesis)
+    : contextParts.join("\n\n");
+
+  return `You are an elite performance creative strategist who creates ads that stop thumbs and convert.
 
 ${buildContext(input)}
 
-${contextParts.join("\n\n")}
+${intelligenceContext}
 
 === AD STRUCTURE ===
 
@@ -893,6 +1076,14 @@ Each creative must specify ONE delivery mode. MIX these across the 5 creatives:
 
 Choose the delivery mode that SERVES the visual hook style. A street interview is voiceover-caption. A scenic vista with text is text-overlay. A person confessing to camera is voiceover-caption. A talking head reacting is voiceover-caption.
 
+=== SPEAKING HOOK FORMATS (for voiceover-caption hooks) ===
+
+When writing VO hooks where a person speaks on camera, use one of these proven UGC formats:
+${HOOK_FORMATS.map(f => `${f.id.toUpperCase()}: ${f.structure}`).join("\n")}
+
+The script follows the FORMAT'S structure but the WORDS are messy natural speech — fillers, pauses, restarts. NOT polished copy read aloud.
+For SPEAKING hooks, include ALL precision fields in ugcPromptParams: eyeDirection, toneOfVoice, speakingPace, facialMicroExpression, bodyPosture, handBehavior, headMovement, pausePoints, voiceBreak, fillerWords, backgroundAmbience, breathingCue.
+
 === VISUAL HOOK STYLES ===
 
 The visual hook is what STOPS THE SCROLL before the text even registers. Think like a clip farmer: what footage would you source or film for this product?
@@ -908,7 +1099,7 @@ KNOWN VISUAL HOOK TYPES:
 - "narrative-animation": Animated or illustrated storytelling. Signals "this is a story, not an ad." Lowers ad resistance. Works for: complex products, story-driven hooks, abstract concepts.
 - "ugc-reaction": A real person on camera with a specific behavioral energy. The person IS the hook — their face, their reaction, their moment.
   HOW TO THINK ABOUT UGC: Take the product's core benefit or feature → imagine the MOMENT a real person experiences it → what does their face do? What do they say? That reaction IS the ad.
-  Examples: Calorie tracker → person scans their work lunch, eyes widen: "wait, there's 40g of protein in this?" (shock-excited). Bible app → person caught scrolling at 2am, pauses, sees a verse appear on lockscreen (caught-guilty → relief). Fitness app → person steps on scale after 2 weeks, slow nod, quiet smile (skeptic-converted).
+  Examples: Calorie tracker → person scans their work lunch, eyes widen: "wait, there's 40g of protein in this?" (shock-excited). Bible app → person checks their phone and a verse is just there on the lockscreen (discovery → surprise). Fitness app → person steps on scale after 2 weeks, slow nod, quiet smile (skeptic-converted). Dog training app → dog does a perfect sit, owner's jaw drops (hype/flex).
   UGC is NOT limited to "wow" products. Every product has a moment where the user FEELS something — surprise, guilt, relief, curiosity, calm. That feeling is the archetype. See UGC PERFORMANCE ARCHETYPES below for 14 specific behavioral energies.
   Works for: literally any product. The question is never "does UGC fit?" — it's "which human moment fits?"
 - "dramatic-reenactment": Acted-out relatable scenario. Skit, POV, mini-drama. Person in the situation the hook describes. Works for: relatable pain points, confession hooks, challenge hooks.
@@ -1011,22 +1202,34 @@ For EVERY hook, ask: "Does this specific feature ACTUALLY solve the tension I'm 
 - The hook's tension must be DIRECTLY resolvable by what the feature does. Not by the broader app. Not by the brand. By THIS SPECIFIC FEATURE.
 - If you can't imagine the body text naturally completing the hook's thought through the feature, the hook doesn't fit. Drop it.
 
+HARD BANS (these fail the fit check EVERY time):
+- If the feature is PERSONAL (lockscreen verse, chat, quiz, daily plan): NEVER write hooks about children, parenting, family, spouse, or "modeling faith." The user is the ONLY person in the ad.
+- NEVER write "2am", "3am", "midnight", "late night" as a default scenario. Time of day is NOT an emotional territory.
+- NEVER repeat the same emotional territory more than TWICE across all creatives.
+- NEVER use manufactured numbers: "47 apps", "150 times", "96 times a day", "50+ times." Only real numbers.
+- NEVER overpromise: the hook must not imply capabilities the feature doesn't have. If the verse changes HOURLY, don't write hooks implying it changes every time you check (that's 80+ times, not 24). Match the hook's claim to the feature's actual behavior.
+- NEVER write niche-clever hooks that almost nobody relates to (e.g., "Bible verse tattoo feels like mockery"). Prioritize BROAD RELATABILITY — the hook should hit 80%+ of the target audience, not 0.1%.
+
 === HOW HOOKS AND BODIES CONNECT ===
-Within each creative, EVERY hook must bridge naturally to EVERY body. The viewer can see any hook paired with any body — and it must feel like one continuous ad.
+Within each creative, EVERY hook must bridge naturally to EVERY body. The viewer can see any hook paired with any body — and it must feel like one thought.
 
 HOW TO ACHIEVE THIS:
 1. First, decide on the emotional TERRITORY for this creative.
-2. Write the BODY text (1-2 variations) — this is the narrative resolution. It describes how the feature resolves tensions from this territory. The feature functionality is the constant. The body text is the NARRATIVE that binds the hook to the feature.
-   - Body text is NOT a product spec sheet. NOT "Bible verses appear on your lockscreen every hour automatically."
-   - Body text IS a narrative continuation. It answers the emotional tension with how the feature changes the person's experience.
-   - Keep body text SHORT: 5-15 words. It appears on screen for 5 seconds.
-3. Write UP TO 5 HOOKS — each creates a different tension within this territory. Only include a hook if it bridges to ALL the body variations. If a hook only works with one body but not the other, drop the hook.
+2. Write the BODY text (1-2 variations) — this is a PLAIN, SIMPLE description of what the feature does, in the TARGET AUDIENCE'S OWN WORDS.
+   - Body text is NOT a narrative. NOT a motivational quote. NOT a reframe. NOT "Start where you actually are, not where you pretend to be."
+   - Body text IS what the feature does, said simply: "a verse shows up on your lockscreen every hour" or "Scripture pops up every time you check your phone"
+   - Match the audience's vocabulary: zoomers say "pops up", millennials say "shows up", older audiences say "appears on your phone." Use THEIR words.
+   - 5-15 words. Plain. Simple. The screen recording shows it, the text confirms it.
+   - The hook does the emotional work. The body just shows what the thing does.
+3. Write UP TO 5 HOOKS — each creates a different tension within this territory. Only include a hook if reading the hook followed by the body feels like one natural thought.
+   BRIDGE TEST: Read the hook, then the body. Does the viewer think "oh, that's what fixes it"? If yes, the bridge works. If the body feels disconnected or like a different ad, drop the hook.
+   The bridge is NOT a literary construction. It happens naturally when the hook creates a need and the body plainly shows what fills it.
 
 FOR EACH CREATIVE:
 1. Choose an emotional territory informed by the intelligence above.
 2. Choose a DELIVERY MODE (text-overlay or voiceover-caption). Mix across creatives.
 3. Write 1-2 BODY VARIATIONS FIRST.
-   - Body text = narrative resolution that bridges ANY hook in this territory to the feature. 5-15 words.
+   - Body text = what the feature does, in the audience's own simple words. 5-15 words. Plain language.
    - Body visual = ALWAYS real screen recording / product footage. NOT Sora2 generated.
    - For VO+caption: the voiceover continues from the hook (same speaker). It narrates what the viewer sees on screen.
 4. Write UP TO 5 HOOK VARIATIONS — same emotional territory, different angles. Only include hooks that bridge to ALL bodies.
@@ -1102,71 +1305,150 @@ ${UGC_ENVIRONMENT_POOL.join(" | ")}
 
 For each UGC hook, output "ugcArchetype" (the ID) and "ugcPromptParams": { archetype, emotion, action, environment, appearance: { ageRange, gender, ethnicity, build, style, hair, details } }. Use these params to write the Sora2 scene description below.
 
-=== VISUAL PROMPT DEPTH (UGC = RAW PHONE FOOTAGE) ===
+${buildVisualArchetypesSection()}
 
-The "prompt" field on each visualSuggestion becomes the direct input to Sora2. BLAND PROMPTS = BLAND VIDEO. CINEMATIC PROMPTS = FAKE-LOOKING VIDEO THAT GETS SCROLLED PAST.
+=== HOW TO WRITE SORA2 DESCRIPTIONS (mandatory for every visualSuggestion) ===
 
-Think like a TikTok creator grabbing their phone to record. NOT like a cinematographer. Every prompt must answer:
-1. WHO — specific person (age, build, skin tone, hair, expression, wardrobe). REAL people. Messy hair, no makeup, wrinkled sleep shirt, bags under eyes. NOT models. NOT styled.
-2. WHERE — their actual environment. Unmade bed, cluttered desk, car with water bottles in the cupholder, couch with a blanket. REAL mess. NOT a set. NOT clean. NOT styled.
-3. HOW IT'S CAPTURED — iPhone front camera ONLY for UGC. Propped on nightstand, dashboard mount, held at arm's length, leaning against something on a desk. The angle should be what a real person would do — slightly off-center, maybe tilted, not perfectly framed.
-4. LIGHT — whatever light is naturally in the room. Overhead bedroom light. Car dashboard glow + street lights. Lamp on nightstand. Kitchen fluorescent. NEVER studio lighting, NEVER ring lights, NEVER "warm key light camera-left." Just describe the actual light source a person would have.
-5. MOTION — one subtle micro-behavior. Glances down, slight head shake, bites lip, adjusts phone angle. ONE thing. Not choreographed.
-6. MOOD — the emotional register. Raw, unfiltered, authentic.
+Every description MUST:
+1. Start with "UGC-style [archetype name]."
+2. Name the person type
+3. Place them in the archetype's physical environment
+4. Include ALL of that archetype's locked sensory details (from the archetype library above)
+5. Inject the emotional tone and voiceline from the hook
+6. Include the archetype's AUDIO PROMPT — what the viewer hears, at what quality, with what environmental bleed
+7. Include the archetype's COLOR GRADE — how the light source affects skin tones and environment color
+8. Include the archetype's CAMERA SUMMARY line
+9. End with the archetype's AUTHENTICITY TAGLINE adapted to the specific scenario
+10. Assign the MOOD ARC from the hook emotion
+
+Every description MUST NOT:
+1. Use cinematic language — no "soft lighting," no "beautiful composition," no "warm key light"
+2. Over-describe — stay at "describing the clip to a friend" density
+3. Add details that wouldn't actually be in that environment
+4. Describe gestures as choreography — only incomplete, unconscious movements
+5. Exceed the natural duration of the moment
+6. Clean up the audio — imperfection is the signature
+7. Apply cinematic color grading — naturalistic UGC color only
+8. Use tripods, professional cameras, ring lights, or any production equipment
+
+Select the archetype by WHERE the person naturally IS when they'd have this thought:
+- After work in car = Car Confession
+- In bed scrolling = Bed Scroll / Pillow Talk
+- Walking somewhere = Walking & Talking
+- Showing their phone screen = Screen Record + Face Cam
+- Telling a close story = Storytime Closeup
+- Making a point emphatically = Zoom-In Emphasis
+- Showing what they see = POV / First Person
+- Interrupted mid-filming = Caught Off Guard
+- Calling a friend = Fake FaceTime
+- Whispering a secret = Whispering / Secret
+- No face, aesthetic mood = Lo-Fi Text on B-Roll
+- Showing proof on their phone = Over-the-Shoulder Demo
 
 TWO MODES — the Sora2 prompt structure depends entirely on whether the person SPEAKS:
 
-MODE 1: TEXT-OVERLAY (person does NOT speak — voiceline_script is null):
-The person is a FROZEN EMOTIONAL STATE. They are NOT about to talk. NOT "sharing a secret." NOT "conspiratorially leaning in." They are FEELING something — and the text overlay articulates what they feel. The 4s clip captures ONE micro-moment of reaction.
-- Describe what they FEEL, not what they're about to SAY
-- ONE frozen expression: "mid-realization, eyes slightly widened, mouth barely open" or "staring at nothing, jaw tight, tired resignation"
-- ONE micro-behavior: tiny eyebrow raise, slight lip press, slow blink. That's it. No speech-implying actions.
-- The text overlay does the talking. The face does the feeling. They are two layers of the same emotion.
-- NEVER describe: "about to share," "conspiratorial energy," "speaking with excitement," "whispering" — these all imply speech that never happens.
+MODE 1: TEXT-OVERLAY 4s CLIPS (person does NOT speak — voiceline_script is null):
+
+The person is a FROZEN EMOTIONAL STATE. 4 seconds. ONE moment. The text overlay does the talking, the face does the feeling.
+
+SORA2 4s CLIP CONSISTENCY RULES (critical — prevents artifacts, glitches, degeneration):
+- NEVER describe movement transitions. No "shifts from X to Y" or "begins to smile." ONE STATIC STATE.
+- Keep the subject CENTERED and STILL. Minimal motion = cleaner generation. The ONLY motion is ONE micro-behavior (blink, eyebrow twitch, slight head tilt). Nothing else moves.
+- ALWAYS specify EXACT camera position: "iPhone front camera propped on [surface] at [height] relative to face, [distance] away." Be precise. Vague camera = inconsistent framing.
+- ALWAYS specify EXACT lighting source and direction: "warm bedside lamp to the LEFT casting soft shadow on RIGHT side of face." Not just "warm light." Direction + source + shadow behavior.
+- ALWAYS specify skin texture: "visible pores on nose, slight under-eye darkness, natural skin shine on forehead." This prevents the AI-smooth-skin look.
+- ALWAYS specify clothing wrinkles/texture: "faded oversized grey cotton tee with stretched collar, slight pilling on shoulder." Not just "oversized tee."
+- ALWAYS specify background OBJECTS (at least 3): "half-empty water glass, phone charger cable, crumpled tissue on nightstand." Specific clutter prevents generic backgrounds.
+- ALWAYS specify image noise/quality: "iPhone 13 front camera sensor noise visible in shadows, slight warm color cast, compression artifacts in dark areas." This sells the phone-filmed look.
+- Face should fill 50-70% of frame. Not too close (distortion), not too far (loses expression).
+- MOUTH IS CLOSED or barely parted. Never open-mouth expressions — Sora2 generates teeth artifacts.
+- Eyes have ONE direction with ONE micro-break: "looking at camera, brief glance down-left." Not "gazing contemplatively" (vague).
+
+PROMPT STRUCTURE FOR 4s CLIPS (follow this exact order, 8-10 sentences):
+1. Person description: ethnicity, age, specific hair (color, style, stray strands), specific clothing with texture/wear details
+2. Skin/face details: under-eye state, makeup level, facial hair, specific imperfections
+3. Body position: EXACT posture, what each hand is doing, body angle relative to camera
+4. Environment: EXACT location with 3+ specific background objects, surface textures
+5. Camera: EXACT device, EXACT mounting position, distance, angle, framing percentage
+6. Lighting: EXACT source, direction, shadow behavior, color temperature, secondary ambient
+7. Expression: ONE frozen micro-expression tied to one specific facial muscle group
+8. Micro-behavior: ONE tiny movement over the 4 seconds (blink, jaw clench, nostril flare)
+9. Image quality: sensor noise, color cast, compression, focus softness
+10. Overall mood: one word emotional register
+
+BAD 4s PROMPT (vague, will produce artifacts):
+"Woman sitting in bed looking at phone with a guilty expression. Warm bedroom lighting. Shot on iPhone."
+
+GOOD 4s PROMPT (specific, consistent generation):
+"White woman, 23, dirty blonde hair in messy low bun with two loose strands framing face, faded oversized grey cotton tee with stretched collar showing collarbone, no makeup. Slight under-eye darkness, natural skin shine on forehead and nose bridge, tiny dry patch on lower lip. Sitting upright against fabric headboard, left hand resting on pulled-up knee, right hand loosely holding phone face-down on lap. Unmade bed with bunched cream duvet, half-empty water glass and phone charger cable on pine nightstand, laundry basket visible in corner. iPhone 13 propped against a book on the nightstand, front camera at eye level, 2 feet away, face fills 60% of frame, slightly off-center to the right. Warm yellow bedside lamp on left casting soft directional shadow on right cheekbone, overhead light off, faint blue glow from window behind. Eyes looking directly at camera lens, still, jaw slightly tight — one slow blink at the 2-second mark. Visible iPhone sensor noise in shadow areas, slight warm color cast, soft focus falloff on background. Resignation."
 
 MODE 2: VOICEOVER-CAPTION (person SPEAKS on camera — audioSource="sora2"):
-INCLUDE the dialogue in the prompt. Describe vocal delivery (tone, pace, emotion). Time visual action to dialogue. 8s and 12s are fine.
+INCLUDE the dialogue in the prompt. Describe vocal delivery (tone, pace, emotion). Time visual action to dialogue. 8s and 12s are fine. Use ALL speaking precision fields.
 
 UGC FACE CLIP RULES:
-- MAXIMUM 4s per clip with a SILENT face (text-overlay). Speaking faces (audioSource="sora2") can use 8s/12s.
-- ONE expression per clip. Single emotional state, not a transition.
-- ONE gaze direction with one micro-variation. Primary anchor + one small movement.
-- Phone glow is NEVER the sole light source. Always a stronger ambient source.
-- Do NOT show the phone screen in frame. Phone can be in hand but angled away.
-- Camera = how a real TikTok creator would film. Propped on nightstand, dashboard mount, handheld at arm's length.
+- 4s for SILENT faces (text-overlay). 8s/12s for SPEAKING faces.
+- ONE expression per clip. Single emotional state.
+- ONE gaze direction + one micro-variation.
+- Phone glow is NEVER the sole light source.
+- No phone screen visible in frame.
+- MOUTH CLOSED for silent clips. Open-mouth = teeth artifacts in Sora2.
+- Camera = real TikTok creator setup. Propped on nightstand, dashboard mount, arm's length.
 
-BAD UGC PROMPT (cinematic + implies speech in a non-speaking clip):
-"A woman in her late 20s sits in a warm, softly lit bedroom. Key light from camera-left casts gentle shadows. Shot on Sony FX3 with 35mm f/1.4, shallow depth of field. She leans in conspiratorially, eyes wide with excitement about sharing this secret."
+=== THE 2-3 SECOND TEST ===
+Every hook must grab in 2-3 seconds or it's dead. Before writing any hook, ask: "Would I stop scrolling for this?" If no, don't write it.
 
-GOOD UGC PROMPT (raw phone footage, frozen emotional state, no speech implied):
-"White woman early 20s, blonde hair in messy bun with loose strands, oversized white tee, no makeup, slightly flushed cheeks. Sitting cross-legged on unmade bed, crumpled duvet pushed to one side, half-empty water glass on nightstand. Warm yellow lamp on nightstand casting soft uneven light across her face, overhead light off. iPhone propped against pillow at slightly low angle, front camera, off-center framing — her face fills right two-thirds of frame. She's mid-realization — eyes widened slightly, mouth barely open, frozen in that split-second of recognition. Completely still except for a tiny eyebrow raise. Grainy low-light iPhone footage, slight lens warmth."
+=== HOOK ENERGY (vary across creatives — NOT just confession) ===
+The hook's energy depends on the PRODUCT and AUDIENCE. Different products trigger different dopamine responses. DO NOT default to quiet confession for everything.
+- DISCOVERY/SHOCK: "ok so I literally just found out you can get Bible verses on your lockscreen" — for features people don't know exist
+- HYPE/FLEX: "He learned this in just 3 days OMGG" — for visible results
+- COMEDIC: meme formats, absurd visuals, brand humor — for products with meme culture
+- CONFRONTATIONAL: calling the viewer out on a behavior they recognize
+- FOMO: everyone knows about this except you
+- CONFESSION: vulnerable, quiet, personal — VALID but not the only gear
+- PRODUCT-VOICE: the app itself talking — "did you skip your spanish lesson? see you soon"
+The hook is the audience's DOPAMINE TRIGGER. What do they already crave, fear, or obsess over? Put THAT in the hook.
 
-PROMPT LENGTH: 5-8 sentences. Each sentence adds a layer — person, environment, objects, light, camera, expression, texture. Short prompts produce generic video.
+=== AI SLOP DETECTION ===
+BANNED — if it sounds like any of these, REWRITE:
+- Banner ad text: "Watch yourself become someone you don't recognize"
+- Church/motivational: "a gentle way back that meets you where you are"
+- Netflix narration: "Someone who... Someone who... Someone who..."
+- Staccato: "Tomorrow I'll read. Tomorrow I'll pray. Tomorrow never comes."
+- "No X. No Y. Just Z."
+- Therapy vocab: "anchored", "grounded", "centered", "aligned", "transformed", "reclaimed", "spiritually"
+- Copywriter before/after: "I used to X. Now I Y." with poetic vocab
+- Editorial questions: "How do I raise kids who love God?"
+- Claims/conclusions: "The spiritual routine I actually stick to"
+- Generic excitement: "I can't believe this is free"
+- Manufactured numbers: "47 times" — only numbers a person would actually know
+THE TEST: If you could paste this into ChatGPT and get the same output, it's slop.
 
-QUALITY RULES:
-- Each creative must target a DIFFERENT emotional territory. No two creatives hitting the same emotion.
-- Hooks are NATURAL FLOWING SENTENCES. How a person talks, texts, or thinks internally.
-  BANNED PATTERNS (these are AI signatures that kill authenticity):
-  - Staccato fragments: "Skip devotions. Feel guilty. Promise tomorrow. Repeat." — real people don't talk in period-separated fragments. They say "I keep telling myself I'll read my Bible tomorrow and I never do."
-  - "No X. No Y. Just Z." pattern: "No fluff. No filler. Just results." — this is the #1 most recognizable ChatGPT cadence. NEVER use it.
-  - Manufactured specific numbers: "deleted my history 47 times this year" — nobody counted. Use numbers only when a person would actually KNOW that number ("I have 3 Bible apps" is real, "I've sinned 47 times" is not).
-  - News headline format: "Study shows 87% of Christians..." — fake statistics, nobody believes these.
-  - Semicolon lists disguised as sentences.
-  TEST: Read the hook out loud. Does it sound like something a person would actually SAY to a friend? Or does it sound like a copywriter wrote it? If the latter, rewrite it.
-- NO METAPHORS. NO POETRY. NO LITERARY LANGUAGE. Real people don't say "spiritually starving in a feast" or "drowning in a sea of distraction." They say "I own three Bibles and haven't opened one in six months" or "I set my alarm to pray and hit snooze every single time." Write how the TARGET AUDIENCE actually talks — their vocabulary, their sentence structure, their level of articulation. A 22-year-old on TikTok talks differently than a 45-year-old mom on Instagram. Match the real person, not the poet.
-  BAD: "you ever realize you're spiritually starving while sitting in front of a feast?"
-  GOOD: "I have every Bible app on my phone and I still don't read Scripture"
-  BAD: "lost in the noise of modern life"
-  GOOD: "I scroll for two hours every night and then wonder why I feel empty"
-- Stay in the product's world. Faith app = faith/scripture/God language. Calorie app = food/body/eating language. Don't drift into generic self-improvement.
-- NO fake statistics ("97% of people..."). NO quotation-mark emphasis. NO exclamation marks.
-- Every hook must pass the "would a real person say this out loud to a friend?" test. If it sounds like a sermon, a poem, or ad copy, rewrite it in plain language.
-- NO PROXY EMBARRASSMENT. Never use children, family members, friends, or partners as the source of shame/guilt. The emotion must come from WITHIN the viewer, not from a fictional third party judging them.
-- NEVER imply the viewer doesn't need the app. Phrases like "no app needed", "without any app", "you don't even need to open an app" are FORBIDDEN. If the product has a widget or feature that works outside the main app (lockscreen, widget, notification), it's still PART of the app being sold. The viewer MUST download the app to get the feature. Don't undermine the product you're advertising.
-- NEVER use the word "AI" or "artificial intelligence" in hooks or body copy unless the product's core value proposition IS its AI. For most products, "AI" is an implementation detail, not a selling point. Sell the OUTCOME, not the technology.
-- Use at least 3 different hook STRUCTURES across the 5 creatives (question, reframe, confession, challenge, social proof, founder, provocation)
-- Use at least 3 different VISUAL HOOK STYLES across the 5 creatives. Don't default to the same visual approach for every creative.
-- TikTok hooks MUST sound like a real person posted it. Meta hooks can be more composed. Match the platform voice.
+=== WHAT MAKES A HOOK GOOD ===
+- Uses a word that TARGETS the audience: "Bible" targets Christians, "macro" targets gym people
+- Creates CURIOSITY or TENSION the body resolves
+- Sounds like something a real person would POST on TikTok, not write in an essay
+- GOOD: "I literally found out you can get Bible verses on your lockscreen"
+- GOOD: "I hated that I couldn't stay consistent with the Bible"
+- BAD: "Watch yourself become someone you don't recognize"
+- BAD: "The spiritual routine I actually stick to"
+
+=== BODY TEXT ===
+PLAIN. What the feature does, in the audience's own simple words. 5-15 words.
+- GOOD: "a new verse shows up on your lockscreen every hour"
+- BAD: "Scripture on your phone, all day, every day" (tagline)
+- BAD: "a gentle way back that meets you where you are" (motivational poster)
+
+=== ADDITIONAL RULES ===
+- Stay in the product's world. Faith = faith language. Food = food language. Don't drift into generic self-improvement.
+- NO fake statistics. NO quotation-mark emphasis. NO exclamation marks.
+- NO PROXY EMBARRASSMENT. Emotion comes from WITHIN the viewer, not from children/family/friends judging them.
+- NEVER undermine the product: no "no app needed", "without opening anything."
+- NEVER mention "AI" unless AI is the core value prop.
+- Use at least 3 different hook ENERGIES across creatives. Not all confession. Not all discovery.
+- Use at least 3 different VISUAL HOOK STYLES. Don't default to the same visual.
+- NEVER repeat the same emotional territory more than twice. If 2 creatives are "temptation", the rest MUST be different.
+- Avoid heavy religious vocabulary in hooks: "sin", "sinful", "repent", "transgression" — nobody talks like this on TikTok. Use how the audience ACTUALLY describes the behavior.
+- TikTok = real person energy. Meta = composed but still human. Match the platform.
 
 JSON:
 {
@@ -1191,7 +1473,8 @@ JSON:
           "songPath": "REQUIRED. Pick from SONG CATALOG above. Must match this hook's emotion. Guilt/shame → sad/nostalgic. Discovery/surprise → excited/happy. Observational → neutral.",
           "voiceoverScript": "VO+caption ONLY (15-30 words). If sora2: what the person SAYS on camera (include in Sora2 prompt too). If elevenlabs: separate VO track. Omit for text-overlay.",
           "duration": "realistic duration. Text-overlay: '3s'. VO+caption: calculate at ~2.2 words/sec with pauses (15 words = '7s', 25 words = '11s'). Must match word count.",
-          "angle": "which psychological lever this pulls",
+          "angle": "which psychological lever this pulls — MUST reference the specific feature name and explain how the feature resolves this hook's tension",
+          "qualityCheck": "REQUIRED. Answer ALL: (1) Does this hook contain a manufactured/fake number? If yes, REWRITE or REMOVE. (2) Does the feature actually do what this hook implies? If no, REMOVE. (3) Would 80%+ of the target audience relate to this? If no, REMOVE. (4) Does this sound like ChatGPT or a real person? If ChatGPT, REWRITE.",
           "ugcArchetype": "REQUIRED for ugc-reaction hooks. The archetype ID from the UGC PERFORMANCE ARCHETYPES catalog (e.g. 'shock-excited', 'caught-guilty'). Omit for non-UGC hooks.",
           "ugcPromptParams": "REQUIRED for ugc-reaction hooks. { archetype, emotion, action, environment, appearance: { ageRange, gender, ethnicity, build, style, hair, details } } — all selected from the archetype's arrays and global pools. Omit for non-UGC hooks.",
           "visualStyle": {
@@ -1201,17 +1484,26 @@ JSON:
           },
           "visualSuggestions": [
             {
-              "idea": "what the viewer sees in this clip segment",
-              "prompt": "RICH scene description for Sora2 (3-6 sentences). Follow VISUAL PROMPT DEPTH rules above. Must include: specific person details, environment with lived-in texture, exact camera/device, lighting sources with imperfections, physical micro-behaviors, mood. If audioSource='sora2': INCLUDE dialogue and vocal delivery. If 'elevenlabs': visual only, no speech.",
-              "clipDuration": "4s | 8s | 12s (Sora2 lengths only). Clips stitch to cover hook duration. FACE RULE: If this is a SILENT face clip (text-overlay UGC where person is NOT speaking), clipDuration MUST be '4s'. If the person SPEAKS on camera (audioSource='sora2'), 8s and 12s are fine — speech anchors facial coherence.",
-              "styleTags": ["Pick 3-6 tags from the SORA2 STYLE TAG CATALOG below. Choose tags that match THIS specific clip's creative intent."]
+              "archetype": "UGC visual archetype ID from library (car-confession, bed-scroll, walking-talking, storytime-closeup, etc.)",
+              "description": "Full Sora-ready description at conversational density. Start with 'UGC-style [archetype name].' MUST include: (1) person type in archetype's physical environment (2) ALL locked sensory details from that archetype (3) audio signature — what viewer hears, environmental bleed (4) color grade — how light affects skin/environment (5) camera summary (6) authenticity tagline adapted to this scenario. Weave ALL into one natural paragraph. 6-10 sentences.",
+              "voiceline_script": "what they say (if speaking) or null (if text-overlay silent clip)",
+              "clipDuration": "4s for silent face | 8s or 12s for speaking",
+              "duration_seconds": "number matching natural moment length",
+              "audio_prompt": "archetype audio signature + scenario-specific sounds",
+              "color_grade": "archetype color signature applied to this specific environment",
+              "camera": "archetype camera summary line",
+              "styleTags": ["UGC-style [archetype]", "iPhone [model]", "[archetype-specific imperfection]", "[environment]", "[audio signature]"],
+              "authenticity_tagline": "archetype tagline adapted to this scenario",
+              "mood_arc": "from hook emotion",
+              "negative_prompt": "what to AVOID for this scenario — cinematic language, studio lighting, tripods, etc."
             }
           ]
         }
       ],
       "bodies": [
         {
-          "text": "5-15 words. Narrative resolution — how the feature resolves the emotional tension from ALL hooks in this creative. NOT a product spec. NOT 'Bible verses on your lockscreen every hour.' Instead: the narrative that bridges the hook's tension to the feature experience. Must work with EVERY hook above.",
+          "text": "PLAIN FEATURE DESCRIPTION. 5-15 words. What the feature LITERALLY does. Example for lockscreen verse: 'a new verse shows up on your lockscreen every hour'. Example for daily plan: 'it picks a verse, a prayer, and a devotional for you every morning'. NO motivational language. NO 'it knows what you need'. NO 'builds your faith routine'. Just the MECHANIC of what the feature does, in simple words.",
+          "bridgeCheck": "REQUIRED. For EACH hook above, write one sentence proving the body connects. Format: 'Hook [text] → Body works because [reason]'. If you cannot write this for a hook, REMOVE that hook.",
           "voiceoverScript": "VO+caption ONLY (10-20 words). Continues from hook VO — narrates what the viewer sees. MUST end with spoken CTA ('tap below to get it' or similar, 3-5 words). Omit for text-overlay.",
           "duration": "realistic duration. Text-overlay: '5s'. VO+caption: calculate at ~2.2 words/sec.",
           "visual": "what the screen recording / product footage shows"
@@ -1231,7 +1523,7 @@ CRITICAL:
 5. MIX visual hook styles. The visual is what stops the scroll. Reason about what footage THIS audience would stop for.
 6. Write bodies FIRST, then hooks. Every hook must bridge to every body within the same creative.
 7. EVERY creative MUST include: hooks (up to 5), bodies (1-2), and cta. Do NOT skip bodies.
-8. Body text is a NARRATIVE resolution (5-15 words), NOT a product spec sheet.
+8. Body text is PLAIN — what the feature does in the audience's own simple words (5-15 words).
 9. NEVER undermine the product: no "no app needed", "without opening anything", "no app to open." The user MUST download the app.
 10. Return ONLY valid JSON. No markdown, no code fences.`;
 }
@@ -1250,6 +1542,7 @@ export function ugcCreativesPrompt(
   creativeTreeData?: CreativeTreeData,
   feedback?: CreativeFeedback,
   existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+  synthesis?: ICreativeSynthesis,
 ): string {
   // === DEEP DIVE INTELLIGENCE (reuse same context builder as topCreativesPrompt) ===
   const contextParts: string[] = [];
@@ -1300,11 +1593,15 @@ ${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).j
 Use these angles as INSPIRATION. You are NOT limited to them — if you see a stronger angle from the psychology/research data, use it.`);
   }
 
-  return `You are an elite UGC performance creative strategist. You create text-overlay ads featuring raw, authentic UGC-reaction footage. Every creative you produce uses a real person's face and reaction as the scroll-stopper.
+  const intelligenceContext = synthesis
+    ? buildSynthesisContext(synthesis)
+    : contextParts.join("\n\n");
+
+  return `You are an elite UGC performance creative strategist. You create text-overlay ads featuring raw, authentic UGC-reaction footage.
 
 ${buildContext(input)}
 
-${contextParts.join("\n\n")}
+${intelligenceContext}
 
 === UGC-ONLY BATCH CONSTRAINTS ===
 
@@ -1370,34 +1667,43 @@ ${SORA2_STYLE_TAGS.map(c => `${c.category.toUpperCase()}: ${c.tags.join(", ")}`)
 - No phone screen visible in frame.
 - Camera = real TikTok creator. iPhone propped on nightstand, dashboard mount, held at arm's length.
 
-=== CRITICAL: NON-SPEAKING UGC PROMPT RULES ===
+${buildVisualArchetypesSection()}
 
-This is a TEXT-OVERLAY batch. The person NEVER speaks. voiceline_script is always null.
+=== CRITICAL: NON-SPEAKING UGC 4s CLIP RULES ===
 
-The person is a FROZEN EMOTIONAL STATE. They are NOT about to talk. NOT "sharing a secret." NOT "conspiratorially leaning in." They are FEELING something — and the text overlay articulates what they feel.
-- Describe what they FEEL, not what they're about to SAY
-- ONE frozen expression: "mid-realization, eyes slightly widened, mouth barely open" or "staring at nothing, jaw tight, tired resignation"
-- ONE micro-behavior: tiny eyebrow raise, slight lip press, slow blink. That's it.
-- NEVER describe: "about to share," "conspiratorial energy," "speaking with excitement," "whispering" — these imply speech that never happens.
-- The text overlay does the talking. The face does the feeling. Two layers of the same emotion.
+This is a TEXT-OVERLAY batch. The person NEVER speaks. voiceline_script is always null. 4 seconds. ONE frozen moment.
+For text-overlay, use the archetype's environment and camera setup but the person is FROZEN — one expression, no speech. The archetype sets WHERE they are and HOW it's filmed. The text overlay does the talking.
 
-=== VISUAL PROMPT DEPTH (UGC = RAW PHONE FOOTAGE) ===
+SORA2 4s CONSISTENCY RULES (prevents artifacts, glitches, degeneration):
+- Subject CENTERED and STILL. Only ONE micro-behavior (blink, eyebrow twitch, jaw clench). Nothing else moves.
+- NEVER describe movement transitions. No "shifts from X to Y." ONE STATIC STATE.
+- MOUTH CLOSED or barely parted. Never open-mouth — Sora2 generates teeth artifacts.
+- EXACT camera position: "iPhone front camera propped on [surface] at [height], [distance] away"
+- EXACT lighting: source, direction, shadow behavior, color temperature
+- EXACT skin texture: "visible pores, slight under-eye darkness, natural skin shine on forehead"
+- EXACT clothing detail: "faded grey cotton tee with stretched collar, slight pilling on shoulder"
+- At least 3 SPECIFIC background objects: "half-empty water glass, charger cable, crumpled tissue"
+- Image quality markers: "iPhone 13 sensor noise in shadows, warm color cast, compression in dark areas"
+- Face fills 50-70% of frame. Not too close, not too far.
+- NEVER: speech-implying actions ("about to share", "conspiratorial", "whispering")
 
-The "prompt" field is the direct input to Sora2. CINEMATIC PROMPTS = FAKE VIDEO THAT GETS SCROLLED PAST.
+PROMPT STRUCTURE (follow this exact order, 8-10 sentences):
+1. Person: ethnicity, age, specific hair (color, style, stray strands), clothing with texture/wear
+2. Face: under-eye state, makeup level, skin imperfections
+3. Body: EXACT posture, what each hand does, angle relative to camera
+4. Environment: EXACT location, 3+ specific background objects, surface textures
+5. Camera: EXACT device, mounting position, distance, angle, framing %
+6. Lighting: EXACT source, direction, shadow behavior, color temp, secondary ambient
+7. Expression: ONE frozen micro-expression tied to one facial muscle group
+8. Micro-behavior: ONE tiny movement over 4 seconds (blink, jaw clench, nostril flare)
+9. Image quality: sensor noise, color cast, compression, focus softness
+10. Mood: one word
 
-Think like a TikTok creator grabbing their phone. Every prompt must answer:
-1. WHO — real person. Messy hair, no makeup, wrinkled sleep shirt. NOT styled. NOT models.
-2. WHERE — their actual room. Unmade bed, cluttered desk, car with stuff in cupholder. REAL mess. Specific objects.
-3. HOW IT'S CAPTURED — iPhone front camera ONLY. Propped, leaning, held. Off-center, maybe tilted.
-4. LIGHT — whatever is naturally there. Overhead light, lamp, dashboard glow. NEVER studio lighting.
-5. EXPRESSION — ONE frozen emotional beat. Not an action. Not speech. A moment caught on camera.
-6. TEXTURE — grainy iPhone footage, slight lens warmth, sensor noise in low light. Details that make it feel like a phone recorded this.
+BAD 4s PROMPT (vague, artifacts guaranteed):
+"Woman sitting in bed looking guilty. Warm light. iPhone."
 
-BAD UGC PROMPT (implies speech + cinematic):
-"She leans in conspiratorially, eyes wide with excitement about sharing this secret. Shot on Sony FX3 with warm studio lighting."
-
-GOOD UGC PROMPT (frozen emotional state + raw phone footage):
-"White woman early 20s, blonde hair in messy bun with loose strands, oversized white tee, no makeup, slightly flushed cheeks. Sitting cross-legged on unmade bed, crumpled duvet pushed to one side, half-empty water glass on nightstand. Warm yellow lamp on nightstand casting soft uneven light across her face, overhead light off. iPhone propped against pillow at slightly low angle, front camera, off-center framing — her face fills right two-thirds of frame. She's mid-realization — eyes widened slightly, mouth barely open, frozen in that split-second of recognition. Completely still except for a tiny eyebrow raise. Grainy low-light iPhone footage, slight lens warmth."
+GOOD 4s PROMPT (specific, consistent):
+"White woman, 23, dirty blonde hair in messy low bun with two loose strands framing face, faded oversized grey cotton tee with stretched collar showing collarbone, no makeup. Slight under-eye darkness, natural skin shine on forehead and nose bridge, tiny dry patch on lower lip. Sitting upright against fabric headboard, left hand resting on pulled-up knee, right hand loosely holding phone face-down on lap. Unmade bed with bunched cream duvet, half-empty water glass and phone charger cable on pine nightstand, laundry basket visible in corner. iPhone 13 propped against a book on the nightstand, front camera at eye level, 2 feet away, face fills 60% of frame, slightly off-center to the right. Warm yellow bedside lamp on left casting soft directional shadow on right cheekbone, overhead light off, faint blue glow from window behind. Eyes looking directly at camera lens, still, jaw slightly tight — one slow blink at the 2-second mark. Visible iPhone sensor noise in shadow areas, slight warm color cast, soft focus falloff on background. Resignation."
 
 PROMPT LENGTH: 5-8 sentences. Short prompts produce generic video.
 
@@ -1453,16 +1759,17 @@ Generate 5 UGC text-overlay ad creative blueprints. Each is a COMPLETE, producti
 
 === PRODUCT-HOOK FIT CHECK ===
 For EVERY hook: "Does this feature ACTUALLY solve the tension I'm creating?" If not, drop the hook.
+HARD BANS: No parenting hooks for personal features. No "2am/3am" default scenarios. No manufactured numbers. No repeated territories.
 
 === HOW HOOKS AND BODIES CONNECT ===
 Within each creative, EVERY hook must bridge naturally to EVERY body. Any hook + any body = one coherent ad.
-Write BODIES FIRST (the narrative resolution), then write hooks that all connect to those bodies.
+Write BODIES FIRST (plain feature description in audience's words), then write hooks that all connect to those bodies.
 
 FOR EACH CREATIVE:
 1. Choose an emotional territory informed by the intelligence above.
 2. deliveryMode is ALWAYS "text-overlay". productionStyle is ALWAYS "ugc-text-overlay".
 3. Write 1-2 BODY VARIATIONS FIRST.
-   - Body text = narrative resolution (5-15 words). Bridges any hook in this territory to the feature.
+   - Body text = plain feature description in audience's words (5-15 words). Bridges any hook in this territory to the feature.
    - Body visual = ALWAYS real screen recording. NOT Sora2.
    - No voiceoverScript (text-overlay mode).
 4. Write UP TO 5 HOOK VARIATIONS — same territory, different angles. Only include hooks that bridge to ALL bodies.
@@ -1495,7 +1802,8 @@ JSON:
           "voiceGender": "female | male — voice gender for this hook. Must match the person in the UGC visual.",
           "songPath": "REQUIRED. Pick from SONG CATALOG. Match hook emotion: guilt/shame → sad/nostalgic. Discovery → excited/happy. Observational → neutral.",
           "duration": "3s (text-overlay timing)",
-          "angle": "which psychological lever this pulls",
+          "angle": "which psychological lever this pulls — MUST reference the specific feature name and explain how the feature resolves this hook's tension",
+          "qualityCheck": "REQUIRED. Answer ALL: (1) Does this hook contain a manufactured/fake number? If yes, REWRITE or REMOVE. (2) Does the feature actually do what this hook implies? If no, REMOVE. (3) Would 80%+ of the target audience relate to this? If no, REMOVE. (4) Does this sound like ChatGPT or a real person? If ChatGPT, REWRITE.",
           "ugcArchetype": "archetype ID from catalog (REQUIRED)",
           "ugcPromptParams": {
             "archetype": "archetype ID",
@@ -1521,7 +1829,8 @@ JSON:
       ],
       "bodies": [
         {
-          "text": "5-15 words. Narrative resolution — bridges the emotional tension from ALL hooks to the feature. NOT a product spec. Must work with EVERY hook above.",
+          "text": "PLAIN FEATURE DESCRIPTION. 5-15 words. What the feature LITERALLY does. NO motivational language. Just the mechanic in simple words.",
+          "bridgeCheck": "REQUIRED. For EACH hook, one sentence proving body connects: 'Hook [text] → works because [reason]'. If you can't write it, REMOVE the hook.",
           "duration": "5s",
           "visual": "what the screen recording shows"
         }
@@ -1539,7 +1848,7 @@ CRITICAL:
 4. Hooks must feel like real human thoughts. TikTok = casual native voice. Meta = composed but human.
 5. VARY archetypes across the 5 creatives. Use at least 4 different archetypes.
 6. Write bodies FIRST, then hooks. Every hook must bridge to every body within the same creative.
-7. Body text is a NARRATIVE resolution (5-15 words), NOT a product spec sheet.
+7. Body text is PLAIN — what the feature does in the audience's own simple words (5-15 words).
 8. ALL Sora2 clips are 4s (face clip rule). No 8s or 12s.
 9. NO metaphors, NO poetry, NO literary language. Real talk only.
 10. NEVER undermine the product: no "no app needed", "without opening anything." User MUST download the app.
@@ -1551,52 +1860,97 @@ CRITICAL:
 // Each produces 3 creatives with a specific audio architecture.
 // ============================================================
 
-const AUDIO_MODE_SIGNATURE = (input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData) =>
-  `${buildContext(input)}\n\n${buildDeepDiveContext(psycheMap, sales, research, tree)}`;
+const AUDIO_MODE_SIGNATURE = (input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData, synthesis?: ICreativeSynthesis) =>
+  synthesis
+    ? `${buildContext(input)}\n\n${buildSynthesisContext(synthesis)}`
+    : `${buildContext(input)}\n\n${buildDeepDiveContext(psycheMap, sales, research, tree)}`;
 
 const AUDIO_MODE_SHARED_SECTIONS = `
 ${buildUGCSection()}
 
+${buildVisualArchetypesSection()}
+
 ${buildSongsSection()}
+
+${buildHookFormatsSection()}
 
 ${buildCommonCopyRules()}
 
 === PRODUCT-HOOK FIT CHECK ===
 For EVERY hook: "Does this feature ACTUALLY solve the tension I'm creating?" If not, drop the hook.
+HARD BANS: No parenting hooks for personal features. No "2am/3am" default scenarios. No manufactured numbers. No repeated territories.
 
 === HOOK-BODY BRIDGE ===
 Write bodies FIRST. Every hook must bridge naturally to every body. Any hook + any body = one coherent ad.
-Body text is a NARRATIVE resolution (5-15 words), NOT a product spec.
+Body text is PLAIN — what the feature literally does, in the audience's simple words (5-15 words). NOT motivational. NOT narrative.
 `;
 
 // --- Mode 1: Sora2 Bleed ---
 export function sora2BleedPrompt(
   input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
   feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+  synthesis?: ICreativeSynthesis,
 ): string {
   return `You are a UGC ad creative strategist specializing in spoken-to-camera hooks where the voice carries over into the product demo.
 
-${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree, synthesis)}
 
 === AUDIO MODE: SORA2 BLEED ===
 
-In this mode, a real person SPEAKS on camera during the hook. Their voice CONTINUES playing as the visual cuts to the body (screen recording). The person finishes their thought over the product demo footage. The video ends shortly after the voice stops — a brief visual tail, not an abrupt cut.
+In this mode, a real person SPEAKS on camera during the hook. Their voice CONTINUES playing as the visual cuts to the body (screen recording). The person finishes their thought over the product demo footage.
 
 RULES:
 - All hooks: audioSource="sora2", person speaks on camera
-- Hook voiceover script: 15-26 words MAX (must fit in one 8s or 12s Sora2 clip at 2.2 words/sec)
-- The hook VO + body VO is ONE CONTINUOUS SCRIPT. Write the full spoken script first, then split at the visual cut point.
-- The Sora2 prompt MUST include the dialogue (what the person says, tone, pace)
-- Body voiceover is the CONTINUATION — the person finishes their thought over the screen recording
-- Body VO MUST end with a spoken CTA ("tap below to get it" or similar, 3-5 words)
-- Sora2 clips: 8s or 12s (person is speaking, so longer clips are fine)
-- UGC archetypes apply — pick archetype, emotion, action, appearance, environment per hook
+- Hook voiceover script: 15-26 words MAX (fits in 8s or 12s at 2.2 words/sec)
+- Hook VO + body VO is ONE CONTINUOUS SCRIPT. Write the full spoken words first, then split at the visual cut.
+- Body VO = continuation, ends with spoken CTA ("tap below to get it", 3-5 words)
+- Sora2 clips: 8s or 12s (speaking anchors coherence)
+
+=== HOW REAL PEOPLE TALK ON CAMERA (critical for VO scripts) ===
+
+The voiceover script is NOT written copy read aloud. It's how a person ACTUALLY SPEAKS when they grab their phone and start talking. Real speech is messy, specific, and unpolished:
+
+SPOKEN STRUCTURE:
+- People start mid-thought: "so like I'm laying in bed right and I grab my phone and there's just... a Bible verse"
+- They discover the thought AS they speak: "I didn't even — like I wasn't trying to be spiritual, it was just THERE"
+- They use filler words naturally: "like", "literally", "honestly", "ok so", "I mean", "you know what"
+- They pause, restart, trail off: "and I just... I don't know, it hit different"
+- They don't have the punchline pre-loaded — the realization happens MID-SENTENCE
+
+FILLER WORDS BY AUDIENCE (these are authenticity markers, NOT mistakes):
+- Zoomer (18-24): "like", "literally", "no because", "wait", "lowkey", "I'm not gonna lie"
+- Millennial (25-34): "honestly", "I mean", "the thing is", "can we talk about", "it's giving"
+- Older (35+): "you know what", "I gotta say", "here's the thing", "I never thought"
+
+BAD VO SCRIPT (copywriter read-aloud): "Every night, same time, same racing thoughts. But now when I check my phone, there's this verse just sitting there."
+GOOD VO SCRIPT (real person talking): "ok so like... every night I grab my phone because I literally cannot sleep and last night there was just a verse on my lockscreen and I was like... wait what"
+
+${buildHookFormatsSection()}
+
+=== SPEAKING UGC SORA2 PRECISION FIELDS ===
+
+For EVERY speaking hook, you MUST specify these fields in ugcPromptParams to direct Sora2 precisely:
+
+- eyeDirection: Where they look during the clip. "straight at camera like a FaceTime call", "starts looking at phone then slowly looks up at camera", "eyes drift down-left while remembering". NOT "looks contemplatively" — be SPECIFIC about the direction and movement.
+- toneOfVoice: Specific vocal quality. "quiet bedroom confession, almost whispering", "excited ramble getting faster", "deadpan like they're just stating a fact", "voice getting thick like they might cry". NOT "speaks emotionally."
+- speakingPace: "fast and stumbling over words", "starts slow then speeds up at the realization", "deliberate pauses between thoughts", "rushes through like they need to get it out"
+- facialMicroExpression: ONE specific thing their face does tied to a specific word. "eyebrows pinch together on 'every single night'", "slight eye roll on 'I know'", "corners of mouth twitch into almost-smile at the end"
+- bodyPosture: "slouched against headboard, knees up", "leaning forward on couch elbows on knees", "sitting in car, one hand on steering wheel". Specific to the environment.
+- handBehavior: "fidgets with phone case while talking", "waves hand dismissively on 'whatever'", "touches chest on the emotional part", "picks at blanket thread"
+- headMovement: "slight shake on 'I can't'", "tilts head back on exhale", "quick nod like convincing themselves"
+- pausePoints: WHERE in the script they hesitate. "pauses for 1 second after 'and I just...'", "trails off at 'I don't know if...' then picks back up"
+- voiceBreak: Where voice changes. "voice drops to near-whisper on 'anymore'", "gets louder and faster on the discovery part", "cracks slightly on 'every night'"
+- fillerWords: The specific fillers for THIS person. "uses 'like' and 'literally'", "starts with 'ok so'", "says 'honestly' before the confession"
+- backgroundAmbience: Sound that sells the space. "fan humming in background", "distant TV noise", "car engine idling + occasional passing car", "complete silence except breathing"
+- breathingCue: "deep exhale before starting to speak", "sharp inhale between sentences", "audible sigh after the confession"
+
+ALL of these go into the Sora2 prompt description. The prompt must describe the EXACT physical performance — every glance, every fidget, every pause, every vocal shift. Sora2 needs this precision or it generates generic talking-head footage.
 
 VISUAL PROMPT RULES (UGC = RAW iPHONE):
 - iPhone front camera ONLY. Propped, handheld, leaning. NOT cinematic.
-- Sora2 prompt INCLUDES dialogue + vocal delivery description
 - Real environments, real mess, natural light. Never studio.
-- 5-8 sentences per prompt.
+- The Sora2 prompt MUST weave together: dialogue + vocal delivery + eye movement + hand behavior + facial expression + pauses + breathing + environment sound
+- 8-12 sentences per prompt for speaking clips (more detail needed than silent clips).
 
 ${AUDIO_MODE_SHARED_SECTIONS}
 
@@ -1608,13 +1962,14 @@ Generate 3 UGC creatives. audioMode="sora2-bleed" on each.
 
 FOR EACH CREATIVE:
 1. Choose an emotional territory.
-2. Write 1-2 BODY VARIATIONS FIRST — narrative resolution (5-15 words). Body VO continues from hook, ends with spoken CTA.
+2. Write 1-2 BODY VARIATIONS FIRST — plain feature description in audience's words (5-15 words). Body VO continues from hook, ends with spoken CTA.
 3. Write UP TO 5 HOOKS — each bridges to all bodies. Person speaks on camera.
-   - voiceoverScript: what they say (15-26 words, includes hook + bleed into body)
+   - voiceoverScript: what they ACTUALLY SAY — messy, with fillers, pauses, restarts. NOT polished copy.
    - text: short on-screen caption (5-15 words)
    - audioSource: always "sora2"
-   - voiceGender, songPath, ugcArchetype, ugcPromptParams: all REQUIRED
-   - visualSuggestions: 1-2 Sora2 clips (8s or 12s), dialogue in prompt
+   - voiceGender, songPath, ugcArchetype: REQUIRED
+   - ugcPromptParams: REQUIRED — must include ALL speaking precision fields (eyeDirection, toneOfVoice, speakingPace, facialMicroExpression, bodyPosture, handBehavior, headMovement, pausePoints, voiceBreak, fillerWords, backgroundAmbience, breathingCue)
+   - visualSuggestions: 1-2 Sora2 clips (8s or 12s), prompt must include dialogue + all precision fields woven into scene description (8-12 sentences)
 4. deliveryMode: "voiceover-caption"
 5. One CTA.
 
@@ -1630,16 +1985,32 @@ JSON:
       "audioSource": "sora2",
       "voiceGender": "female | male",
       "songPath": "from catalog",
-      "voiceoverScript": "what the person says (15-26 words)",
+      "voiceoverScript": "what they ACTUALLY say — messy, fillers, pauses, real speech (15-26 words)",
       "duration": "calculated from word count",
       "angle": "",
       "ugcArchetype": "archetype ID",
-      "ugcPromptParams": { "archetype": "", "emotion": "", "action": "", "environment": "", "appearance": {} },
+      "ugcPromptParams": {
+        "archetype": "", "emotion": "", "action": "", "environment": "",
+        "appearance": { "ageRange": "", "gender": "", "ethnicity": "", "build": "", "style": "", "hair": "", "details": "" },
+        "eyeDirection": "specific gaze direction + movement",
+        "toneOfVoice": "specific vocal quality",
+        "speakingPace": "how fast/slow, where it changes",
+        "facialMicroExpression": "one specific expression tied to a word",
+        "bodyPosture": "specific posture in this environment",
+        "handBehavior": "what hands do during speech",
+        "headMovement": "specific head motion tied to a moment",
+        "pausePoints": "where in the script they hesitate/trail off",
+        "voiceBreak": "where voice changes quality",
+        "fillerWords": "audience-specific filler words used",
+        "backgroundAmbience": "ambient sound that sells the space",
+        "breathingCue": "specific breathing moment"
+      },
       "visualStyle": { "type": "ugc-reaction", "name": "", "description": "" },
-      "visualSuggestions": [{ "idea": "", "prompt": "5-8 sentences, INCLUDES dialogue", "clipDuration": "8s or 12s", "styleTags": [] }]
+      "visualSuggestions": [{ "idea": "", "prompt": "8-12 sentences weaving dialogue + all precision fields into one scene description", "clipDuration": "8s or 12s", "styleTags": [] }]
     }],
     "bodies": [{
-      "text": "narrative resolution (5-15 words)",
+      "text": "PLAIN FEATURE DESCRIPTION. What the feature LITERALLY does. 5-15 words. NO motivational language.",
+          "bridgeCheck": "REQUIRED. For EACH hook: 'Hook [text] → works because [reason]'. Can't write it? Remove the hook.",
       "voiceoverScript": "continuation from hook VO + spoken CTA at end (10-20 words)",
       "duration": "", "visual": "screen recording description"
     }],
@@ -1655,10 +2026,11 @@ Return ONLY valid JSON.`;
 export function elevenlabsFullVOPrompt(
   input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
   feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+  synthesis?: ICreativeSynthesis,
 ): string {
   return `You are a UGC ad creative strategist specializing in silent UGC footage with full AI voiceover narration.
 
-${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree, synthesis)}
 
 === AUDIO MODE: ELEVENLABS FULL VO ===
 
@@ -1700,7 +2072,7 @@ Generate 3 UGC creatives. audioMode="elevenlabs-full-vo" on each.
 
 FOR EACH CREATIVE:
 1. Choose an emotional territory.
-2. Write 1-2 BODY VARIATIONS FIRST — narrative resolution (5-15 words). Body VO ends with spoken CTA.
+2. Write 1-2 BODY VARIATIONS FIRST — plain feature description in audience's words (5-15 words). Body VO ends with spoken CTA.
 3. Write UP TO 5 HOOKS — silent person on camera, ElevenLabs narrates.
    - voiceoverScript: what the AI voice says during the hook (15-30 words)
    - text: short on-screen caption (5-15 words)
@@ -1731,7 +2103,8 @@ JSON:
       "visualSuggestions": [{ "idea": "", "prompt": "5-8 sentences, NO dialogue, frozen emotion", "clipDuration": "4s", "styleTags": [] }]
     }],
     "bodies": [{
-      "text": "narrative resolution (5-15 words)",
+      "text": "PLAIN FEATURE DESCRIPTION. What the feature LITERALLY does. 5-15 words. NO motivational language.",
+          "bridgeCheck": "REQUIRED. For EACH hook: 'Hook [text] → works because [reason]'. Can't write it? Remove the hook.",
       "voiceoverScript": "ElevenLabs VO continues + spoken CTA at end (10-20 words)",
       "duration": "", "visual": "screen recording description"
     }],
@@ -1747,10 +2120,11 @@ Return ONLY valid JSON.`;
 export function sora2ElevenlabsHandoffPrompt(
   input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
   feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+  synthesis?: ICreativeSynthesis,
 ): string {
   return `You are a UGC ad creative strategist specializing in creator-to-narrator handoff ads where the voice changes at the body.
 
-${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree, synthesis)}
 
 === AUDIO MODE: SORA2 → ELEVENLABS HANDOFF ===
 
@@ -1760,16 +2134,17 @@ RULES:
 - Hook: audioSource="sora2", person speaks on camera (8s or 12s clips)
 - Body: different voice (ElevenLabs narrator), can be different gender
 - The HANDOFF must feel intentional: creator shares experience → narrator introduces solution
-- Hook VO: 15-26 words (fits in 12s). Personal, confessional, specific.
-- Body VO: 10-20 words. More composed, explanatory. MUST end with spoken CTA.
-- Hook voiceGender = the creator. Body can specify a different gender implicitly.
-- Sora2 prompt INCLUDES dialogue for the hook
+- Hook VO: 15-26 words. Written as REAL SPEECH — fillers, pauses, restarts. NOT polished copy.
+- Body VO: 10-20 words. More composed (it's a narrator). MUST end with spoken CTA.
+- Sora2 prompt INCLUDES dialogue + ALL speaking precision fields
+
+See SPEAKING UGC rules from Sora2 Bleed mode — the same real-speech rules apply here:
+- Filler words by audience, messy structure, mid-thought discovery, pause points, voice breaks
+- ALL speaking precision fields REQUIRED in ugcPromptParams (eyeDirection, toneOfVoice, speakingPace, facialMicroExpression, bodyPosture, handBehavior, headMovement, pausePoints, voiceBreak, fillerWords, backgroundAmbience, breathingCue)
 
 VISUAL PROMPT RULES (UGC = RAW iPHONE):
 - iPhone front camera. Real environments. Not cinematic.
-- Hook Sora2 prompt includes what the person says + vocal delivery
-- 8s or 12s clips (person speaking)
-- 5-8 sentences per prompt.
+- 8s or 12s clips. 8-12 sentences per prompt weaving dialogue + precision fields.
 
 ${AUDIO_MODE_SHARED_SECTIONS}
 
@@ -1781,13 +2156,14 @@ Generate 3 UGC creatives. audioMode="sora2-elevenlabs-handoff" on each.
 
 FOR EACH CREATIVE:
 1. Choose an emotional territory.
-2. Write 1-2 BODY VARIATIONS FIRST — narrative resolution (5-15 words). Body uses ElevenLabs narrator, ends with spoken CTA.
-3. Write UP TO 5 HOOKS — person speaks on camera, voice hands off to narrator at body.
-   - voiceoverScript: what the creator says (15-26 words)
+2. Write 1-2 BODY VARIATIONS FIRST — plain feature description in audience's words (5-15 words). Body uses ElevenLabs narrator, ends with spoken CTA.
+3. Write UP TO 5 HOOKS — person speaks on camera (real messy speech), voice hands off to narrator at body.
+   - voiceoverScript: what the creator ACTUALLY says — messy, with fillers (15-26 words)
    - text: short on-screen caption (5-15 words)
    - audioSource: always "sora2"
-   - voiceGender, songPath, ugcArchetype, ugcPromptParams: all REQUIRED
-   - visualSuggestions: 8s or 12s, dialogue in prompt
+   - voiceGender, songPath, ugcArchetype: REQUIRED
+   - ugcPromptParams: REQUIRED with ALL speaking precision fields
+   - visualSuggestions: 8s or 12s, 8-12 sentence prompts with dialogue + precision
 4. deliveryMode: "voiceover-caption"
 5. One CTA.
 
@@ -1803,16 +2179,23 @@ JSON:
       "audioSource": "sora2",
       "voiceGender": "female | male",
       "songPath": "from catalog",
-      "voiceoverScript": "what creator says (15-26 words)",
+      "voiceoverScript": "what creator ACTUALLY says — messy, fillers, real speech (15-26 words)",
       "duration": "calculated",
       "angle": "",
       "ugcArchetype": "archetype ID",
-      "ugcPromptParams": { "archetype": "", "emotion": "", "action": "", "environment": "", "appearance": {} },
+      "ugcPromptParams": {
+        "archetype": "", "emotion": "", "action": "", "environment": "",
+        "appearance": { "ageRange": "", "gender": "", "ethnicity": "", "build": "", "style": "", "hair": "", "details": "" },
+        "eyeDirection": "", "toneOfVoice": "", "speakingPace": "", "facialMicroExpression": "",
+        "bodyPosture": "", "handBehavior": "", "headMovement": "", "pausePoints": "",
+        "voiceBreak": "", "fillerWords": "", "backgroundAmbience": "", "breathingCue": ""
+      },
       "visualStyle": { "type": "ugc-reaction", "name": "", "description": "" },
       "visualSuggestions": [{ "idea": "", "prompt": "5-8 sentences, INCLUDES dialogue", "clipDuration": "8s or 12s", "styleTags": [] }]
     }],
     "bodies": [{
-      "text": "narrative resolution (5-15 words)",
+      "text": "PLAIN FEATURE DESCRIPTION. What the feature LITERALLY does. 5-15 words. NO motivational language.",
+          "bridgeCheck": "REQUIRED. For EACH hook: 'Hook [text] → works because [reason]'. Can't write it? Remove the hook.",
       "voiceoverScript": "ElevenLabs narrator + spoken CTA (10-20 words)",
       "duration": "", "visual": "screen recording description"
     }],
@@ -1828,10 +2211,11 @@ Return ONLY valid JSON.`;
 export function sora2SilencePrompt(
   input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
   feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
+  synthesis?: ICreativeSynthesis,
 ): string {
   return `You are a UGC ad creative strategist specializing in spoken hooks that cut to silent product demos.
 
-${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree, synthesis)}
 
 === AUDIO MODE: SORA2 → SILENCE ===
 
@@ -1840,16 +2224,18 @@ In this mode, a real person SPEAKS on camera during the hook (Sora2). The body i
 RULES:
 - Hook: audioSource="sora2", person speaks on camera (8s or 12s clips)
 - Body: NO audio. Text overlay only. No voiceoverScript on body.
-- Hook VO: 15-26 words. Creates tension through speech.
-- Body text: narrative resolution (5-15 words). Resolves visually + with text. No voice.
-- The silence IS the transition. The person stops talking, the product appears. Don't fill it.
-- Sora2 prompt INCLUDES dialogue for the hook
+- Hook VO: 15-26 words. Written as REAL SPEECH — fillers, pauses, restarts. NOT polished copy.
+- Body text: plain feature description in audience's words (5-15 words). No voice.
+- The silence IS the transition. Person stops talking, product appears.
+- Sora2 prompt INCLUDES dialogue + ALL speaking precision fields
+
+See SPEAKING UGC rules from Sora2 Bleed mode — same real-speech rules apply:
+- Filler words by audience, messy structure, mid-thought discovery, pause points, voice breaks
+- ALL speaking precision fields REQUIRED in ugcPromptParams
 
 VISUAL PROMPT RULES (UGC = RAW iPHONE):
 - iPhone front camera. Real environments. Not cinematic.
-- Hook Sora2 prompt includes dialogue + vocal delivery
-- 8s or 12s clips (person speaking)
-- 5-8 sentences per prompt.
+- 8s or 12s clips. 8-12 sentences per prompt weaving dialogue + precision fields.
 
 ${AUDIO_MODE_SHARED_SECTIONS}
 
@@ -1861,13 +2247,14 @@ Generate 3 UGC creatives. audioMode="sora2-silence" on each.
 
 FOR EACH CREATIVE:
 1. Choose an emotional territory.
-2. Write 1-2 BODY VARIATIONS FIRST — narrative resolution (5-15 words). NO voiceover on body.
-3. Write UP TO 5 HOOKS — person speaks on camera, body is silent.
-   - voiceoverScript: what the person says (15-26 words)
+2. Write 1-2 BODY VARIATIONS FIRST — plain feature description in audience's words (5-15 words). NO voiceover on body.
+3. Write UP TO 5 HOOKS — person speaks on camera (real messy speech), body is silent.
+   - voiceoverScript: what the person ACTUALLY says — messy, fillers, real speech (15-26 words)
    - text: short on-screen caption (5-15 words)
    - audioSource: always "sora2"
-   - voiceGender, songPath, ugcArchetype, ugcPromptParams: all REQUIRED
-   - visualSuggestions: 8s or 12s, dialogue in prompt
+   - voiceGender, songPath, ugcArchetype: REQUIRED
+   - ugcPromptParams: REQUIRED with ALL speaking precision fields
+   - visualSuggestions: 8s or 12s, 8-12 sentence prompts with dialogue + precision
 4. deliveryMode: "voiceover-caption"
 5. One CTA (text only, no spoken CTA since body is silent).
 
@@ -1883,16 +2270,23 @@ JSON:
       "audioSource": "sora2",
       "voiceGender": "female | male",
       "songPath": "from catalog",
-      "voiceoverScript": "what person says (15-26 words)",
+      "voiceoverScript": "what person ACTUALLY says — messy, fillers, real speech (15-26 words)",
       "duration": "calculated",
       "angle": "",
       "ugcArchetype": "archetype ID",
-      "ugcPromptParams": { "archetype": "", "emotion": "", "action": "", "environment": "", "appearance": {} },
+      "ugcPromptParams": {
+        "archetype": "", "emotion": "", "action": "", "environment": "",
+        "appearance": { "ageRange": "", "gender": "", "ethnicity": "", "build": "", "style": "", "hair": "", "details": "" },
+        "eyeDirection": "", "toneOfVoice": "", "speakingPace": "", "facialMicroExpression": "",
+        "bodyPosture": "", "handBehavior": "", "headMovement": "", "pausePoints": "",
+        "voiceBreak": "", "fillerWords": "", "backgroundAmbience": "", "breathingCue": ""
+      },
       "visualStyle": { "type": "ugc-reaction", "name": "", "description": "" },
-      "visualSuggestions": [{ "idea": "", "prompt": "5-8 sentences, INCLUDES dialogue", "clipDuration": "8s or 12s", "styleTags": [] }]
+      "visualSuggestions": [{ "idea": "", "prompt": "8-12 sentences weaving dialogue + all precision fields", "clipDuration": "8s or 12s", "styleTags": [] }]
     }],
     "bodies": [{
-      "text": "narrative resolution (5-15 words)",
+      "text": "PLAIN FEATURE DESCRIPTION. What the feature LITERALLY does. 5-15 words. NO motivational language.",
+          "bridgeCheck": "REQUIRED. For EACH hook: 'Hook [text] → works because [reason]'. Can't write it? Remove the hook.",
       "duration": "5s", "visual": "screen recording description"
     }],
     "cta": { "text": "Tap Below to Get It" },

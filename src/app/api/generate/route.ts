@@ -6,6 +6,7 @@ import {
   salesPlaybookPrompt,
   researchPrompt,
   creativeTreePrompt,
+  creativeSynthesisPrompt,
   topCreativesPrompt,
   ugcCreativesPrompt,
   sora2BleedPrompt,
@@ -13,7 +14,7 @@ import {
   sora2ElevenlabsHandoffPrompt,
   sora2SilencePrompt,
 } from "@/config/prompts";
-import type { IProjectInput, IGenerationResult, IPsycheMapData, ISalesPlaybookData, IResearchData, ICreativeTreeData, ICreativeFeedback } from "@/types/creative";
+import type { IProjectInput, IGenerationResult, IPsycheMapData, ISalesPlaybookData, IResearchData, ICreativeTreeData, ICreativeFeedback, ICreativeSynthesis } from "@/types/creative";
 import { ESectionType } from "@/config/enums";
 import { CLAUDE_MODELS, GPT_MODELS } from "@/config/constants";
 import { SECTION_CONFIGS } from "@/config/generation-config";
@@ -177,53 +178,28 @@ export async function POST(request: NextRequest) {
         SECTION_CONFIGS[ESectionType.CreativeTree].model,
       ) as ICreativeTreeData;
 
-      // Step 3a: Top Creatives — 3 parallel calls (2+2+1) — GPT for v5, Claude otherwise
-      const batchPrompt = (batchNum: number, batchSize: number, startRank: number) =>
-        topCreativesPrompt(input, psycheMap, salesPlaybook, research, creativeTree)
-          .replace(
-            "Generate 5 ad creative blueprints.",
-            `Generate exactly ${batchSize} ad creative blueprints. Start ranking from ${startRank}. This is batch ${batchNum} of 3 — ensure DIFFERENT emotional territories than other batches would pick. ${batchNum === 1 ? "Pick the 2 strongest angles." : batchNum === 2 ? "Pick 2 unexpected/niche angles." : "Pick 1 bold, unconventional angle."}`
-          );
+      // Step 2.5: Creative Synthesis — distills deep dive into actionable brief (Sonnet, cheap)
+      const synthesis = await callClaude(
+        creativeSynthesisPrompt(input, psycheMap, salesPlaybook, research, creativeTree),
+        4000,
+        CLAUDE_MODELS.SONNET,
+      ) as ICreativeSynthesis;
 
-      const [batch1, batch2, batch3] = await Promise.all([
-        callCreativeModel(batchPrompt(1, 2, 1), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-        callCreativeModel(batchPrompt(2, 2, 3), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-        callCreativeModel(batchPrompt(3, 1, 5), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+      // Step 3: ALL creatives in parallel — each gets the synthesis brief, NOT raw deep dive
+      const [topCreativesResult, ugcResult, sora2Bleed, elevenlabsFull, handoff, sora2Silence] = await Promise.all([
+        // 3a: Top Creatives — single call, 5 creatives
+        callCreativeModel(topCreativesPrompt(input, psycheMap, salesPlaybook, research, creativeTree, undefined, undefined, synthesis), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        // 3b: UGC Text-Overlay — single call, 5 creatives
+        callCreativeModel(ugcCreativesPrompt(input, psycheMap, salesPlaybook, research, creativeTree, undefined, undefined, synthesis), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        // 3c: Audio Modes — 4 calls, 3 creatives each
+        callCreativeModel(sora2BleedPrompt(input, psycheMap, salesPlaybook, research, creativeTree, undefined, undefined, synthesis), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        callCreativeModel(elevenlabsFullVOPrompt(input, psycheMap, salesPlaybook, research, creativeTree, undefined, undefined, synthesis), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        callCreativeModel(sora2ElevenlabsHandoffPrompt(input, psycheMap, salesPlaybook, research, creativeTree, undefined, undefined, synthesis), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
+        callCreativeModel(sora2SilencePrompt(input, psycheMap, salesPlaybook, research, creativeTree, undefined, undefined, synthesis), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
       ]);
 
-      const regularCreatives = [
-        ...(batch1.creatives || []),
-        ...(batch2.creatives || []),
-        ...(batch3.creatives || []),
-      ].map((c, i) => ({ ...c, rank: i + 1 }));
-
-      // Step 3b: UGC Creatives — 3 parallel calls (2+2+1), sequenced after regular
-      const ugcBatchPrompt = (batchNum: number, batchSize: number, startRank: number) =>
-        ugcCreativesPrompt(input, psycheMap, salesPlaybook, research, creativeTree)
-          .replace(
-            "Generate 5 UGC text-overlay ad creative blueprints.",
-            `Generate exactly ${batchSize} UGC text-overlay ad creative blueprints. Start ranking from ${startRank}. This is batch ${batchNum} of 3 — ensure DIFFERENT emotional territories than other batches would pick. ${batchNum === 1 ? "Pick the 2 strongest angles." : batchNum === 2 ? "Pick 2 unexpected/niche angles." : "Pick 1 bold, unconventional angle."}`
-          );
-
-      const [ugcBatch1, ugcBatch2, ugcBatch3] = await Promise.all([
-        callCreativeModel(ugcBatchPrompt(1, 2, 1), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-        callCreativeModel(ugcBatchPrompt(2, 2, 3), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-        callCreativeModel(ugcBatchPrompt(3, 1, 5), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-      ]);
-
-      const ugcCreatives = [
-        ...(ugcBatch1.creatives || []),
-        ...(ugcBatch2.creatives || []),
-        ...(ugcBatch3.creatives || []),
-      ].map((c, i) => ({ ...c, rank: regularCreatives.length + i + 1, isUgcBatch: true as const }));
-
-      // Step 3c: Audio Mode Creatives — 4 parallel calls (1 per mode, 3 creatives each)
-      const [sora2Bleed, elevenlabsFull, handoff, sora2Silence] = await Promise.all([
-        callCreativeModel(sora2BleedPrompt(input, psycheMap, salesPlaybook, research, creativeTree), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-        callCreativeModel(elevenlabsFullVOPrompt(input, psycheMap, salesPlaybook, research, creativeTree), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-        callCreativeModel(sora2ElevenlabsHandoffPrompt(input, psycheMap, salesPlaybook, research, creativeTree), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-        callCreativeModel(sora2SilencePrompt(input, psycheMap, salesPlaybook, research, creativeTree), SECTION_CONFIGS[ESectionType.TopCreatives].tokens) as Promise<{ creatives: IGenerationResult["topCreatives"]["creatives"] }>,
-      ]);
+      const regularCreatives = (topCreativesResult.creatives || []).map((c, i) => ({ ...c, rank: i + 1 }));
+      const ugcCreatives = (ugcResult.creatives || []).map((c, i) => ({ ...c, rank: regularCreatives.length + i + 1, isUgcBatch: true as const }));
 
       const audioModeCreatives = [
         ...(sora2Bleed.creatives || []).map((c) => ({ ...c, audioMode: "sora2-bleed" as const })),
@@ -241,6 +217,7 @@ export async function POST(request: NextRequest) {
         salesPlaybook,
         research,
         creativeTree: creativeTree as IGenerationResult["creativeTree"],
+        synthesis,
         topCreatives: topCreatives as IGenerationResult["topCreatives"],
         createdAt: new Date().toISOString(),
       };
@@ -266,53 +243,28 @@ export async function POST(request: NextRequest) {
         prompt = creativeTreePrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research);
         break;
       case ESectionType.TopCreatives: {
-        // "Generate 5 more" — regular (2+2+1) + UGC (2+2+1)
+        // "Generate 5 more" — single call each for regular + UGC
         const useGPTForMore = input.scenario === "v5";
         const callMore = useGPTForMore
           ? (p: string, t: number) => callGPT(p, t)
           : (p: string, t: number) => callClaude(p, t, config.model);
 
-        const basePrompt = topCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research, context?.creativeTree, context?.feedback, context?.existingCreatives);
-        const tcBatchPrompt = (batchNum: number, batchSize: number, startRank: number) =>
-          basePrompt.replace(
-            "Generate 5 ad creative blueprints.",
-            `Generate exactly ${batchSize} ad creative blueprints. Start ranking from ${startRank}. This is batch ${batchNum} of 3 — ensure DIFFERENT emotional territories than other batches would pick. ${batchNum === 1 ? "Pick the 2 strongest angles." : batchNum === 2 ? "Pick 2 unexpected/niche angles." : "Pick 1 bold, unconventional angle."}`
-          );
-
-        const ugcBasePrompt = ugcCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research, context?.creativeTree, context?.feedback, context?.existingCreatives);
-        const ugcBatchPromptFn = (batchNum: number, batchSize: number, startRank: number) =>
-          ugcBasePrompt.replace(
-            "Generate 5 UGC text-overlay ad creative blueprints.",
-            `Generate exactly ${batchSize} UGC text-overlay ad creative blueprints. Start ranking from ${startRank}. This is batch ${batchNum} of 3 — ensure DIFFERENT emotional territories than other batches would pick. ${batchNum === 1 ? "Pick the 2 strongest angles." : batchNum === 2 ? "Pick 2 unexpected/niche angles." : "Pick 1 bold, unconventional angle."}`
-          );
-
         const existingCount = context?.existingCreatives?.length || 0;
 
-        // Regular batches first
-        const [b1, b2, b3] = await Promise.all([
-          callMore(tcBatchPrompt(1, 2, existingCount + 1), config.tokens) as Promise<{ creatives: unknown[] }>,
-          callMore(tcBatchPrompt(2, 2, existingCount + 3), config.tokens) as Promise<{ creatives: unknown[] }>,
-          callMore(tcBatchPrompt(3, 1, existingCount + 5), config.tokens) as Promise<{ creatives: unknown[] }>,
+        const basePrompt = topCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research, context?.creativeTree, context?.feedback, context?.existingCreatives);
+        const ugcBasePrompt = ugcCreativesPrompt(input, context?.psycheMap, context?.salesPlaybook, context?.research, context?.creativeTree, context?.feedback, context?.existingCreatives);
+
+        // Regular + UGC in parallel, single call each
+        const [regularResult, ugcResult] = await Promise.all([
+          callMore(basePrompt, config.tokens) as Promise<{ creatives: unknown[] }>,
+          callMore(ugcBasePrompt, config.tokens) as Promise<{ creatives: unknown[] }>,
         ]);
 
-        const regularMerged = [
-          ...(b1.creatives || []),
-          ...(b2.creatives || []),
-          ...(b3.creatives || []),
-        ].map((c, i) => ({ ...(c as Record<string, unknown>), rank: existingCount + i + 1 }));
+        const regularMerged = (regularResult.creatives || [])
+          .map((c, i) => ({ ...(c as Record<string, unknown>), rank: existingCount + i + 1 }));
 
-        // UGC batches after regular
-        const [ub1, ub2, ub3] = await Promise.all([
-          callMore(ugcBatchPromptFn(1, 2, existingCount + 1), config.tokens) as Promise<{ creatives: unknown[] }>,
-          callMore(ugcBatchPromptFn(2, 2, existingCount + 3), config.tokens) as Promise<{ creatives: unknown[] }>,
-          callMore(ugcBatchPromptFn(3, 1, existingCount + 5), config.tokens) as Promise<{ creatives: unknown[] }>,
-        ]);
-
-        const ugcMerged = [
-          ...(ub1.creatives || []),
-          ...(ub2.creatives || []),
-          ...(ub3.creatives || []),
-        ].map((c, i) => ({ ...(c as Record<string, unknown>), rank: existingCount + regularMerged.length + i + 1, isUgcBatch: true }));
+        const ugcMerged = (ugcResult.creatives || [])
+          .map((c, i) => ({ ...(c as Record<string, unknown>), rank: existingCount + regularMerged.length + i + 1, isUgcBatch: true }));
 
         return NextResponse.json({ creatives: [...regularMerged, ...ugcMerged] });
       }

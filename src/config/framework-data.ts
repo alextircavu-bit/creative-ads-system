@@ -245,7 +245,7 @@ export const RESEARCH_TECHNIQUES: ResearchTechniqueDef[] = [
   { name: "Competitor Ad Library Audit", color: "#3b82f6", description: "Meta Ad Library, TikTok Creative Center - analyze longest-running ads to find proven patterns" },
   { name: "Reddit Thread Deep Dive", color: "#f59e0b", description: "Comment mining, pain point extraction, copy their exact language verbatim" },
   { name: "Platform-Specific Search", color: "#22c55e", description: "TikTok search, Facebook Groups, Instagram hashtags, YouTube long-form - find where the audience talks" },
-  { name: "The 2AM State", color: "#8b5cf6", description: "Become the avatar at their most vulnerable — alone, scrolling, defenses down. What are they FEELING at 2AM? That emotional state is what your ad must mirror to stop their scroll." },
+  { name: "The Scroll-Stop State", color: "#8b5cf6", description: "Understand the emotional state your target audience is in when scrolling. Not a specific time of day — the emotional temperature when they encounter your ad. Bored? Anxious? Curious? Procrastinating? That state determines which hook energy works." },
 ];
 
 // --- Shadow Avatar Steps ---

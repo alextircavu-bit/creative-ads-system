@@ -340,6 +340,7 @@ export interface IResearchData {
   avatarTraits: IAvatarTrait[];
   audienceSegments: IAudienceSegment[];
   benefitExpansion?: IBenefitExpansion;
+  viewerScenarios?: string[];  // Specific real-life moments where the audience encounters/needs the product
   preCreativeChecklist: string[];
 }
 
@@ -397,10 +398,22 @@ export type HookAudioSource =
   | "elevenlabs"; // No person speaking — ElevenLabs VO laid over silent/ambient Sora2 footage.
 
 export interface IVisualSuggestion {
-  idea: string;            // The visual concept (what the viewer sees)
-  prompt: string;          // Scene description for Sora2. If audioSource="sora2": INCLUDE dialogue/speech. If "elevenlabs": visual-only.
-  clipDuration: SoraClipDuration; // Sora2 clip length: "4s" | "8s" | "12s". Multiple clips stitch to cover hook duration.
-  styleTags: string[];     // Sora2 style/mood tags. Drive the visual treatment. E.g. ["ugc", "iphone", "handheld"] or ["cinematic", "sci-fi", "VFX"].
+  // Legacy fields (kept for backward compat)
+  idea?: string;
+  prompt?: string;
+  clipDuration: SoraClipDuration;
+  styleTags: string[];
+  // New archetype-based fields
+  archetype?: string;           // UGC visual archetype ID (car-confession, bed-scroll, etc.)
+  description?: string;         // Full Sora-ready scene description — one paragraph weaving scene, audio, color, camera, authenticity
+  voiceline_script?: string | null;
+  duration_seconds?: number;
+  audio_prompt?: string;        // Archetype audio signature + scenario-specific sounds
+  color_grade?: string;         // Archetype color signature applied to this environment
+  camera?: string;              // Archetype camera summary
+  authenticity_tagline?: string; // Archetype tagline adapted to this scenario
+  mood_arc?: string;
+  negative_prompt?: string;     // What to avoid for this scenario
 }
 
 export interface IAdSection {
@@ -424,6 +437,19 @@ export interface IUGCPromptParams {
     hair: string;
     details: string;
   };
+  // --- SPEAKING UGC FIELDS (for voiced hooks only) ---
+  eyeDirection?: string;      // Where they look: "straight at camera", "down at phone then up", "off to the side then back"
+  toneOfVoice?: string;       // Specific vocal quality: "quiet confession", "excited ramble", "deadpan matter-of-fact"
+  speakingPace?: string;      // "fast and stumbling", "slow with long pauses", "starts slow builds speed"
+  facialMicroExpression?: string; // One specific micro-expression: "slight frown when saying 'every night'", "half-smile at the end"
+  bodyPosture?: string;       // "slouched against headboard", "leaning forward elbows on knees", "sitting back with arms crossed"
+  handBehavior?: string;      // What hands do: "fidgets with phone case", "gestures when emphasizing", "rubs face mid-sentence"
+  headMovement?: string;      // "slight shake on 'I can't'", "nods slowly", "tilts head thinking"
+  pausePoints?: string;       // Where they hesitate: "pauses after 'and I just...' for 1 second", "trails off at the end"
+  voiceBreak?: string;        // Where voice cracks/changes: "voice drops quiet on 'anymore'", "gets louder on the realization"
+  fillerWords?: string;       // Audience-specific fillers: "like, literally, honestly" (zoomer) or "I mean, the thing is" (millennial)
+  backgroundAmbience?: string; // Ambient sound that sells the space: "fan humming", "distant TV", "car engine idling"
+  breathingCue?: string;      // "deep exhale before starting", "sharp inhale mid-thought", "sigh at the end"
 }
 
 export interface IHookVariation {
@@ -439,6 +465,8 @@ export interface IHookVariation {
   sora2Prompts?: ISora2Prompt[];         // Extracted Sora2 prompt payloads, 1:1 with visualSuggestions. Stamped on save.
   // --- TIMING ---
   duration: string;       // Total hook duration. Sum of stitched clips.
+  // --- UGC VISUAL ARCHETYPE ---
+  ugcVisualArchetype?: string; // Which filming format: car-confession, bed-scroll, walking-talking, etc.
   // --- MUSIC ---
   songPath?: string;      // Song file name from SONGS catalog, matched by hook emotion/mood
   // --- METADATA ---
@@ -499,14 +527,37 @@ export interface ICreativeFeedback {
 }
 
 export interface ISora2Prompt {
+  prompt: string;              // Combined Sora2-ready prompt — one paragraph with everything. Feed this directly to Sora2.
   description: string;
   voiceline_script: string | null;
   duration_seconds: number;
   style_tags: string[];
+  // Archetype fields
+  archetype?: string;
+  audio_prompt?: string;
+  color_grade?: string;
+  camera?: string;
+  authenticity_tagline?: string;
+  mood_arc?: string;
+  negative_prompt?: string;
 }
 
 export interface ITopCreativesData {
   creatives: IAdCreativeBlueprint[];
+}
+
+// --- Creative Synthesis (bridge between deep dive and creatives) ---
+
+export interface ICreativeSynthesis {
+  feature: string;
+  mechanic: string;
+  audience: string;
+  vocabulary: string[];
+  dopamineTrigger: string;
+  viewerScenarios: string[];
+  hookEnergies: string[];
+  anglesToAvoid: string[];
+  bodyTexts: string[];
 }
 
 // --- Full Generation Result ---
@@ -518,6 +569,7 @@ export interface IGenerationResult {
   psycheMap: IPsycheMapData;
   salesPlaybook: ISalesPlaybookData;
   research: IResearchData;
+  synthesis?: ICreativeSynthesis;
   topCreatives: ITopCreativesData;
   createdAt: string;
 }

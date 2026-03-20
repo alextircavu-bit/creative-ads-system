@@ -6,17 +6,43 @@ import { DB_TABLES } from "@/config/constants";
 /**
  * Stamp sora2Prompts on each hook, 1:1 with its visualSuggestions
  */
+function buildCombinedPrompt(
+  description: string,
+  moodArc?: string,
+  negativePrompt?: string,
+): string {
+  // Description already contains scene, audio, color, camera, voiceline, authenticity woven together
+  // Only append mood arc and negative prompt if not already in the description
+  const parts = [description];
+  if (moodArc && !description.toLowerCase().includes("mood arc")) parts.push(`Mood arc: ${moodArc}.`);
+  if (negativePrompt && !description.toLowerCase().includes("do not use")) parts.push(`Do not use: ${negativePrompt}.`);
+  return parts.join(" ");
+}
+
 function stampSora2Prompts(result: IGenerationResult): void {
   const creatives = result.topCreatives?.creatives || [];
   for (const creative of creatives) {
     for (const hook of creative.hooks || []) {
       const hasSora2Speech = hook.audioSource === "sora2" && !!hook.voiceoverScript;
-      hook.sora2Prompts = (hook.visualSuggestions || []).map((v) => ({
-        description: v.prompt || v.idea,
-        voiceline_script: hasSora2Speech ? (hook.voiceoverScript ?? null) : null,
-        duration_seconds: parseInt(v.clipDuration) || 8,
-        style_tags: v.styleTags || [],
-      }));
+      hook.sora2Prompts = (hook.visualSuggestions || []).map((v) => {
+        const description = v.description || v.prompt || v.idea || "";
+        const voiceline = v.voiceline_script !== undefined ? v.voiceline_script : (hasSora2Speech ? (hook.voiceoverScript ?? null) : null);
+
+        return {
+          prompt: buildCombinedPrompt(description, v.mood_arc, v.negative_prompt),
+          description,
+          voiceline_script: voiceline,
+          duration_seconds: v.duration_seconds || parseInt(v.clipDuration) || 8,
+          style_tags: v.styleTags || [],
+          archetype: v.archetype,
+          audio_prompt: v.audio_prompt,
+          color_grade: v.color_grade,
+          camera: v.camera,
+          authenticity_tagline: v.authenticity_tagline,
+          mood_arc: v.mood_arc,
+          negative_prompt: v.negative_prompt,
+        };
+      });
     }
   }
 }
