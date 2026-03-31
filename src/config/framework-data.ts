@@ -24,6 +24,13 @@ export const EMOTIONAL_ANGLES: EmotionalAngleDef[] = [
   { id: "habit_architecture", name: "Habit Architecture", mechanism: "The invisible systems running your daily behavior. Replacing bad loops with good ones. Friction, triggers, rewards.", color: "#22c55e" },
   { id: "discovery_revelation", name: "Discovery & Revelation", mechanism: "Uncovering something hidden about yourself, your patterns, or your potential. The pull of self-knowledge.", color: "#f59e0b" },
   { id: "relief_surrender", name: "Relief & Surrender", mechanism: "Exhaustion from carrying something — finally being able to put it down. The appeal of effortlessness.", color: "#14b8a6" },
+  { id: "humor_absurdity", name: "Humor & Absurdity", mechanism: "Comedy as a scroll-stopper. Memes, exaggeration, self-deprecation, brand humor, absurd visuals. The viewer laughs first, then learns about the product.", color: "#fbbf24" },
+  { id: "pride_flex", name: "Pride & Flex", mechanism: "Look what happened. Look what I did. Showing off a result, a transformation, a win. The viewer wants that same feeling of accomplishment or possession.", color: "#f97316" },
+  { id: "craving_desire", name: "Craving & Desire", mechanism: "Raw want. Not an aspiration gap — just pure desire for a thing, an experience, a sensation. Food, luxury, pleasure, satisfaction. The product IS the craving.", color: "#ef4444" },
+  { id: "anger_injustice", name: "Anger & Injustice", mechanism: "Righteous anger. Something is unfair, overpriced, broken, or a scam. The viewer is being ripped off and this product fixes it. The most shareable emotion on social.", color: "#dc2626" },
+  { id: "nostalgia", name: "Nostalgia", mechanism: "Bittersweet ache for the past. Not loss — warmth. Remembering who you used to be, what things used to feel like. The product reconnects you to that feeling.", color: "#d946ef" },
+  { id: "excitement_hype", name: "Excitement & Hype", mechanism: "Pure high energy. Something amazing just happened or is about to happen. Urgency, buzz, can't-contain-it energy. The product is the source of the excitement.", color: "#10b981" },
+  { id: "belonging_tribe", name: "Belonging & Tribe", mechanism: "I found my people. Not comparison or status — the warm feeling of being part of something. Community, shared identity, insider knowledge. The product connects you to your group.", color: "#6366f1" },
 ];
 
 // --- Copywriting Frameworks (5) ---

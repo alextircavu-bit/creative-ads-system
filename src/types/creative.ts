@@ -2,7 +2,7 @@
 // Core Types - All data is AI-generated, these are the shapes
 // ============================================================
 
-export type ScenarioType = "v3" | "v4" | "v5";
+export type ScenarioType = "v3" | "v4" | "v5" | "applovin" | "research-dlp";
 
 // V3 = mobile app ads (features, benefits, purpose)
 // V4 = any product ads (generic)
@@ -333,6 +333,39 @@ export interface IBenefitExpansion {
   hidden?: true;
 }
 
+// --- Avatars ---
+
+export interface IAvatar {
+  id: string;
+  name: string;                  // "Sarah, 24, Austin TX"
+  ascii: string;                 // ASCII portrait
+  demographics: string;          // Age, location, job, relationship
+  dailyRoutine: string;          // Hour-by-hour typical day
+  painLanguage: string[];        // EXACT phrases they use to describe their problem
+  dreamState: string;            // What life looks like with problem solved
+  scrollBehavior: string;        // What they watch, follow, engage with
+  objections: string[];          // Why they wouldn't buy
+  purchaseTrigger: string;       // The specific moment they'd pull the trigger
+  voiceTone: string;             // How they text, talk, write comments
+  vocabularySample: string[];    // 5-10 phrases they actually say
+  consciousnessLevel: string;    // Hawkins scale: shame, guilt, fear, desire, anger, pride, courage, neutrality, willingness
+  whyTheyBuy: string;            // Their specific reason for wanting this product
+  chatSystemPrompt: string;      // Full system prompt for role-playing as this avatar
+  // Research-driven insights
+  awarenessStage: string;        // unaware / problem aware / solution aware / product aware / most aware + why
+  emotionalDelta: {
+    currentState: string;        // Where this avatar is emotionally right now
+    elevatedState: string;       // Where the product takes them
+    gap: string;                 // The delta that drives action
+  };
+  objectionKillers: { objection: string; insight: string }[];  // Each objection + the insight that neutralizes it
+  hookInspirations: string[];    // 5-8 raw hook directions inspired by this avatar's pain/desire — not finished copy, just angles
+}
+
+export interface IAvatarData {
+  avatars: IAvatar[];
+}
+
 export interface IResearchData {
   shadowAvatarSteps: IShadowAvatarStep[];
   searchQueries: ISearchQuery[];
@@ -488,6 +521,20 @@ export interface IBodyVariation {
   duration?: string;      // Total body duration.
 }
 
+// Scene for long-form ads (45-50s multi-scene story arcs)
+export interface IAdScene {
+  sceneNumber: number;
+  label: string;             // COLD OPEN, PROBLEM, AGITATION, PRODUCT REVEAL, PROOF, CTA
+  duration: string;          // "4s" | "8s" | "12s"
+  text: string;              // On-screen text for this scene
+  voiceoverScript?: string | null;
+  audioSource?: HookAudioSource | "none";
+  voiceGender?: "female" | "male";
+  ugcVisualArchetype?: string;
+  visualSuggestion?: IVisualSuggestion;
+  sora2Prompt?: ISora2Prompt;  // Stamped on save
+}
+
 export interface IAdCreativeBlueprint {
   rank: number;
   name: string;
@@ -503,9 +550,14 @@ export interface IAdCreativeBlueprint {
   productionStyle: string;
   deliveryMode: DeliveryMode;
   audioMode?: AudioMode;
-  // Multiple variations for swipeable cards
+  // Short-form: hook+body swipeable cards
   hooks: IHookVariation[];
   bodies: IBodyVariation[];
+  // Long-form: scene-based story arc (Applovin)
+  scenes?: IAdScene[];
+  framework?: string;        // PAS | AIDA | BAB — story structure used
+  songPath?: string;          // One song for the whole ad
+  totalDuration?: string;     // Sum of all scenes
   // Single CTA (overlay bar, not a video section)
   cta: { text: string; deliveryMode?: DeliveryMode };
   // Legacy single hook/body for backward compat with existing data
@@ -554,10 +606,18 @@ export interface ICreativeSynthesis {
   audience: string;
   vocabulary: string[];
   dopamineTrigger: string;
+  existingDesire?: string;
+  emotionalDelta?: {
+    currentState: string;
+    elevatedState: string;
+    delta: string;
+  };
+  contrastAnalysis?: string;
   viewerScenarios: string[];
   hookEnergies: string[];
   anglesToAvoid: string[];
   bodyTexts: string[];
+  scrollStopperTest?: string;
 }
 
 // --- Full Generation Result ---
@@ -569,6 +629,7 @@ export interface IGenerationResult {
   psycheMap: IPsycheMapData;
   salesPlaybook: ISalesPlaybookData;
   research: IResearchData;
+  avatars?: IAvatarData;
   synthesis?: ICreativeSynthesis;
   topCreatives: ITopCreativesData;
   createdAt: string;

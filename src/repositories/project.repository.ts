@@ -19,30 +19,47 @@ function buildCombinedPrompt(
   return parts.join(" ");
 }
 
+function stampVisualSuggestion(v: Record<string, unknown>, fallbackVoiceline?: string | null) {
+  const description = (v.description || v.prompt || v.idea || "") as string;
+  const voiceline = v.voiceline_script !== undefined ? v.voiceline_script as string | null : (fallbackVoiceline ?? null);
+  return {
+    prompt: buildCombinedPrompt(description, v.mood_arc as string, v.negative_prompt as string),
+    description,
+    voiceline_script: voiceline,
+    duration_seconds: (v.duration_seconds as number) || parseInt(v.clipDuration as string) || 8,
+    style_tags: (v.styleTags || []) as string[],
+    archetype: v.archetype as string,
+    audio_prompt: v.audio_prompt as string,
+    color_grade: v.color_grade as string,
+    camera: v.camera as string,
+    authenticity_tagline: v.authenticity_tagline as string,
+    mood_arc: v.mood_arc as string,
+    negative_prompt: v.negative_prompt as string,
+  };
+}
+
 function stampSora2Prompts(result: IGenerationResult): void {
   const creatives = result.topCreatives?.creatives || [];
   for (const creative of creatives) {
-    for (const hook of creative.hooks || []) {
+    // Short-form: stamp hooks
+    const hooks = Array.isArray(creative.hooks) ? creative.hooks : [];
+    for (const hook of hooks) {
       const hasSora2Speech = hook.audioSource === "sora2" && !!hook.voiceoverScript;
-      hook.sora2Prompts = (hook.visualSuggestions || []).map((v) => {
-        const description = v.description || v.prompt || v.idea || "";
-        const voiceline = v.voiceline_script !== undefined ? v.voiceline_script : (hasSora2Speech ? (hook.voiceoverScript ?? null) : null);
-
-        return {
-          prompt: buildCombinedPrompt(description, v.mood_arc, v.negative_prompt),
-          description,
-          voiceline_script: voiceline,
-          duration_seconds: v.duration_seconds || parseInt(v.clipDuration) || 8,
-          style_tags: v.styleTags || [],
-          archetype: v.archetype,
-          audio_prompt: v.audio_prompt,
-          color_grade: v.color_grade,
-          camera: v.camera,
-          authenticity_tagline: v.authenticity_tagline,
-          mood_arc: v.mood_arc,
-          negative_prompt: v.negative_prompt,
-        };
-      });
+      const fallback = hasSora2Speech ? (hook.voiceoverScript ?? null) : null;
+      hook.sora2Prompts = (hook.visualSuggestions || []).map((v) =>
+        stampVisualSuggestion(v as unknown as Record<string, unknown>, fallback)
+      );
+    }
+    // Long-form: stamp scenes
+    const scenes = Array.isArray(creative.scenes) ? creative.scenes : [];
+    for (const scene of scenes) {
+      if (scene.visualSuggestion) {
+        const fallback = scene.voiceoverScript ?? null;
+        scene.sora2Prompt = stampVisualSuggestion(
+          scene.visualSuggestion as unknown as Record<string, unknown>,
+          fallback,
+        );
+      }
     }
   }
 }
@@ -110,10 +127,12 @@ class ProjectRepository {
    * Create a new project
    */
   public async create(input: IProjectInput): Promise<IProjectRow> {
+    // Applovin saves as v3 in the DB (same form/data), but input_data preserves "applovin" for routing
+    const dbScenario = input.scenario === "applovin" ? "v3" : input.scenario === "research-dlp" ? "v4" : input.scenario;
     const { data, error } = await supabase
       .from(DB_TABLES.PROJECTS)
       .insert({
-        scenario: input.scenario,
+        scenario: dbScenario,
         product_name: input.productName,
         product_description: input.productDescription,
         app_id: input.appId || null,
@@ -163,8 +182,10 @@ class ProjectRepository {
     if (result.topCreatives?.creatives) {
       for (const creative of result.topCreatives.creatives) {
         creative.hidden = true; // whyThisScript, sourceFramework, scenario on this object
-        for (const hook of creative.hooks) {
-          hook.hidden = true; // visualSuggestions on this object
+        if (Array.isArray(creative.hooks)) {
+          for (const hook of creative.hooks) {
+            hook.hidden = true; // visualSuggestions on this object
+          }
         }
       }
     }

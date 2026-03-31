@@ -1,3 +1,42 @@
 - platform lingo (updated based on trends, social-geographic and age/sex factors and target audience market) that is suitable to each TikTok , meta etc. The market user should not be able to tell the difference between organic and ad lingo. This changes with trends, so we need a system in place that periodically
 analyses the current state of trends. If that is not possible, an option for the dev to feed TikTok trends lingo every month into it , maybe?
 - the entire platform framework should work on my thought process and marketing architecture that is unique to other platforms and offer ease of access and great ROI and value
+- 
+
+The #1 priority and purpose of the platform: Anyone with an online business should be able to create ads, ideas and ad strategy campaigns with this platform. The platform should be easy to use , user friendly and also yield maximum value output. The marketing department(s) of the business should also gain value
+from the advanced part of the website with the educational and my thought framework and technique.
+
+
+The experience of the product and its benefit should be directly reflected in the template of the ad.
+
+For example:
+
+Ugc + body (screen rec)
+motivational stories
+product related + text overlay > body
+podcast style + screen record
+street interview + screen record
+
+
+
+Research - searches that translate into the Stefan framebyframe sora2 copy ad.
+
+
+
+
+Worrying is praying for something you don't want. We are all fearful and anxious over the world conflict now, but do this instead: Read Bible affirmations from your lockscreen every hour. Tap below to get it.
+
+
+
+notes: 
+First, we need to establish the type of user this app is for. Great. now how does this app make me feel after I get it? what type of person am I? egotistical? do I want to be the most interesting guy for others? or for myself to
+actually be smarter? or do I just have curiousities, or does it help me in my job (domain) ? who am I? - see shadow avatar technique.
+
+-> Cialdini part (they don't know they don't want to spend time on their phone, we cant assume that, that's an anti-scrolling or doomscrolling hook ad angle, it can be used here, but it's not something that is FUNDAMENTAL. 
+-> I would not really rely too much on the social proof in ads, you can't really make ads on that. don't scrap it completely, but i think  it shouldn't be such a priority for this type of feature. If I were to buy a rolex (selling the rolex through my platform), then yes. you can use that.
+-> "It also does benefit expansion: the surface benefit is "book quotes on lockscreen." The expanded threads are things like — this replaces mindless notifications with something meaningful, this makes you a reader without requiring discipline, every phone unlock becomes a
+  micro-learning moment, you discover books you'd never find on your own." < - this is a great insight, very good.
+
+now the script tree:
+
+Alongside creating the classic copywriting examples in the tree, I want you to make them normally as you would , not really for my template, just tackle different emotions the way you're doing right now and write the texts and scenarios, BUT, AFT

@@ -12,6 +12,8 @@ export enum EScenario {
   V3 = "v3",  // Mobile Apps
   V4 = "v4",  // Any Product
   V5 = "v5",  // Any Product + GPT Creatives (comparison)
+  Applovin = "applovin", // Long-form 45-50s ads
+  ResearchDLP = "research-dlp", // Deep dive only + chat, no ad generation
 }
 
 /**

@@ -85,7 +85,7 @@ export const UGC_ARCHETYPES: IUGCArchetypeDef[] = [
     name: "Shock Excited",
     description: "Eyes go wide, natural 'oh shit' moment. Genuine surprise that can't be faked — the body reacts before the brain catches up.",
     arousal: "high",
-    territories: ["discovery_revelation", "aspiration_gap"],
+    territories: ["discovery_revelation", "aspiration_gap", "excitement_hype", "pride_flex"],
     emotion: ["surprise", "disbelief", "excitement", "awe", "shock"],
     action: [
       "hand to mouth",
@@ -102,7 +102,7 @@ export const UGC_ARCHETYPES: IUGCArchetypeDef[] = [
     name: "Rant Passionate",
     description: "Fired up, can't hold back, intense energy. Speaking fast, gesturing, the kind of person who pulls you into their conviction.",
     arousal: "high",
-    territories: ["identity_tension", "social_positioning"],
+    territories: ["identity_tension", "social_positioning", "anger_injustice"],
     emotion: ["frustration", "conviction", "indignation", "urgency", "righteous anger"],
     action: [
       "gestures emphatically",
@@ -119,7 +119,7 @@ export const UGC_ARCHETYPES: IUGCArchetypeDef[] = [
     name: "Chaotic Interrupt",
     description: "Unexpected behavior that breaks the scroll pattern. Something visually jarring or contextually wrong that forces attention.",
     arousal: "high",
-    territories: ["habit_architecture", "discovery_revelation"],
+    territories: ["habit_architecture", "discovery_revelation", "humor_absurdity"],
     emotion: ["manic energy", "absurdity", "impulsiveness", "chaos", "spontaneity"],
     action: [
       "bursts into frame",
@@ -138,7 +138,7 @@ export const UGC_ARCHETYPES: IUGCArchetypeDef[] = [
     name: "Playing Coy",
     description: "Slight smirk, knows something you don't. Casual energy with an undertone of 'I've got a secret worth hearing.'",
     arousal: "medium",
-    territories: ["discovery_revelation", "social_positioning"],
+    territories: ["discovery_revelation", "social_positioning", "humor_absurdity", "belonging_tribe"],
     emotion: ["smugness", "playfulness", "teasing", "knowing confidence", "mischief"],
     action: [
       "slight smirk to camera",
@@ -172,7 +172,7 @@ export const UGC_ARCHETYPES: IUGCArchetypeDef[] = [
     name: "Bestie Conspiratorial",
     description: "Close to camera, 'come here' energy. Whispering a secret to their best friend. Intimate, trust-building, low-key urgent.",
     arousal: "medium",
-    territories: ["social_positioning", "discovery_revelation"],
+    territories: ["social_positioning", "discovery_revelation", "belonging_tribe"],
     emotion: ["intimacy", "urgency-whisper", "trust", "conspiratorial excitement", "insider knowledge"],
     action: [
       "leans close to camera",
@@ -206,7 +206,7 @@ export const UGC_ARCHETYPES: IUGCArchetypeDef[] = [
     name: "Quiet Confidence",
     description: "Slight smile, direct look, composed. Not trying to sell anything. The calm energy of someone who found something that just works.",
     arousal: "medium",
-    territories: ["relief_surrender", "identity_tension"],
+    territories: ["relief_surrender", "identity_tension", "pride_flex"],
     emotion: ["calm assurance", "settled satisfaction", "groundedness", "quiet pride", "inner peace"],
     action: [
       "slight smile, direct eye contact",
@@ -301,7 +301,7 @@ export const UGC_ARCHETYPES: IUGCArchetypeDef[] = [
     name: "FOMO Left Behind",
     description: "Looking at phone seeing others succeed, 'why not me' energy. The quiet sting of watching everyone else figure it out.",
     arousal: "low",
-    territories: ["displacement", "social_positioning", "aspiration_gap"],
+    territories: ["displacement", "social_positioning", "aspiration_gap", "craving_desire"],
     emotion: ["envy", "inadequacy", "left out", "self-doubt", "quiet desperation"],
     action: [
       "scrolls through others' posts",
@@ -318,7 +318,7 @@ export const UGC_ARCHETYPES: IUGCArchetypeDef[] = [
     name: "Nostalgic Remembering",
     description: "Distant gaze, touching something meaningful, lost in memory. The ache of something that used to be and isn't anymore.",
     arousal: "low",
-    territories: ["loss_decay", "identity_tension"],
+    territories: ["loss_decay", "identity_tension", "nostalgia"],
     emotion: ["nostalgia", "longing", "bittersweet", "wistfulness", "gentle grief"],
     action: [
       "gazes into distance",

@@ -9,11 +9,14 @@ import { ResearchTab } from "@/components/research/research-tab";
 import { CopyCheckTab } from "@/components/copy-check/copy-check-tab";
 import { TopCreativesTab } from "@/components/top-creatives/top-creatives-tab";
 import { TemplatesPage } from "@/components/templates/templates-page";
+import { ChatPanel } from "@/components/chat/chat-panel";
+import { AvatarsTab } from "@/components/avatars/avatars-tab";
 import { useProgressiveGeneration } from "@/hooks/use-generation";
 import type { SectionStep } from "@/hooks/use-generation";
 import { useCreateProject, useProjectsByScenario } from "@/hooks/use-projects";
 import { generationRepository } from "@/repositories/generation.repository";
 import { projectRepository } from "@/repositories/project.repository";
+import { supabase } from "@/lib/supabase";
 import type { ProjectInput, ScenarioType, GenerationResult, AdCreativeBlueprint, ProjectRow } from "@/types/creative";
 
 // Sidebar navigation items
@@ -27,6 +30,7 @@ const NAV_DEEP_DIVE = [
   { id: "psyche", label: "Psychology", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
   { id: "sales", label: "Sales Strategy", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
   { id: "creative", label: "Scripts", icon: "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" },
+  { id: "avatars", label: "Avatars", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" },
 ];
 
 const NAV_TOOLS = [
@@ -41,7 +45,8 @@ interface ScenarioPageProps {
 
 export function ScenarioPage({ scenario }: ScenarioPageProps) {
   const [input, setInput] = useState<ProjectInput | null>(null);
-  const [activeView, setActiveView] = useState("dashboard");
+  const isResearchDLP = scenario === "research-dlp";
+  const [activeView, setActiveView] = useState(isResearchDLP ? "research" : "dashboard");
   const [theme, setTheme] = useState<Theme>("dark");
   const [apiKey, setApiKey] = useState("");
   const [showApiInput, setShowApiInput] = useState(false);
@@ -51,6 +56,8 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
   const [isGeneratingMore, setIsGeneratingMore] = useState(false);
   const [allCreatives, setAllCreatives] = useState<AdCreativeBlueprint[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(isResearchDLP);
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string; timestamp: string }[]>([]);
 
   // Apply theme to html element
   useEffect(() => {
@@ -170,8 +177,58 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
 
   const r = result as Partial<GenerationResult>;
 
+  // Build chat system context from deep dive data
+  const chatContext = [
+    input ? `Product: ${input.productName}\nFeature: ${input.featureName || "N/A"}\nDescription: ${input.productDescription}` : "",
+    r.psycheMap ? `Psychology: ${r.psycheMap.cognitiveProfile?.name || ""} — Pain: ${r.psycheMap.painPleasure?.pains?.join(", ") || ""} — Pleasure: ${r.psycheMap.painPleasure?.pleasures?.join(", ") || ""}` : "",
+    r.salesPlaybook ? `Sales: Market Soph Level ${r.salesPlaybook.marketSophistication?.level || "?"} — Demand: ${r.salesPlaybook.demandTemperature?.level || "?"} — Top Cialdini: ${r.salesPlaybook.cialdiniWeapons?.sort((a, b) => b.power - a.power).slice(0, 3).map(w => w.name).join(", ") || ""}` : "",
+    r.research ? `Audience: ${r.research.avatarTraits?.map(t => `${t.label}: ${t.value}`).join(" | ") || ""}\nSegments: ${r.research.audienceSegments?.slice(0, 3).map(s => `${s.name} — ${s.bestAngle}`).join("; ") || ""}` : "",
+    (r as Record<string, unknown>).synthesis ? `Synthesis: ${JSON.stringify((r as Record<string, unknown>).synthesis)}` : "",
+  ].filter(Boolean).join("\n\n");
+
+  // Save chat messages to project
+  const handleSaveChatMessages = async (msgs: { role: "user" | "assistant"; content: string; timestamp: string }[]) => {
+    setChatMessages(msgs);
+    if (activeProjectId) {
+      try {
+        await supabase.from("projects").update({ chat_messages: msgs }).eq("id", activeProjectId);
+      } catch { /* silent */ }
+    }
+  };
+
+  // Build synopsis from synthesis data for chat context display
+  const synthData = (r as Record<string, unknown>).synthesis as Record<string, unknown> | undefined;
+  const chatSynopsis = synthData ? [
+    synthData.feature && `Feature: ${synthData.feature}`,
+    synthData.mechanic && `How it works: ${synthData.mechanic}`,
+    synthData.audience && `Audience: ${synthData.audience}`,
+    synthData.dopamineTrigger && `Dopamine trigger: ${synthData.dopamineTrigger}`,
+    synthData.existingDesire && `Existing desire: ${synthData.existingDesire}`,
+    synthData.contrastAnalysis && `Contrast: ${synthData.contrastAnalysis}`,
+    (synthData.emotionalDelta as Record<string, string>)?.delta && `Emotional delta: ${(synthData.emotionalDelta as Record<string, string>).delta}`,
+    Array.isArray(synthData.viewerScenarios) && synthData.viewerScenarios.length > 0 && `Viewer scenarios: ${(synthData.viewerScenarios as string[]).slice(0, 5).join(" | ")}`,
+    Array.isArray(synthData.hookEnergies) && `Hook energies: ${(synthData.hookEnergies as string[]).join(", ")}`,
+  ].filter(Boolean).join("\n") : undefined;
+
+  // Build avatar options for chat dropdown
+  const avatarData = (r as Record<string, unknown>).avatars as { avatars: { id: string; name: string; chatSystemPrompt: string }[] } | undefined;
+  const chatAvatars = avatarData?.avatars?.map(a => ({ id: a.id, name: a.name, chatSystemPrompt: a.chatSystemPrompt })) || [];
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      {/* Chat Panel — floating for normal modes, inline for research-dlp */}
+      {!isResearchDLP && (
+        <ChatPanel
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          systemContext={chatContext}
+          savedMessages={chatMessages}
+          onSaveMessages={handleSaveChatMessages}
+          synopsis={chatSynopsis}
+          avatars={chatAvatars}
+        />
+      )}
+
       {/* ===== SIDEBAR ===== */}
       <aside className="w-[220px] flex-shrink-0 flex flex-col border-r border-border/40 bg-card/50">
         {/* Logo + back */}
@@ -193,7 +250,7 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-5">
           {/* Main */}
           <div>
-            {NAV_MAIN.map((item) => (
+            {NAV_MAIN.filter((item) => !(isResearchDLP && item.id === "dashboard")).map((item) => (
               <SidebarItem
                 key={item.id}
                 item={item}
@@ -286,6 +343,7 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
               {activeView === "psyche" && "Psychology"}
               {activeView === "sales" && "Sales Strategy"}
               {activeView === "creative" && "Scripts"}
+              {activeView === "avatars" && "Customer Avatars"}
               {activeView === "copycheck" && "Copy Check"}
             </h1>
             <p className="text-xs text-muted-foreground/60 truncate">{input.productName} — {input.productDescription.slice(0, 80)}{input.productDescription.length > 80 ? "..." : ""}</p>
@@ -300,6 +358,17 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
             <svg className={`w-3.5 h-3.5 ${isGenerating ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 12a9 9 0 1 1-6.22-8.56" />
               <polyline points="21 3 21 9 15 9" />
+            </svg>
+          </button>
+
+          {/* Chat toggle */}
+          <button
+            onClick={() => setIsChatOpen(!isChatOpen)}
+            className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${isChatOpen ? "bg-blue-500/20 text-blue-400" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"}`}
+            title="Creative Sparring"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </button>
 
@@ -330,7 +399,7 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
 
         {/* Progress bar */}
         {isGenerating && (
-          <GenerationProgress steps={steps} progress={progress} totalElapsed={totalElapsed} error={error} />
+          <GenerationProgress steps={isResearchDLP ? steps.filter(s => s.key !== "topCreatives") : steps} progress={progress} totalElapsed={totalElapsed} error={error} />
         )}
 
         {/* Error banner */}
@@ -362,6 +431,30 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
                     productName={input.productName}
                     onGenerateMore={handleGenerateMore}
                     isGeneratingMore={isGeneratingMore}
+                    onSaveResults={async () => {
+                      try {
+                        let projectId = activeProjectId;
+                        if (!projectId) {
+                          const newProject = await projectRepository.create(input);
+                          projectId = newProject.id;
+                          setActiveProjectId(projectId);
+                        }
+                        const fullResult = {
+                          id: projectId,
+                          input,
+                          psycheMap: r.psycheMap,
+                          salesPlaybook: r.salesPlaybook,
+                          research: r.research,
+                          creativeTree: r.creativeTree,
+                          topCreatives: { creatives: allCreatives.length > 0 ? allCreatives : r.topCreatives?.creatives || [] },
+                          createdAt: new Date().toISOString(),
+                        } as GenerationResult;
+                        await projectRepository.saveResult(projectId, fullResult);
+                        alert("Results saved!");
+                      } catch (e) {
+                        alert("Save failed: " + (e instanceof Error ? e.message : "Unknown error"));
+                      }
+                    }}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-24">
@@ -467,6 +560,17 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
               </div>
             )}
 
+            {/* AVATARS */}
+            {activeView === "avatars" && (
+              <div>
+                {(r as Record<string, unknown>).avatars ? (
+                  <AvatarsTab data={(r as Record<string, unknown>).avatars as import("@/types/creative").IAvatarData} />
+                ) : (
+                  <LoadingSection label="Avatars" />
+                )}
+              </div>
+            )}
+
             {/* COPY CHECK */}
             {activeView === "copycheck" && (
               <CopyCheckTab input={input} />
@@ -475,6 +579,22 @@ export function ScenarioPage({ scenario }: ScenarioPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Inline Chat Panel for Research DLP */}
+      {isResearchDLP && (
+        <div className="w-[420px] flex-shrink-0 border-l border-white/[0.06]">
+          <ChatPanel
+            isOpen={true}
+            onClose={() => {}}
+            systemContext={chatContext}
+            savedMessages={chatMessages}
+            onSaveMessages={handleSaveChatMessages}
+            alwaysOpen
+            synopsis={chatSynopsis}
+            avatars={chatAvatars}
+          />
+        </div>
+      )}
     </div>
   );
 }

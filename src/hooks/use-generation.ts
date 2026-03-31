@@ -215,52 +215,26 @@ export function useProgressiveGeneration() {
     };
 
     try {
-      // === STEP 1: Psyche Map + Sales Playbook + Research ALL IN PARALLEL ===
-      // Sales/Research barely use Psyche context - fire everything at once
-      setCurrentSection("Psychology + Sales Strategy + Research");
-      setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: ESectionStatus.Generating } : s)));
+      // === SINGLE CALL — the All route handles the full optimized pipeline ===
+      // Steps: (PsycheMap + Sales + Research) parallel → (CreativeTree + Synthesis) parallel → All creatives parallel
+      setCurrentSection("Generating all sections...");
+      setSteps((prev) => prev.map((s) => ({ ...s, status: ESectionStatus.Generating })));
 
-      const step1Start = Date.now();
+      const fullResult = await generationRepository.generateAll(input) as IGenerationResult;
 
-      const [psycheData, salesData, researchData] = await Promise.all([
-        generationRepository.generatePsycheMap(input),
-        generationRepository.generateSalesPlaybook(input),
-        generationRepository.generateResearch(input),
-      ]);
+      const elapsed = Date.now() - globalStart;
 
-      const step1Elapsed = Date.now() - step1Start;
+      accumulated.psycheMap = fullResult.psycheMap;
+      accumulated.salesPlaybook = fullResult.salesPlaybook;
+      accumulated.research = fullResult.research;
+      accumulated.creativeTree = fullResult.creativeTree;
+      accumulated.synthesis = (fullResult as unknown as Record<string, unknown>).synthesis;
+      accumulated.topCreatives = fullResult.topCreatives;
 
-      accumulated.psycheMap = psycheData;
-      accumulated.salesPlaybook = salesData;
-      accumulated.research = researchData;
-      setResult((prev) => ({ ...prev, psycheMap: psycheData, salesPlaybook: salesData, research: researchData }));
-      setSteps((prev) => prev.map((s, idx) => (idx <= 2 ? { ...s, status: ESectionStatus.Done, elapsed: step1Elapsed } : s)));
-      setProgress(50);
-      setTotalElapsed(Date.now() - globalStart);
-
-      // === STEP 2: Creative Tree (informed by all 3) ===
-      const baseContext = {
-        psycheMap: accumulated.psycheMap as IPsycheMapData,
-        salesPlaybook: accumulated.salesPlaybook as ISalesPlaybookData,
-        research: accumulated.research as IResearchData,
-      };
-
-      const creativeTreeData = await runSection(3, "creativeTree", "Scripts", () =>
-        generationRepository.generateCreativeTree(input, baseContext)
-      ) as ICreativeTreeData;
-      setProgress(75);
-
-      // === STEP 3: Top Creatives (informed by all 3 + Creative Tree) ===
-      const fullContext = {
-        ...baseContext,
-        creativeTree: creativeTreeData,
-      };
-
-      const topCreativesData = await runSection(4, "topCreatives", "Top Creatives", () =>
-        generationRepository.generateTopCreatives(input, fullContext)
-      );
+      setResult(fullResult);
+      setSteps((prev) => prev.map((s) => ({ ...s, status: ESectionStatus.Done, elapsed })));
       setProgress(100);
-      setTotalElapsed(Date.now() - globalStart);
+      setTotalElapsed(elapsed);
 
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Generation failed";
@@ -275,8 +249,8 @@ export function useProgressiveGeneration() {
       return null;
     }
 
-    // Success - build full result
-    const fullResult: IGenerationResult = {
+    // Success — the All route already returned the full result
+    const finalResult: IGenerationResult = {
       id: projectId || crypto.randomUUID(),
       input,
       psycheMap: accumulated.psycheMap as IGenerationResult["psycheMap"],
@@ -287,13 +261,23 @@ export function useProgressiveGeneration() {
       createdAt: new Date().toISOString(),
     };
 
-    if (projectId) {
-      await projectRepository.saveResult(projectId, fullResult).catch(() => {});
+    // Autosave — create project if needed, then save result
+    let saveId = projectId;
+    if (!saveId) {
+      try {
+        const newProject = await projectRepository.create(input);
+        saveId = newProject.id;
+      } catch {
+        // Project creation failed silently — result stays in UI state only
+      }
+    }
+    if (saveId) {
+      await projectRepository.saveResult(saveId, { ...finalResult, id: saveId }).catch(() => {});
     }
 
     setCurrentSection(null);
     setIsGenerating(false);
-    return fullResult;
+    return finalResult;
   }, []);
 
   return { generate, progress, currentSection, result, error, isGenerating, steps, totalElapsed, setResult };

@@ -23,6 +23,23 @@ const V4_PRESETS: Record<string, { name: string; benefit: string }> = {
   },
 };
 
+const APPLOVIN_PRESETS: Record<string, { appName: string; features: string; benefit: string }> = {
+  biblechatAll: {
+    appName: "BibleChat",
+    features: `Lockscreen Verses — a new Bible verse on your lockscreen every hour, Scripture finds you without opening anything
+Lockscreen Affirmations — Bible-based affirmations on your lockscreen every hour, positive faith reminders throughout your day
+Lockscreen Calendar Widget — Christian calendar on your lockscreen showing today's date and its biblical meaning
+Audio Bible — listen to Scripture anywhere, full Bible narrated so you can hear God's word while driving, cooking, or walking
+Daily Plan — personalized verse, prayer, and devotional each morning, takes 5 minutes
+Chat — ask any faith question and get answers grounded in Scripture, like having a pastor in your pocket 24/7
+Bible Trivia Games — test your Bible knowledge with daily trivia, fun way to learn Scripture
+Bible Animation Series — animated Bible stories you can watch, faith content that feels like entertainment
+Bible Study Plans — personalized Bible study plans based on where you are in your faith journey
+Voice Ask the Bible — ask any Bible question out loud and hear the answer spoken back to you, hands-free Scripture guidance`,
+    benefit: "Everything a Christian needs on their phone — Scripture on your lockscreen, audio Bible, personalized devotionals and study plans, voice-powered Bible Q&A, trivia, animations, and a Christian calendar.",
+  },
+};
+
 const V3_PRESETS: Record<string, { appName: string; featureName: string; benefit: string }> = {
   bcReels: {
     appName: "BibleChat",
@@ -68,7 +85,7 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
   const [productBenefit, setProductBenefit] = useState("");
   const [creatorBrief, setCreatorBrief] = useState("");
   const { projects } = useProjectsByScenario(scenario);
-  const isV3 = scenario === "v3" || scenario === "v5";
+  const isV3 = scenario === "v3" || scenario === "v5" || scenario === "applovin";
 
   const handleSubmit = () => {
     if (!productName.trim()) return;
@@ -79,7 +96,16 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
       productDescription: productBenefit.trim(),
       ...(creatorBrief.trim() ? { creatorBrief: creatorBrief.trim() } : {}),
     };
-    if (isV3) {
+    if (scenario === "applovin") {
+      // Applovin: multi-feature — featureName has all features, appFeatures stores them for the prompt
+      onSubmit({
+        ...base,
+        featureName: featureName.trim().split("\n")[0]?.trim() || "Multiple Features",
+        appFeatures: featureName.trim(),
+        appId: toSlug(productName),
+        featureId: "applovin-longform",
+      });
+    } else if (isV3) {
       onSubmit({
         ...base,
         featureName: featureName.trim(),
@@ -92,7 +118,13 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
   };
 
   const loadPreset = (key: string) => {
-    if (isV3) {
+    if (scenario === "applovin") {
+      const p = APPLOVIN_PRESETS[key];
+      if (!p) return;
+      setProductName(p.appName);
+      setFeatureName(p.features);
+      setProductBenefit(p.benefit);
+    } else if (isV3) {
       const p = V3_PRESETS[key];
       if (!p) return;
       setProductName(p.appName);
@@ -131,7 +163,9 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
         Creative System
       </h1>
       <p className="text-muted-foreground text-center max-w-md mb-10 text-sm leading-relaxed">
-        {scenario === "v5"
+        {scenario === "research-dlp"
+          ? "Deep dive into any product's audience. Psychology, sales mechanics, research — then brainstorm with Opus."
+          : scenario === "v5"
           ? "Mobile app ads with GPT-4o creatives. Same deep dive, different creative engine. Compare with V3."
           : scenario === "v3"
           ? "Enter a mobile app feature to generate ad blueprints, psychology analysis, and sales mechanics."
@@ -164,8 +198,8 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
           )}
         </div>
 
-        {/* Feature Name - V3 only */}
-        {isV3 && (
+        {/* Feature Name - V3/V5 single feature */}
+        {isV3 && scenario !== "applovin" && (
           <div className="mb-4">
             <label className="block text-xs font-medium text-foreground mb-1.5">
               Feature Name
@@ -183,6 +217,24 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
                 feature_id: <span className="font-mono text-primary">{toSlug(featureName)}</span>
               </p>
             )}
+          </div>
+        )}
+
+        {/* Multiple Features - Applovin only */}
+        {scenario === "applovin" && (
+          <div className="mb-4">
+            <label className="block text-xs font-medium text-foreground mb-1.5">
+              Features <span className="text-muted-foreground/40 font-normal">(one per line — the ad narrative picks the best ones)</span>
+            </label>
+            <textarea
+              className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors resize-y min-h-[100px]"
+              placeholder={"e.g.\nLockscreen Verses — a new Bible verse on your lockscreen every hour\nAI Chat — ask any question and get answers grounded in Scripture\nDaily Plan — personalized verse, prayer, and devotional each morning\nReels — swipe through Bible verse reels instead of doomscrolling"}
+              value={featureName}
+              onChange={(e) => setFeatureName(e.target.value)}
+            />
+            <p className="mt-1.5 text-[11px] text-muted-foreground/60 leading-relaxed">
+              List your app&apos;s key features. Each 45-50s ad will pick the best features that fit its story.
+            </p>
           </div>
         )}
 
@@ -230,10 +282,10 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-3.5 h-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-              Generating...
+              {scenario === "research-dlp" ? "Researching..." : "Generating..."}
             </span>
           ) : (
-            "Generate Ads"
+            scenario === "research-dlp" ? "Start Deep Dive" : "Generate Ads"
           )}
         </button>
       </div>
@@ -241,13 +293,13 @@ export function LandingForm({ scenario, onSubmit, onLoadProject, isLoading }: La
       {/* Presets */}
       <div className="flex flex-wrap items-center justify-center gap-1.5 mt-6">
         <span className="text-[11px] text-muted-foreground/50 mr-1">Try:</span>
-        {Object.entries(isV3 ? V3_PRESETS : V4_PRESETS).map(([key, preset]) => (
+        {Object.entries(scenario === "applovin" ? APPLOVIN_PRESETS : isV3 ? V3_PRESETS : V4_PRESETS).map(([key, preset]) => (
           <button
             key={key}
             className="rounded-md border border-border/50 px-3 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
             onClick={() => loadPreset(key)}
           >
-            {"appName" in preset ? `${preset.appName} — ${preset.featureName}` : preset.name}
+            {"features" in preset ? `${(preset as { appName: string }).appName} — All Features` : "appName" in preset ? `${(preset as { appName: string }).appName} — ${(preset as { featureName: string }).featureName}` : (preset as { name: string }).name}
           </button>
         ))}
       </div>

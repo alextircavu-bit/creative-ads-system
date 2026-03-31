@@ -5,7 +5,6 @@
 // ============================================================
 
 import type { ProjectInput, PsycheMapData, SalesPlaybookData, ResearchData, CreativeTreeData, CreativeFeedback } from "@/types/creative";
-import type { ICreativeSynthesis } from "@/types/creative";
 import {
   EMOTIONAL_ANGLES,
   FRAMEWORKS,
@@ -31,11 +30,10 @@ import {
 import { UGC_ARCHETYPES, UGC_APPEARANCE_POOL, UGC_ENVIRONMENT_POOL } from "@/config/ugc-archetypes";
 import { SONGS } from "@/config/songs";
 import { HOOK_FORMATS } from "@/config/hook-formats";
-import { UGC_VISUAL_ARCHETYPES } from "@/config/ugc-visual-archetypes";
 
 function buildContext(input: ProjectInput): string {
   const base = `Product: ${input.productName}\nDescription: ${input.productDescription}`;
-  if (input.scenario === "v3" || input.scenario === "v5" || input.scenario === "applovin") {
+  if (input.scenario === "v3" || input.scenario === "v5") {
     return `${base}\nType: Mobile App\nFeature Being Marketed: ${input.featureName || "N/A"}\nApp Features: ${input.appFeatures || "N/A"}\nApp Benefits: ${input.appBenefits || "N/A"}\nApp Purpose: ${input.appPurpose || "N/A"}`;
   }
   return `${base}\nTarget Audience: ${input.targetAudience || "N/A"}\nUSP: ${input.uniqueSellingPoint || "N/A"}`;
@@ -198,12 +196,9 @@ Purchase Context:
 How the product is sold calibrates ad intensity. A free app download needs soft CTAs ("try it"). A $299 course needs hard conviction-building. Impulse purchases need urgency. Considered purchases need trust. This directly affects hook aggression, CTA wording, and body framing.
 
 Demand Temperature:
-How much existing desire exists for the OUTCOME this product delivers — NOT the specific mechanism/feature. Evaluate demand for what the user GETS, not how the product delivers it.
-- LOW: Nobody wants the outcome. You must create desire from scratch.
-- MEDIUM: People want the outcome but aren't actively shopping for solutions. Bridge from their existing desire to your product.
-- HIGH: People actively want this and are searching for solutions. Lead with the product.
-CRITICAL PRINCIPLE (Eugene Schwartz): Mass desire CANNOT be created. It can only be TRANSFERRED. Don't try to educate the market or create new desire. Channel the desire that ALREADY EXISTS in this audience into this product. What do they already want? This product fulfills that want through a new mechanism.
-IMPORTANT: Evaluate demand for the OUTCOME, not the mechanism. A lockscreen verse widget is HIGH demand because the outcome (daily Scripture) is what millions want. The mechanism is new, but the desire is ancient.
+How much existing desire/awareness exists for this product in the market. This is NOT about message saturation (that's Market Sophistication) — this is about whether people already WANT what you're selling or if you need to CREATE the want.
+- LOW: Nobody's searching for this. You must manufacture desire through relatable scenarios. Hooks CANNOT lead with the product — they lead with emotion/scenario and let the product reveal itself. Heavy bridge work needed. (e.g., lockscreen Bible verses — nobody wakes up wanting this)
+- MEDIUM: People know the problem but aren't actively shopping for this solution. Bridge from their existing desire to your product. (e.g., calorie tracker — people want to eat better but aren't comparing apps)
 - HIGH: People are actively looking. Product sells itself. Lead with features, social proof, comparisons. Minimal bridge needed. (e.g., iPhone case — people are already searching)
 
 === YOUR TASK ===
@@ -349,12 +344,7 @@ export function researchPrompt(input: ProjectInput, psycheMapData?: PsycheMapDat
 
   const creatorBrief = input.creatorBrief ? `\n\n=== CREATOR BRIEF (privileged insider knowledge — this person knows the product and audience intimately. Weight this HEAVILY in your research.) ===\n${input.creatorBrief}` : "";
 
-  return `You are an elite ad researcher. I'm giving you a HARDCODED research methodology framework. Your job is to personalize every step for this specific product. Do NOT change the methodology - only personalize the content.
-
-CORE PRINCIPLES:
-- VOICE OF CUSTOMER (VOC): Your #1 goal is to extract the EXACT WORDS the audience uses. Not marketing words. Not your words. THEIR words. The best hook ever written was a customer's exact phrase used word-for-word. Speak their language.
-- PURPLE OCEAN: This product exists in a proven market with demand. Your job is to find the SPECIFIC NICHE within that market that this product owns 100%. Not the whole market — the slice nobody else is serving.
-- Research is 80% of copywriting. Everything downstream depends on how deep and specific this research is.${creatorBrief}
+  return `You are an elite ad researcher. I'm giving you a HARDCODED research methodology framework. Your job is to personalize every step for this specific product. Do NOT change the methodology - only personalize the content.${creatorBrief}
 
 ${buildContext(input)}
 
@@ -472,90 +462,6 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code fences. The shadow avatar
 }
 
 // ============================================================
-// 3.5. AVATARS — Full psychographic personas you can talk to
-// Generated parallel with Creative Tree, informed by Steps 1 deep dive
-// ============================================================
-
-export function avatarsPrompt(
-  input: ProjectInput,
-  psycheMapData?: PsycheMapData,
-  salesData?: SalesPlaybookData,
-  researchData?: ResearchData,
-): string {
-  const context: string[] = [];
-  if (psycheMapData) {
-    context.push(`Pain: ${psycheMapData.painPleasure.pains.join(", ")}`, `Pleasure: ${psycheMapData.painPleasure.pleasures.join(", ")}`);
-  }
-  if (salesData) {
-    context.push(`Awareness: ${salesData.awarenessLevels?.sort((a, b) => b.relevance - a.relevance).slice(0, 2).map(l => l.name).join(", ") || "N/A"}`);
-    context.push(`Objections: ${salesData.objectionMap?.map(o => o.objection).join(", ") || "N/A"}`);
-  }
-  if (researchData) {
-    context.push(`Segments: ${researchData.audienceSegments?.map(s => `${s.name} (${s.demographics})`).join(", ") || "N/A"}`);
-    context.push(`Avatar traits: ${researchData.avatarTraits?.map(t => `${t.label}: ${t.value}`).join(", ") || "N/A"}`);
-  }
-
-  return `You create deeply specific customer avatars for ad targeting. Each avatar is a REAL PERSON — specific enough to have a conversation with. Not a demographic profile. A human being with a name, a daily routine, a way of talking, and a specific reason they need this product.
-
-${buildContext(input)}
-
-${context.join("\n")}
-
-Generate 5 avatars. Each must be a DIFFERENT type of person who would buy this product for a DIFFERENT reason.
-
-RULES:
-- Each avatar has a specific name, age, location, job
-- Daily routine is hour-by-hour specific (wake up, commute, work, scroll, sleep)
-- Pain language = the EXACT WORDS this person uses. Not marketing words. How they'd text a friend about their problem.
-- Vocabulary sample = 5-10 phrases they ACTUALLY say on TikTok, in texts, in comments
-- Consciousness level from Hawkins scale: shame (20), guilt (30), fear (100), desire (125), anger (150), pride (175), courage (200), neutrality (250), willingness (310)
-- The chatSystemPrompt must be detailed enough that an AI can role-play as this person convincingly. Include their speech patterns, beliefs, emotional state, daily frustrations, what makes them laugh, what triggers them.
-- ASCII portrait: 8-12 lines, simple character art that gives a visual sense of the person (hair, face, clothing vibe). Keep it minimal but distinctive.
-
-AVATAR DIVERSITY — the 5 must cover:
-1. The OBVIOUS buyer — largest segment, most common reason
-2. The PAIN-DRIVEN buyer — active suffering, highest intent
-3. The ASPIRATIONAL buyer — wants to become someone better
-4. The SKEPTICAL buyer — needs convincing, has objections
-5. The UNEXPECTED buyer — niche angle nobody targets
-
-JSON:
-{
-  "avatars": [
-    {
-      "id": "avatar_1",
-      "name": "First name, age, city",
-      "ascii": "8-12 line ASCII portrait",
-      "demographics": "age, location, job, relationship, income bracket",
-      "dailyRoutine": "6am wake up → 6:30 scroll phone → 7 commute → ... → 11pm bed. Hour by hour.",
-      "painLanguage": ["exact phrases they use to describe their problem — 5-8 phrases"],
-      "dreamState": "What life looks like with this problem solved. Specific, not abstract.",
-      "scrollBehavior": "What they watch on TikTok, who they follow on IG, what YouTube they consume, what subreddits they lurk",
-      "objections": ["why they wouldn't buy — 3-5 specific objections in their own words"],
-      "purchaseTrigger": "The specific moment they'd download/buy. What happens right before they act.",
-      "voiceTone": "How they talk — casual, formal, sarcastic, earnest, etc. How they text. Their energy.",
-      "vocabularySample": ["5-10 actual phrases they say — slang, filler words, their generation's language"],
-      "consciousnessLevel": "Hawkins level name + number + why this person is at this level",
-      "whyTheyBuy": "Their specific reason for wanting this product — not the marketing reason, THEIR reason",
-      "chatSystemPrompt": "You are [name]. You are [age] years old, living in [city], working as [job]. [3-5 sentences of personality, beliefs, daily frustrations, emotional state, speech patterns, what makes you laugh, what triggers you]. You talk like [specific speech style]. When asked about [product category], you feel [specific emotion] because [specific reason]. You would/wouldn't buy [product] because [specific logic]. Stay in character. Use your vocabulary. Never break character.",
-      "awarenessStage": "Which stage: unaware / problem aware / solution aware / product aware / most aware. WHY this avatar is at this stage — what do they know and not know about the problem and the solution?",
-      "emotionalDelta": {
-        "currentState": "Where this avatar is emotionally right now in their daily life — specific, not abstract",
-        "elevatedState": "How they'd feel if this product actually worked for them — the moment of relief/excitement/pride",
-        "gap": "The distance between those two states. This gap is what makes ads convert for this avatar. One sentence."
-      },
-      "objectionKillers": [
-        { "objection": "their objection in their own words", "insight": "the research-backed insight that neutralizes it — not a rebuttal, an understanding of WHY they feel this way and what would change their mind" }
-      ],
-      "hookInspirations": ["5-8 raw angles inspired by this avatar's specific pain/desire/situation. NOT finished hooks. Just directions: 'the guilt of scrolling instead of praying', 'discovery that Scripture can be passive', 'the moment they realize they haven't opened a Bible app in months'. These are SEEDS for ad creation."]
-    }
-  ]
-}
-
-Return ONLY valid JSON.`;
-}
-
-// ============================================================
 // 4. CREATIVE TREE - Generated LAST (receives ALL previous data)
 // This is the OUTPUT - the amalgamation of all psychology,
 // sales, and research insights for maximum ad performance.
@@ -599,8 +505,8 @@ Closing Techniques: ${salesData.closingTechniques.map((t) => t.name).join(", ")}
       : "";
     contextParts.push(`=== RESEARCH DATA ===
 Avatar: ${researchData.avatarTraits.map((t) => `${t.label}: ${t.value}`).join(" | ")}${segmentContext}
-Key Insights: ${(researchData.shadowAvatarSteps || []).map((s) => s.description).join(" → ")}
-Pre-Creative Checklist: ${(researchData.preCreativeChecklist || []).slice(0, 5).join("; ")}`);
+Key Insights: ${researchData.shadowAvatarSteps.map((s) => s.description).join(" → ")}
+Pre-Creative Checklist: ${researchData.preCreativeChecklist.slice(0, 5).join("; ")}`);
   }
 
   const anglesJSON = EMOTIONAL_ANGLES.map((a) => ({
@@ -663,20 +569,21 @@ Generate a JSON object:
 
       TWO-PHASE PROCESS for each script:
 
-      PHASE 1 — TERRITORY EXPLORATION: Pick a specific ANGLE within this territory that fits the framework. Then write the script as the framework NATIVELY works. PAS as a real PAS (problem, agitate, solution — full copy). AIDA as real AIDA. Don't constrain to any ad format yet — no hooks, no body text, no template. Write it as if it were a sales letter, landing page, or email. This is RAW COPYWRITING exploring the territory.
+      PHASE 1 — TERRITORY EXPLORATION: Pick a specific ANGLE within this territory that fits the framework. Then write the script as the framework NATIVELY works. PAS as a real PAS (problem, agitate, solution — full copy). AIDA as real AIDA. Don't constrain to any ad format yet. Write it as if it were a sales letter, landing page, email — whatever the framework was designed for. This is the RAW copywriting.
 
-      PHASE 2 — SYNOPSIS: Extract the core insight. What psychological effect does this script create? What is the STORY it tells? What viewer scenario does it tap into? What emotional shift does it produce? This synopsis is what ad creators (short-form or long-form) will use as raw material. Do NOT distill to a hook+body — that's the ad template's job.
+      PHASE 2 — DISTILLATION: Extract the CORE PSYCHOLOGICAL EFFECT. What does this script DO to the reader? What emotion does it trigger? What tension does it create? Distill that into a hook (5-20 words) and a body (one plain sentence describing the feature).
 
-      IMPORTANT: Each script within the SAME territory should explore a DIFFERENT angle. The frameworks are tools to approach the territory from different psychological angles.
+      IMPORTANT: Each script within the SAME territory should explore a DIFFERENT angle of that territory. Don't repeat the same hook direction across frameworks — the frameworks are tools to approach the territory from different psychological angles.
 
       {
         "frameworkId": "the framework id",
         "steps": [
-          { "label": "native", "type": "full", "text": "PHASE 1: The full native copywriting execution. Name the specific angle. 3-6 sentences of real copy." },
+          { "label": "native", "type": "full", "text": "PHASE 1: The full native copywriting execution. Name the specific angle within the territory you're exploring. 3-6 sentences." },
           { "label": "effect", "type": "mechanism", "text": "PHASE 2: The core psychological effect — what emotion, tension, or reframe does this create? One sentence." },
-          { "label": "synopsis", "type": "full", "text": "What STORY does this tell? What viewer scenario does it tap? What emotional journey: [start emotion] → [trigger] → [end emotion]? What features fit this narrative? 2-3 sentences." }
+          { "label": "hook", "type": "attention|problem|before|situation", "text": "The distilled hook — 5-20 words. This is what stops the scroll." },
+          { "label": "body", "type": "solution|after|desire|result", "text": "The product resolution (one sentence). Plainly describes the feature." }
         ],
-        "hooks": ["5 alternative angles within this territory — each a different DIRECTION to explore, written as natural sentences. These are inspiration seeds, not final ad copy."]
+        "hooks": ["5 alternative hook lines — each explores a DIFFERENT angle within this same territory. Natural flowing sentences, not fragments."]
       }
     ]
   },
@@ -755,22 +662,11 @@ ${researchData.benefitExpansion ? `Benefit expansion:\n  Surface: ${researchData
   if (creativeTreeData) {
     const sortedAngles = [...creativeTreeData.emotionalAngles].sort((a, b) => b.relevanceScore - a.relevanceScore);
     const topAngles = sortedAngles.slice(0, 8);
-    // Extract synopses from scripts
-    const synopses: string[] = [];
-    if (creativeTreeData.scripts) {
-      for (const [territoryId, scripts] of Object.entries(creativeTreeData.scripts)) {
-        for (const script of (scripts as { steps: { label: string; text: string }[] }[])) {
-          const synopsisStep = script.steps.find((s: { label: string }) => s.label === "synopsis");
-          if (synopsisStep) synopses.push(`[${territoryId}] ${synopsisStep.text}`);
-        }
-      }
-    }
-
     parts.push(`=== CREATIVE TREE INTELLIGENCE ===
 Top emotional angles (by relevance):
 ${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).join("\n")}
-${synopses.length > 0 ? `\nStory synopses (use as raw material for ads):\n${synopses.slice(0, 10).map((s, i) => `  ${i + 1}. ${s}`).join("\n")}` : ""}
-Use these angles and synopses as INSPIRATION. Build hooks and stories FROM viewer scenarios and synopses.`);
+Use these angles as INSPIRATION. You are NOT limited to them.
+IMPORTANT: If VIEWER SCENARIOS are listed in the Research section above, build hooks FROM those specific moments. They are real-life situations the audience lives in — much stronger than abstract emotional territories.`);
   }
 
   return parts.join("\n\n");
@@ -793,28 +689,6 @@ ${Object.entries(UGC_APPEARANCE_POOL).map(([k, v]) => `${k}: ${v.join(", ")}`).j
 
 ENVIRONMENTS:
 ${UGC_ENVIRONMENT_POOL.join(" | ")}`;
-}
-
-function buildVisualArchetypesSection(): string {
-  return `=== UGC VISUAL ARCHETYPE LIBRARY ===
-
-Select the archetype by WHERE the person naturally IS when they'd have this thought.
-
-ARCHETYPES (use the FULL description template, audio, color, camera, and locked details):
-${UGC_VISUAL_ARCHETYPES.map(a => `${a.id}: ${a.name}
-  Description template: ${a.descriptionTemplate}
-  Audio: ${a.audioPrompt}
-  Color: ${a.colorGrade}
-  Camera: ${a.cameraSummary}
-  Locked details: ${a.lockedDetails}
-  Vibe: ${a.authenticityTagline}`).join("\n\n")}
-
-VOICELINE RULES:
-- Must sound like speech, not copy
-- The person is mid-thought when the clip starts
-- Contractions, filler words, and incomplete sentences are correct
-- Delivery adapts to archetype: whispered in Whispering/Secret, projected in Walking & Talking, intimate in Storytime Closeup, raised in Car Confession, casual in Bed Scroll
-- Punctuation controls TTS delivery: use "..." for pauses, "—" for breaks, "?" for uptick. "an hourly lockscreen widget tap below" reads robotic. "a verse shows up... like, every hour? on your lockscreen. tap below to get it" reads human.`;
 }
 
 function buildHookFormatsSection(): string {
@@ -853,14 +727,10 @@ The hook's energy depends on the PRODUCT and AUDIENCE. Different products trigge
 The hook is the audience's DOPAMINE TRIGGER. What do they already crave, fear, or obsess over? Put THAT in the hook.
 
 === WHAT MAKES A HOOK GOOD ===
-- COPY IS 80% OF THE HOOK. The visual (15%) and audio (5%) support the copy. Don't over-invest in visual at the expense of words.
-- It uses a word that TARGETS the audience: "Bible" targets Christians, "macro" targets gym people. The targeting IS the vocabulary.
+- It uses a word that TARGETS the audience: "Bible" targets Christians, "macro" targets gym people, "streak" targets Duolingo users. The targeting is in the vocabulary.
 - It creates CURIOSITY or TENSION that the body resolves.
-- CLARITY OVER CLEVERNESS. Always. 5th grade reading level. The ugly ad with clear copy beats the pretty ad with clever copy every time.
+- The visual + text + audio work as ONE UNIT. Sometimes the face carries it, sometimes the text, sometimes the sound. Whichever is strongest leads.
 - It sounds like something a real person would POST, not something a copywriter would write.
-- EMOTIONAL DELTA: The best hooks meet the viewer where they are, briefly show what's possible, then the gap between those two states drives action. Hook = where they are. Body = where they could be. The delta sells.
-- CONTRAST: Your ad must look NOTHING like what this audience is used to seeing. If it blends in with their feed, they scroll past. Stand out by doing the opposite of every other ad in this space.
-- DISGUISE: The ad should not look or feel like an ad. The moment they think "this is an ad" they scroll. It should feel like content they'd watch anyway.
 
 GOOD HOOKS (real examples):
 - "I literally found out you can get Bible verses on your lockscreen" — native speech, product-specific, curious
@@ -915,36 +785,6 @@ Weave naturally: presupposition, reframing, pattern interrupt, anchoring, dissoc
 - NEVER use manufactured numbers: "47 apps", "150 times", "96 times a day". Only real numbers a person would know.`;
 }
 
-function buildSynthesisContext(synthesis?: ICreativeSynthesis): string {
-  if (!synthesis) return "";
-  return `=== CREATIVE BRIEF (this is your PRIMARY context — use THIS, not raw data) ===
-
-FEATURE: ${synthesis.feature}
-MECHANIC: ${synthesis.mechanic}
-AUDIENCE: ${synthesis.audience}
-THEIR VOCABULARY (use THESE words, not marketing words): ${synthesis.vocabulary.join(", ")}
-DOPAMINE TRIGGER: ${synthesis.dopamineTrigger}
-${synthesis.existingDesire ? `EXISTING DESIRE TO CHANNEL: ${synthesis.existingDesire}` : ""}
-${synthesis.emotionalDelta ? `EMOTIONAL DELTA:
-  Where they are now: ${synthesis.emotionalDelta.currentState}
-  Where the product takes them: ${synthesis.emotionalDelta.elevatedState}
-  The gap that drives action: ${synthesis.emotionalDelta.delta}` : ""}
-${synthesis.contrastAnalysis ? `CONTRAST (how to stand out): ${synthesis.contrastAnalysis}` : ""}
-${synthesis.scrollStopperTest ? `SCROLL STOPPER VISUAL: ${synthesis.scrollStopperTest}` : ""}
-
-VIEWER SCENARIOS (build hooks FROM these specific moments):
-${synthesis.viewerScenarios.map((s, i) => `${i + 1}. ${s}`).join("\n")}
-
-HOOK ENERGIES THAT WORK: ${synthesis.hookEnergies.join(" | ")}
-
-ANGLES TO AVOID:
-${synthesis.anglesToAvoid.map(a => `- ${a}`).join("\n")}
-
-BODY TEXT OPTIONS: ${synthesis.bodyTexts.join(" | ")}
-
-REMEMBER: Copy is 80% of the hook. The visual supports the copy, not the other way around. Clarity over cleverness. 5th grade reading level. The best ads look ugly but the copy punches you in the gut.`;
-}
-
 function buildFeedbackSection(
   feedback?: CreativeFeedback,
   existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
@@ -969,69 +809,6 @@ function buildFeedbackSection(
 }
 
 // ============================================================
-// 4.5. CREATIVE SYNTHESIS — Distills deep dive into actionable brief
-// This is the BRIDGE between deep dive intelligence and creative generation.
-// Cheap Sonnet call that extracts only what matters for writing hooks.
-// ============================================================
-
-export function creativeSynthesisPrompt(
-  input: ProjectInput,
-  psycheMapData?: PsycheMapData,
-  salesData?: SalesPlaybookData,
-  researchData?: ResearchData,
-  creativeTreeData?: CreativeTreeData,
-): string {
-  const deepDive = buildDeepDiveContext(psycheMapData, salesData, researchData, creativeTreeData);
-
-  return `You are a creative strategist who distills research into actionable briefs for ad copywriters.
-
-${buildContext(input)}
-
-${deepDive}
-
-Your job: Read ALL the deep dive intelligence above and produce a SHORT, FOCUSED creative brief. This brief will be the ONLY context an ad copywriter receives. Everything they need to write great hooks must be in this brief. Nothing else.
-
-RULES:
-- Be SPECIFIC, not abstract. "Christians aged 22-35 who feel guilty about not reading Scripture" not "faith-seeking audience."
-- Vocabulary must be ACTUAL WORDS the audience uses on TikTok/Instagram. Not marketing words. Not therapy words. This is called Voice of Customer (VOC) — use THEIR language, THEIR phraseology, how THEY would describe their problem.
-- Viewer scenarios must be SPECIFIC MOMENTS in real life, not emotional categories.
-- Dopamine trigger = what makes this specific audience stop scrolling for THIS product.
-- Angles to avoid = hooks that DON'T connect to what this feature actually does.
-- Body texts = plain descriptions of what the feature does, in the audience's simple words.
-- CONTRAST: What does EVERY other ad in this space look like? What would be the OPPOSITE? The goal is to stand out from what the audience is already bombarded with — not to blend in with competitors.
-- EMOTIONAL DELTA: Map the audience's current emotional state → where the product briefly takes them → and the gap between those two. That gap is what drives action. Meet them where they are, show them what's possible, the delta sells.
-- MASS DESIRE: Don't try to create desire. Channel the desire that ALREADY exists in this audience into this product. What do they already want? How does this product fulfill that existing want?
-- All copy should be at 5th-8th grade reading level. CLARITY over cleverness. Always.
-
-JSON:
-{
-  "feature": "What the feature literally does in one plain sentence",
-  "mechanic": "EXACTLY how it works — frequency, trigger, limitations.",
-  "audience": "Who buys this — specific demographics, psychographics, in plain words",
-  "vocabulary": ["10-15 words/phrases the audience ACTUALLY uses when talking about this on TikTok/Instagram — their exact language, not marketing language"],
-  "dopamineTrigger": "One sentence: what makes this audience stop scrolling for this product",
-  "existingDesire": "What does this audience ALREADY want? What desire already exists that this product channels? Don't create new desire — name the one that's already there.",
-  "emotionalDelta": {
-    "currentState": "Where the audience is emotionally RIGHT NOW — their default state when scrolling",
-    "elevatedState": "Where the product briefly takes them — what it feels like to have this problem solved",
-    "delta": "The gap between current and elevated. This gap is what makes people act. One sentence describing the contrast."
-  },
-  "contrastAnalysis": "What does EVERY other ad in this space look like? What are competitors doing? What would be the POLAR OPPOSITE that would stand out? The ad should look NOTHING like what this audience is used to seeing.",
-  "viewerScenarios": [
-    "7-10 SPECIFIC moments from the audience's real life where this feature fits. Different locations, times, emotional states. Include 2-3 positive/exciting scenarios."
-  ],
-  "hookEnergies": ["3-5 hook energies that work for this product+audience"],
-  "anglesToAvoid": [
-    "Specific angles that DON'T work and WHY"
-  ],
-  "bodyTexts": ["1-2 plain descriptions of the feature in audience words"],
-  "scrollStopperTest": "Describe a visual that would make someone say 'what the fuck did I just see' — not pretty, not polished, just impossible to scroll past. The scroll stopper is 15% of the hook but it's what earns the first 2 seconds."
-}
-
-Return ONLY valid JSON.`;
-}
-
-// ============================================================
 // 5. TOP CREATIVES - Creative Engine
 // Uses ALL deep dive data as intelligence. Creative Tree provides
 // angle relevance scores and psychological mapping, but Top Creatives
@@ -1046,7 +823,6 @@ export function topCreativesPrompt(
   creativeTreeData?: CreativeTreeData,
   feedback?: CreativeFeedback,
   existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
-  synthesis?: ICreativeSynthesis,
 ): string {
   // === DEEP DIVE INTELLIGENCE ===
   const contextParts: string[] = [];
@@ -1098,16 +874,11 @@ ${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).j
 Use these angles as INSPIRATION. You are NOT limited to them — if you see a stronger angle from the psychology/research data, use it.`);
   }
 
-  // Use synthesis brief as primary context when available, fall back to raw deep dive
-  const intelligenceContext = synthesis
-    ? buildSynthesisContext(synthesis)
-    : contextParts.join("\n\n");
-
-  return `You are an elite performance creative strategist who creates ads that stop thumbs and convert.
+  return `You are an elite performance creative strategist who creates ads that stop thumbs and convert. You have DEEP psychological intelligence about this product's audience. Use it ALL.
 
 ${buildContext(input)}
 
-${intelligenceContext}
+${contextParts.join("\n\n")}
 
 === AD STRUCTURE ===
 
@@ -1197,14 +968,6 @@ Each creative must specify ONE delivery mode. MIX these across the 5 creatives:
     Notice: the bridge lives in the last hook sentence + first body sentence. The transition is seamless.
 
 Choose the delivery mode that SERVES the visual hook style. A street interview is voiceover-caption. A scenic vista with text is text-overlay. A person confessing to camera is voiceover-caption. A talking head reacting is voiceover-caption.
-
-=== SPEAKING HOOK FORMATS (for voiceover-caption hooks) ===
-
-When writing VO hooks where a person speaks on camera, use one of these proven UGC formats:
-${HOOK_FORMATS.map(f => `${f.id.toUpperCase()}: ${f.structure}`).join("\n")}
-
-The script follows the FORMAT'S structure but the WORDS are messy natural speech — fillers, pauses, restarts. NOT polished copy read aloud.
-For SPEAKING hooks, include ALL precision fields in ugcPromptParams: eyeDirection, toneOfVoice, speakingPace, facialMicroExpression, bodyPosture, handBehavior, headMovement, pausePoints, voiceBreak, fillerWords, backgroundAmbience, breathingCue.
 
 === VISUAL HOOK STYLES ===
 
@@ -1325,12 +1088,10 @@ For EVERY hook, ask: "Does this specific feature ACTUALLY solve the tension I'm 
 - If you can't imagine the body text naturally completing the hook's thought through the feature, the hook doesn't fit. Drop it.
 
 HARD BANS (these fail the fit check EVERY time):
-- If the feature is PERSONAL (lockscreen verse, chat, quiz, daily plan): NEVER write hooks about children, parenting, family, spouse, or "modeling faith." The user is the ONLY person in the ad.
-- NEVER write "2am", "3am", "midnight", "late night" as a default scenario. Time of day is NOT an emotional territory.
-- NEVER repeat the same emotional territory more than TWICE across all creatives.
-- NEVER use manufactured numbers: "47 apps", "150 times", "96 times a day", "50+ times." Only real numbers.
-- NEVER overpromise: the hook must not imply capabilities the feature doesn't have. If the verse changes HOURLY, don't write hooks implying it changes every time you check (that's 80+ times, not 24). Match the hook's claim to the feature's actual behavior.
-- NEVER write niche-clever hooks that almost nobody relates to (e.g., "Bible verse tattoo feels like mockery"). Prioritize BROAD RELATABILITY — the hook should hit 80%+ of the target audience, not 0.1%.
+- If the feature is PERSONAL (lockscreen verse, chat, quiz, daily plan): NEVER write hooks about children, parenting, family, spouse, or "modeling faith." The user is the ONLY person in the ad. Their kids don't know or care about a lockscreen widget.
+- NEVER write "2am", "3am", "midnight", "late night" as a default scenario. Time of day is NOT an emotional territory — it's a crutch. If the audience research specifically identifies late-night behavior as a key moment, fine. Otherwise, hooks happen at ANY time.
+- NEVER repeat the same emotional territory more than TWICE across all creatives. If you already wrote 2 "temptation" creatives, the next one MUST be a different territory.
+- NEVER use manufactured numbers: "47 apps", "150 times", "96 times a day", "50+ times." Only use numbers a real person would know about themselves ("3 Bible apps", "6 hours of screen time").
 
 === HOW HOOKS AND BODIES CONNECT ===
 Within each creative, EVERY hook must bridge naturally to EVERY body. The viewer can see any hook paired with any body — and it must feel like one thought.
@@ -1427,45 +1188,17 @@ ${UGC_ENVIRONMENT_POOL.join(" | ")}
 
 For each UGC hook, output "ugcArchetype" (the ID) and "ugcPromptParams": { archetype, emotion, action, environment, appearance: { ageRange, gender, ethnicity, build, style, hair, details } }. Use these params to write the Sora2 scene description below.
 
-${buildVisualArchetypesSection()}
+=== VISUAL PROMPT DEPTH (UGC = RAW PHONE FOOTAGE) ===
 
-=== HOW TO WRITE SORA2 DESCRIPTIONS (mandatory for every visualSuggestion) ===
+The "prompt" field on each visualSuggestion becomes the direct input to Sora2. BLAND PROMPTS = BLAND VIDEO. CINEMATIC PROMPTS = FAKE-LOOKING VIDEO THAT GETS SCROLLED PAST.
 
-Every description MUST:
-1. Start with "UGC-style [archetype name]."
-2. Name the person type
-3. Place them in the archetype's physical environment
-4. Include ALL of that archetype's locked sensory details (from the archetype library above)
-5. Inject the emotional tone and voiceline from the hook
-6. Include the archetype's AUDIO PROMPT — what the viewer hears, at what quality, with what environmental bleed
-7. Include the archetype's COLOR GRADE — how the light source affects skin tones and environment color
-8. Include the archetype's CAMERA SUMMARY line
-9. End with the archetype's AUTHENTICITY TAGLINE adapted to the specific scenario
-10. Assign the MOOD ARC from the hook emotion
-
-Every description MUST NOT:
-1. Use cinematic language — no "soft lighting," no "beautiful composition," no "warm key light"
-2. Over-describe — stay at "describing the clip to a friend" density
-3. Add details that wouldn't actually be in that environment
-4. Describe gestures as choreography — only incomplete, unconscious movements
-5. Exceed the natural duration of the moment
-6. Clean up the audio — imperfection is the signature
-7. Apply cinematic color grading — naturalistic UGC color only
-8. Use tripods, professional cameras, ring lights, or any production equipment
-
-Select the archetype by WHERE the person naturally IS when they'd have this thought:
-- After work in car = Car Confession
-- In bed scrolling = Bed Scroll / Pillow Talk
-- Walking somewhere = Walking & Talking
-- Showing their phone screen = Screen Record + Face Cam
-- Telling a close story = Storytime Closeup
-- Making a point emphatically = Zoom-In Emphasis
-- Showing what they see = POV / First Person
-- Interrupted mid-filming = Caught Off Guard
-- Calling a friend = Fake FaceTime
-- Whispering a secret = Whispering / Secret
-- No face, aesthetic mood = Lo-Fi Text on B-Roll
-- Showing proof on their phone = Over-the-Shoulder Demo
+Think like a TikTok creator grabbing their phone to record. NOT like a cinematographer. Every prompt must answer:
+1. WHO — specific person (age, build, skin tone, hair, expression, wardrobe). REAL people. Messy hair, no makeup, wrinkled sleep shirt, bags under eyes. NOT models. NOT styled.
+2. WHERE — their actual environment. Unmade bed, cluttered desk, car with water bottles in the cupholder, couch with a blanket. REAL mess. NOT a set. NOT clean. NOT styled.
+3. HOW IT'S CAPTURED — iPhone front camera ONLY for UGC. Propped on nightstand, dashboard mount, held at arm's length, leaning against something on a desk. The angle should be what a real person would do — slightly off-center, maybe tilted, not perfectly framed.
+4. LIGHT — whatever light is naturally in the room. Overhead bedroom light. Car dashboard glow + street lights. Lamp on nightstand. Kitchen fluorescent. NEVER studio lighting, NEVER ring lights, NEVER "warm key light camera-left." Just describe the actual light source a person would have.
+5. MOTION — one subtle micro-behavior. Glances down, slight head shake, bites lip, adjusts phone angle. ONE thing. Not choreographed.
+6. MOOD — the emotional register. Raw, unfiltered, authentic.
 
 TWO MODES — the Sora2 prompt structure depends entirely on whether the person SPEAKS:
 
@@ -1595,8 +1328,7 @@ JSON:
           "songPath": "REQUIRED. Pick from SONG CATALOG above. Must match this hook's emotion. Guilt/shame → sad/nostalgic. Discovery/surprise → excited/happy. Observational → neutral.",
           "voiceoverScript": "VO+caption ONLY (15-30 words). If sora2: what the person SAYS on camera (include in Sora2 prompt too). If elevenlabs: separate VO track. Omit for text-overlay.",
           "duration": "realistic duration. Text-overlay: '3s'. VO+caption: calculate at ~2.2 words/sec with pauses (15 words = '7s', 25 words = '11s'). Must match word count.",
-          "angle": "which psychological lever this pulls — MUST reference the specific feature name and explain how the feature resolves this hook's tension",
-          "qualityCheck": "REQUIRED. Answer ALL: (1) Does this hook contain a manufactured/fake number? If yes, REWRITE or REMOVE. (2) Does the feature actually do what this hook implies? If no, REMOVE. (3) Would 80%+ of the target audience relate to this? If no, REMOVE. (4) Does this sound like ChatGPT or a real person? If ChatGPT, REWRITE.",
+          "angle": "which psychological lever this pulls — MUST reference the specific feature name and explain how the feature resolves this hook's tension in one sentence",
           "ugcArchetype": "REQUIRED for ugc-reaction hooks. The archetype ID from the UGC PERFORMANCE ARCHETYPES catalog (e.g. 'shock-excited', 'caught-guilty'). Omit for non-UGC hooks.",
           "ugcPromptParams": "REQUIRED for ugc-reaction hooks. { archetype, emotion, action, environment, appearance: { ageRange, gender, ethnicity, build, style, hair, details } } — all selected from the archetype's arrays and global pools. Omit for non-UGC hooks.",
           "visualStyle": {
@@ -1606,18 +1338,10 @@ JSON:
           },
           "visualSuggestions": [
             {
-              "archetype": "UGC visual archetype ID from library (car-confession, bed-scroll, walking-talking, storytime-closeup, etc.)",
-              "description": "Full Sora-ready description at conversational density. Start with 'UGC-style [archetype name].' MUST include: (1) person type in archetype's physical environment (2) ALL locked sensory details from that archetype (3) audio signature — what viewer hears, environmental bleed (4) color grade — how light affects skin/environment (5) camera summary (6) authenticity tagline adapted to this scenario. Weave ALL into one natural paragraph. 6-10 sentences.",
-              "voiceline_script": "what they say (if speaking) or null (if text-overlay silent clip)",
-              "clipDuration": "4s for silent face | 8s or 12s for speaking",
-              "duration_seconds": "number matching natural moment length",
-              "audio_prompt": "archetype audio signature + scenario-specific sounds",
-              "color_grade": "archetype color signature applied to this specific environment",
-              "camera": "archetype camera summary line",
-              "styleTags": ["UGC-style [archetype]", "iPhone [model]", "[archetype-specific imperfection]", "[environment]", "[audio signature]"],
-              "authenticity_tagline": "archetype tagline adapted to this scenario",
-              "mood_arc": "from hook emotion",
-              "negative_prompt": "what to AVOID for this scenario — cinematic language, studio lighting, tripods, etc."
+              "idea": "what the viewer sees in this clip segment",
+              "prompt": "RICH scene description for Sora2 (3-6 sentences). Follow VISUAL PROMPT DEPTH rules above. Must include: specific person details, environment with lived-in texture, exact camera/device, lighting sources with imperfections, physical micro-behaviors, mood. If audioSource='sora2': INCLUDE dialogue and vocal delivery. If 'elevenlabs': visual only, no speech.",
+              "clipDuration": "4s | 8s | 12s (Sora2 lengths only). Clips stitch to cover hook duration. FACE RULE: If this is a SILENT face clip (text-overlay UGC where person is NOT speaking), clipDuration MUST be '4s'. If the person SPEAKS on camera (audioSource='sora2'), 8s and 12s are fine — speech anchors facial coherence.",
+              "styleTags": ["Pick 3-6 tags from the SORA2 STYLE TAG CATALOG below. Choose tags that match THIS specific clip's creative intent."]
             }
           ]
         }
@@ -1664,7 +1388,6 @@ export function ugcCreativesPrompt(
   creativeTreeData?: CreativeTreeData,
   feedback?: CreativeFeedback,
   existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
-  synthesis?: ICreativeSynthesis,
 ): string {
   // === DEEP DIVE INTELLIGENCE (reuse same context builder as topCreativesPrompt) ===
   const contextParts: string[] = [];
@@ -1715,15 +1438,11 @@ ${topAngles.map((a) => `  ${a.name} [${a.relevanceScore}] — ${a.mechanism}`).j
 Use these angles as INSPIRATION. You are NOT limited to them — if you see a stronger angle from the psychology/research data, use it.`);
   }
 
-  const intelligenceContext = synthesis
-    ? buildSynthesisContext(synthesis)
-    : contextParts.join("\n\n");
-
-  return `You are an elite UGC performance creative strategist. You create text-overlay ads featuring raw, authentic UGC-reaction footage.
+  return `You are an elite UGC performance creative strategist. You create text-overlay ads featuring raw, authentic UGC-reaction footage. Every creative you produce uses a real person's face and reaction as the scroll-stopper.
 
 ${buildContext(input)}
 
-${intelligenceContext}
+${contextParts.join("\n\n")}
 
 === UGC-ONLY BATCH CONSTRAINTS ===
 
@@ -1789,12 +1508,9 @@ ${SORA2_STYLE_TAGS.map(c => `${c.category.toUpperCase()}: ${c.tags.join(", ")}`)
 - No phone screen visible in frame.
 - Camera = real TikTok creator. iPhone propped on nightstand, dashboard mount, held at arm's length.
 
-${buildVisualArchetypesSection()}
-
 === CRITICAL: NON-SPEAKING UGC 4s CLIP RULES ===
 
 This is a TEXT-OVERLAY batch. The person NEVER speaks. voiceline_script is always null. 4 seconds. ONE frozen moment.
-For text-overlay, use the archetype's environment and camera setup but the person is FROZEN — one expression, no speech. The archetype sets WHERE they are and HOW it's filmed. The text overlay does the talking.
 
 SORA2 4s CONSISTENCY RULES (prevents artifacts, glitches, degeneration):
 - Subject CENTERED and STILL. Only ONE micro-behavior (blink, eyebrow twitch, jaw clench). Nothing else moves.
@@ -1924,8 +1640,7 @@ JSON:
           "voiceGender": "female | male — voice gender for this hook. Must match the person in the UGC visual.",
           "songPath": "REQUIRED. Pick from SONG CATALOG. Match hook emotion: guilt/shame → sad/nostalgic. Discovery → excited/happy. Observational → neutral.",
           "duration": "3s (text-overlay timing)",
-          "angle": "which psychological lever this pulls — MUST reference the specific feature name and explain how the feature resolves this hook's tension",
-          "qualityCheck": "REQUIRED. Answer ALL: (1) Does this hook contain a manufactured/fake number? If yes, REWRITE or REMOVE. (2) Does the feature actually do what this hook implies? If no, REMOVE. (3) Would 80%+ of the target audience relate to this? If no, REMOVE. (4) Does this sound like ChatGPT or a real person? If ChatGPT, REWRITE.",
+          "angle": "which psychological lever this pulls — MUST reference the specific feature name and explain how the feature resolves this hook's tension in one sentence",
           "ugcArchetype": "archetype ID from catalog (REQUIRED)",
           "ugcPromptParams": {
             "archetype": "archetype ID",
@@ -1982,15 +1697,11 @@ CRITICAL:
 // Each produces 3 creatives with a specific audio architecture.
 // ============================================================
 
-const AUDIO_MODE_SIGNATURE = (input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData, synthesis?: ICreativeSynthesis) =>
-  synthesis
-    ? `${buildContext(input)}\n\n${buildSynthesisContext(synthesis)}`
-    : `${buildContext(input)}\n\n${buildDeepDiveContext(psycheMap, sales, research, tree)}`;
+const AUDIO_MODE_SIGNATURE = (input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData) =>
+  `${buildContext(input)}\n\n${buildDeepDiveContext(psycheMap, sales, research, tree)}`;
 
 const AUDIO_MODE_SHARED_SECTIONS = `
 ${buildUGCSection()}
-
-${buildVisualArchetypesSection()}
 
 ${buildSongsSection()}
 
@@ -2011,11 +1722,10 @@ Body text is PLAIN — what the feature literally does, in the audience's simple
 export function sora2BleedPrompt(
   input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
   feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
-  synthesis?: ICreativeSynthesis,
 ): string {
   return `You are a UGC ad creative strategist specializing in spoken-to-camera hooks where the voice carries over into the product demo.
 
-${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree, synthesis)}
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
 
 === AUDIO MODE: SORA2 BLEED ===
 
@@ -2148,11 +1858,10 @@ Return ONLY valid JSON.`;
 export function elevenlabsFullVOPrompt(
   input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
   feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
-  synthesis?: ICreativeSynthesis,
 ): string {
   return `You are a UGC ad creative strategist specializing in silent UGC footage with full AI voiceover narration.
 
-${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree, synthesis)}
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
 
 === AUDIO MODE: ELEVENLABS FULL VO ===
 
@@ -2242,11 +1951,10 @@ Return ONLY valid JSON.`;
 export function sora2ElevenlabsHandoffPrompt(
   input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
   feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
-  synthesis?: ICreativeSynthesis,
 ): string {
   return `You are a UGC ad creative strategist specializing in creator-to-narrator handoff ads where the voice changes at the body.
 
-${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree, synthesis)}
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
 
 === AUDIO MODE: SORA2 → ELEVENLABS HANDOFF ===
 
@@ -2333,11 +2041,10 @@ Return ONLY valid JSON.`;
 export function sora2SilencePrompt(
   input: ProjectInput, psycheMap?: PsycheMapData, sales?: SalesPlaybookData, research?: ResearchData, tree?: CreativeTreeData,
   feedback?: CreativeFeedback, existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
-  synthesis?: ICreativeSynthesis,
 ): string {
   return `You are a UGC ad creative strategist specializing in spoken hooks that cut to silent product demos.
 
-${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree, synthesis)}
+${AUDIO_MODE_SIGNATURE(input, psycheMap, sales, research, tree)}
 
 === AUDIO MODE: SORA2 → SILENCE ===
 
@@ -2413,152 +2120,6 @@ JSON:
     }],
     "cta": { "text": "Tap Below to Get It" },
     "whyThisScript": ""
-  }]
-}
-
-Return ONLY valid JSON.`;
-}
-
-// ============================================================
-// 5d. APPLOVIN LONG-FORM ADS — 45-50 second multi-scene ad scripts
-// Full story arc: cold open → tension → agitation → product → proof → CTA
-// Each scene = one Sora2 clip (4s/8s/12s) with archetype-locked details
-// ============================================================
-
-export function applovinLongFormPrompt(
-  input: ProjectInput,
-  psycheMapData?: PsycheMapData,
-  salesData?: SalesPlaybookData,
-  researchData?: ResearchData,
-  creativeTreeData?: CreativeTreeData,
-  feedback?: CreativeFeedback,
-  existingCreatives?: { name: string; emotion: string; targetSegment?: string; hookTexts: string[] }[],
-  synthesis?: ICreativeSynthesis,
-): string {
-  const brief = synthesis ? buildSynthesisContext(synthesis) : buildDeepDiveContext(psycheMapData, salesData, researchData, creativeTreeData);
-  const feedbackBlock = buildFeedbackSection(feedback, existingCreatives);
-
-  return `You write 45-50 second long-form UGC ad scripts for mobile apps. Each ad is a COMPLETE STORY with multiple scenes stitched together.
-
-${buildContext(input)}
-
-${brief}
-
-=== MULTI-FEATURE SELECTION ===
-The app may have MULTIPLE features listed above. Each ad should pick the 1-3 features that best serve its story arc. Not every ad uses every feature. The narrative decides which features appear and when. A discovery-energy ad might showcase one surprising feature. A problem→solution ad might show the problem then reveal 2 features that fix it. Pick what serves the STORY, not what covers the most features.
-
-${feedbackBlock}
-
-=== LONG-FORM AD STRUCTURE (45-50 seconds total) ===
-
-Each ad has 5-6 SCENES. Each scene = one Sora2 clip (4s, 8s, or 12s). Scenes stitch together to form a complete story arc.
-
-SCENE 1: COLD OPEN / HOOK (3-5s)
-- Stop the scroll. The viewer decides in 2-3 seconds.
-- Can be: a face, a statement, a question, a visual that demands attention.
-- This is the short-form hook energy — discovery, shock, confession, humor, whatever stops thumbs.
-
-SCENE 2: PROBLEM / TENSION SETUP (8-12s)
-- Deepen the feeling. Make it specific and personal.
-- The viewer thinks "that's literally me" or "I know exactly what they mean."
-- Show the SITUATION, not just describe it. A person in the moment of the problem.
-
-SCENE 3: AGITATION / TWIST (8-12s)
-- Make it worse OR surprise them. Raise the stakes.
-- Failed attempts: "I tried X, I tried Y, nothing worked."
-- Or unexpected angle: the problem is worse than they thought.
-- Or humor: exaggerate the situation to absurdity.
-
-SCENE 4: PRODUCT REVEAL (8-12s)
-- Here's what fixes it. Show the app/feature in action.
-- Screen recording mixed with reaction footage.
-- The transition from problem to product should feel EARNED — the story led here naturally.
-- The body text is plain: what the feature does, in the audience's words.
-
-SCENE 5: PROOF / RESULT (8-10s)
-- Show it working. The person's reaction AFTER using it.
-- This is where pride/flex, relief, excitement territory lives.
-- "Look at this" energy — they're showing the result, not selling.
-
-SCENE 6: CTA / CLOSE (3-5s)
-- Spoken CTA or text CTA. Keep it short.
-- "Tap below to get it" / "Link in bio" / "Download free"
-
-=== VISUAL FILMING FORMATS (one per scene, can vary across scenes) ===
-${UGC_VISUAL_ARCHETYPES.map(a => `${a.id}: ${a.name} — ${a.authenticityTagline}
-  Camera: ${a.cameraSummary}
-  Locked: ${a.lockedDetails}`).join("\n")}
-
-Scenes can use DIFFERENT archetypes. Scene 1 might be bed-scroll, Scene 2 walking-talking, Scene 4 screen-record-facecam. The archetype changes as the STORY moves locations.
-
-=== SONGS ===
-${SONGS.map(s => `${s.path} [${s.emotion}] — ${s.description}`).join("\n")}
-One song per ad (carries across all scenes). Pick by the dominant emotion of the story.
-
-=== COPYWRITING FRAMEWORKS ===
-Each ad should follow ONE framework as its story structure:
-- PAS: Problem (scenes 1-2) → Agitate (scene 3) → Solve (scenes 4-5) → CTA
-- AIDA: Attention (scene 1) → Interest (scene 2-3) → Desire (scene 4-5) → Action (scene 6)
-- BAB: Before (scenes 1-3) → After (scenes 4-5) → Bridge is the product reveal
-Vary frameworks across the 5 ads.
-
-=== RULES ===
-- Hook text and VO: how a real person talks. Filler words, incomplete sentences, natural speech.
-- Body/product scene: plain feature description in audience's words.
-- Every Sora2 description starts with "UGC-style [archetype name]." and includes locked details.
-- No manufactured numbers. No parenting hooks for personal features. No repeated territories.
-- VO punctuation controls TTS: "..." for pauses, "—" for breaks.
-- Total duration: 45-50 seconds. Count your scene durations.
-- Each ad uses a different emotional territory from the 15 available.
-
-Generate 5 long-form ad scripts. JSON:
-{
-  "creatives": [{
-    "rank": 1,
-    "name": "2-4 word concept",
-    "emotion": "primary emotion",
-    "platform": "TikTok or Meta/IG",
-    "format": "9:16 vertical",
-    "deliveryMode": "voiceover-caption",
-    "framework": "PAS | AIDA | BAB",
-    "scenario": "the story this ad tells in one sentence",
-    "productionStyle": "ugc long-form",
-    "targetSegment": "who this hits",
-    "songPath": "from catalog",
-    "totalDuration": "calculated sum of all scenes (45-50s)",
-    "scenes": [
-      {
-        "sceneNumber": 1,
-        "label": "COLD OPEN",
-        "duration": "4s | 8s | 12s",
-        "text": "on-screen text for this scene (5-15 words)",
-        "voiceoverScript": "what the person says or narrator says. Natural speech with punctuation for TTS. Null if silent.",
-        "audioSource": "sora2 | elevenlabs | none",
-        "voiceGender": "female | male",
-        "ugcVisualArchetype": "archetype ID",
-        "visualSuggestion": {
-          "archetype": "archetype ID",
-          "description": "Full UGC-style Sora2 description. Start with 'UGC-style [name].' Include ALL locked details, audio, color, camera, authenticity. 6-10 sentences.",
-          "voiceline_script": "what they say or null",
-          "clipDuration": "4s | 8s | 12s",
-          "duration_seconds": 4,
-          "audio_prompt": "archetype audio signature",
-          "color_grade": "archetype color applied to this scene",
-          "camera": "archetype camera summary",
-          "styleTags": ["UGC-style [archetype]", "iPhone", "..."],
-          "authenticity_tagline": "adapted tagline",
-          "mood_arc": "emotion for this scene",
-          "negative_prompt": "what to avoid"
-        }
-      }
-    ],
-    "bodies": [{
-      "text": "plain feature description. 5-15 words.",
-      "duration": "5s",
-      "visual": "screen recording description"
-    }],
-    "cta": { "text": "Tap Below to Get It" },
-    "whyThisScript": "why this story converts"
   }]
 }
 

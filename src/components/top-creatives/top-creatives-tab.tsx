@@ -42,6 +42,7 @@ interface TopCreativesTabProps {
   productName: string;
   onGenerateMore?: () => void;
   isGeneratingMore?: boolean;
+  onSaveResults?: () => void;
 }
 
 function getHooks(c: AdCreativeBlueprint): HookVariation[] {
@@ -211,7 +212,7 @@ function PhoneMockup({
 }
 
 
-export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratingMore }: TopCreativesTabProps) {
+export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratingMore, onSaveResults }: TopCreativesTabProps) {
   const [deliveryFilter, setDeliveryFilter] = useState<string | null>(null);
 
   const filteredCreatives = deliveryFilter
@@ -282,6 +283,8 @@ export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratin
 
       <div className="flex flex-col gap-10">
         {filteredCreatives.map((creative, idx) => {
+          const isLongForm = !!(creative as Record<string, unknown>).scenes && ((creative as Record<string, unknown>).scenes as unknown[])?.length > 0;
+          const scenes = isLongForm ? ((creative as Record<string, unknown>).scenes as { sceneNumber: number; label: string; duration: string; text: string; voiceoverScript?: string | null; audioSource?: string; ugcVisualArchetype?: string; sora2Prompt?: Record<string, unknown> }[]) : [];
           const hooks = getHooks(creative);
           const bodies = getBodies(creative);
 
@@ -355,8 +358,74 @@ export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratin
                 </div>
               </div>
 
-              {/* Phone mockups side by side */}
-              <div className="grid grid-cols-2 gap-4 max-w-xl">
+              {/* Long-form scene display (Applovin) */}
+              {isLongForm && (
+                <div className="space-y-3 max-w-2xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Story Arc</span>
+                    {(creative as Record<string, unknown>).framework && (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                        {(creative as Record<string, unknown>).framework as string}
+                      </span>
+                    )}
+                    {(creative as Record<string, unknown>).totalDuration && (
+                      <span className="text-[10px] text-muted-foreground/40">{(creative as Record<string, unknown>).totalDuration as string} total</span>
+                    )}
+                  </div>
+                  {scenes.map((scene) => (
+                    <div key={scene.sceneNumber} className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white/[0.06] text-white/40">
+                          {scene.sceneNumber}
+                        </span>
+                        <span className="text-xs font-semibold text-white/60">{scene.label}</span>
+                        <span className="text-[10px] text-muted-foreground/30">{scene.duration}</span>
+                        {scene.ugcVisualArchetype && (
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                            {scene.ugcVisualArchetype}
+                          </span>
+                        )}
+                        {scene.audioSource && scene.audioSource !== "none" && (
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                            {scene.audioSource}
+                          </span>
+                        )}
+                      </div>
+                      <div className="bg-white/[0.06] rounded-lg px-4 py-3 mb-2">
+                        <p className="text-sm font-semibold text-white/90">{scene.text}</p>
+                      </div>
+                      {scene.voiceoverScript && (
+                        <div className="bg-white/[0.03] rounded-lg px-3 py-2 mb-2">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <svg className="w-2.5 h-2.5 text-violet-400/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                            </svg>
+                            <span className="text-[8px] font-medium text-violet-400/50 uppercase tracking-wider">
+                              {scene.audioSource === "sora2" ? "Sora2 Speech" : "Voiceover"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-white/50 leading-relaxed italic">{scene.voiceoverScript}</p>
+                        </div>
+                      )}
+                      {scene.sora2Prompt && (
+                        <button
+                          type="button"
+                          className="text-[9px] text-cyan-400/40 hover:text-cyan-400/70 transition-colors"
+                          onClick={() => {
+                            navigator.clipboard.writeText(JSON.stringify(scene.sora2Prompt, null, 2));
+                          }}
+                        >
+                          Copy Sora2 Prompt
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Phone mockups side by side (short-form only) */}
+              {!isLongForm && <div className="grid grid-cols-2 gap-4 max-w-xl">
                 <PhoneMockup
                   section="hook"
                   items={hookItems}
@@ -460,7 +529,7 @@ export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratin
                     </div>
                   )}
                 />
-              </div>
+              </div>}
 
               {/* Total ad duration */}
               {(() => {
@@ -484,7 +553,22 @@ export function TopCreativesTab({ data, productName, onGenerateMore, isGeneratin
         })}
       </div>
 
-      {/* Generate 5 More button */}
+      {/* Save + Generate More buttons */}
+      {onSaveResults && (
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={onSaveResults}
+            className="px-6 py-2.5 rounded-lg border border-green-500/30 bg-green-500/10 hover:bg-green-500/20 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span className="text-sm font-medium text-green-400">Save Results</span>
+          </button>
+        </div>
+      )}
       {onGenerateMore && (
         <div className="flex justify-center mt-10">
           <button

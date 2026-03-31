@@ -20,7 +20,7 @@ export default function HomePage() {
         AI-powered ad creative generation. Choose your scenario to get started.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
         <Link
           href="/v4"
           className="group block p-8 rounded-2xl border border-border bg-card hover:border-purple-500/50 transition-all"
@@ -32,7 +32,7 @@ export default function HomePage() {
           </p>
         </Link>
 
-<Link
+        <Link
           href="/v3"
           className="group block p-8 rounded-2xl border border-border bg-card hover:border-blue-500/50 transition-all"
         >
@@ -42,7 +42,29 @@ export default function HomePage() {
             Mobile app features, benefits, and purpose. Optimized for app install campaigns.
           </p>
         </Link>
+
+        <Link
+          href="/applovin"
+          className="group block p-8 rounded-2xl border border-border bg-card hover:border-orange-500/50 transition-all"
+        >
+          <div className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3">Applovin</div>
+          <div className="text-lg font-bold mb-2">Applovin Ads</div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Long-form 45-50s multi-scene ad scripts. Same deep dive, full story arc. Loads V3 history.
+          </p>
+        </Link>
       </div>
+
+      <Link
+        href="/research-dlp"
+        className="mt-6 block p-6 rounded-2xl border border-border bg-card hover:border-amber-500/50 transition-all w-full max-w-4xl"
+      >
+        <div className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-2">Research Alex DLP</div>
+        <div className="text-lg font-bold mb-1">Deep Dive + Chat</div>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Psychology, sales mechanics, audience research — then brainstorm with Opus. No ad generation. Pure research and ideation.
+        </p>
+      </Link>
 
       {/* Framework + Changelog row */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 w-full max-w-4xl mt-8">

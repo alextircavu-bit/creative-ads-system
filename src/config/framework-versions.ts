@@ -21,6 +21,28 @@ export interface IFrameworkVersion {
 
 export const FRAMEWORK_VERSIONS: IFrameworkVersion[] = [
   {
+    id: "v3.0",
+    date: "2026-03-20",
+    time: "22:30",
+    label: "Major: 15 Territories, Visual Archetypes, Pipeline Optimization, Sora2 Overhaul",
+    summary: "Added 7 positive/high-energy emotional territories (15 total). 12 UGC visual archetypes with locked physical reality. Full Sora2 prompt with combined field. Pipeline optimized: single API call, parallel steps, Sonnet for audio modes. ~3-4 min generation, ~$2-3 cost.",
+    changes: [
+      { section: "Territories", description: "Added 7 new emotional territories: Humor & Absurdity, Pride & Flex, Craving & Desire, Anger & Injustice, Nostalgia, Excitement & Hype, Belonging & Tribe. Total: 15 (was 8).", type: "added" },
+      { section: "Sora2", description: "12 UGC visual archetypes with locked physical reality: Car, Bed, Walking, Screen Record, Closeup, Zoom, POV, Caught Off Guard, FaceTime, Whisper, B-Roll, Over-Shoulder", type: "added" },
+      { section: "Sora2", description: "New output schema: archetype, description, audio_prompt, color_grade, camera, authenticity_tagline, mood_arc, negative_prompt as separate fields", type: "added" },
+      { section: "Sora2", description: "Combined 'prompt' field — one paragraph with everything, ready to feed directly to Sora2 engine", type: "added" },
+      { section: "Sora2", description: "Stamping function updated to carry all archetype fields + build combined prompt", type: "changed" },
+      { section: "Sora2", description: "Naturalistic UGC color — casual filters fine, only cinematic grading banned", type: "changed" },
+      { section: "Pipeline", description: "Progressive generation switched to single All route call (was individual section calls)", type: "changed" },
+      { section: "Pipeline", description: "Creative Tree + Synthesis now run in parallel (both read from Step 1)", type: "changed" },
+      { section: "Pipeline", description: "Audio mode calls switched from Opus to Sonnet (archetypes lock the visual)", type: "changed" },
+      { section: "Pipeline", description: "Generation time: ~3-4 min (was ~20 min). Cost: ~$2-3 (was ~$5)", type: "changed" },
+      { section: "Framework Data", description: "UGC performance archetypes updated with new territory connections", type: "changed" },
+      { section: "Types", description: "ISora2Prompt: added prompt, archetype, audio_prompt, color_grade, camera, authenticity_tagline, mood_arc, negative_prompt fields", type: "added" },
+      { section: "Types", description: "IVisualSuggestion: added archetype-based fields alongside legacy fields", type: "added" },
+    ],
+  },
+  {
     id: "v2.8",
     date: "2026-03-19",
     time: "15:00",
