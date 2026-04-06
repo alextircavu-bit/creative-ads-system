@@ -32,9 +32,15 @@ function LoadingBubble() {
   );
 }
 
+interface ChatImage {
+  base64: string;
+  mediaType: "image/png" | "image/jpeg" | "image/gif" | "image/webp";
+}
+
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  images?: ChatImage[];
   timestamp: string;
 }
 
@@ -59,9 +65,31 @@ export function ChatPanel({ isOpen, onClose, systemContext, savedMessages, onSav
   const [selectedAvatar, setSelectedAvatar] = useState<string>("strategist");
   const [messages, setMessages] = useState<ChatMessage[]>(savedMessages || []);
   const [input, setInput] = useState("");
+  const [pendingImages, setPendingImages] = useState<ChatImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Handle paste for images
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith("image/")) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) continue;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = (reader.result as string).split(",")[1];
+          const mediaType = item.type as ChatImage["mediaType"];
+          setPendingImages((prev) => [...prev, { base64, mediaType }]);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
 
   // Load saved messages when they change
   useEffect(() => {
@@ -81,21 +109,36 @@ export function ChatPanel({ isOpen, onClose, systemContext, savedMessages, onSav
   }, [isOpen]);
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && pendingImages.length === 0) || isLoading) return;
 
     const userMessage: ChatMessage = {
       role: "user",
-      content: input.trim(),
+      content: input.trim() || "(image)",
+      images: pendingImages.length > 0 ? [...pendingImages] : undefined,
       timestamp: new Date().toISOString(),
     };
 
     const newMessages = [...messages, userMessage];
+    setPendingImages([]);
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
 
     try {
-      const apiMessages = newMessages.map((m) => ({ role: m.role, content: m.content }));
+      const apiMessages = newMessages.map((m) => {
+        if (m.images?.length) {
+          // Build multimodal content array for Claude
+          const content: unknown[] = [];
+          for (const img of m.images) {
+            content.push({ type: "image", source: { type: "base64", media_type: img.mediaType, data: img.base64 } });
+          }
+          if (m.content && m.content !== "(image)") {
+            content.push({ type: "text", text: m.content });
+          }
+          return { role: m.role, content };
+        }
+        return { role: m.role, content: m.content };
+      });
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -267,7 +310,12 @@ export function ChatPanel({ isOpen, onClose, systemContext, savedMessages, onSav
                     : "bg-white/[0.04] border border-white/[0.06] text-white/70"
                 }`}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                {msg.images?.map((img, imgIdx) => (
+                  <img key={imgIdx} src={`data:${img.mediaType};base64,${img.base64}`} alt="" className="max-w-full rounded-lg mb-2 border border-white/[0.1]" />
+                ))}
+                {msg.content && msg.content !== "(image)" && (
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                )}
                 <p className="text-[9px] text-white/15 mt-2">
                   {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
@@ -283,23 +331,39 @@ export function ChatPanel({ isOpen, onClose, systemContext, savedMessages, onSav
         {/* Input */}
         <div className="px-4 py-3 border-t border-white/[0.06]">
           <div className="flex gap-2">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-              placeholder="Ask anything about this product..."
-              className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/[0.15] resize-none"
-              rows={2}
-            />
+            <div className="flex-1">
+              {pendingImages.length > 0 && (
+                <div className="flex gap-2 mb-2">
+                  {pendingImages.map((img, i) => (
+                    <div key={i} className="relative">
+                      <img src={`data:${img.mediaType};base64,${img.base64}`} alt="" className="w-16 h-16 rounded-lg object-cover border border-white/[0.1]" />
+                      <button
+                        onClick={() => setPendingImages((prev) => prev.filter((_, j) => j !== i))}
+                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 flex items-center justify-center text-[8px] text-white"
+                      >×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onPaste={handlePaste}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder={pendingImages.length > 0 ? "Add a message to your image..." : "Ask anything... (paste images with Ctrl+V)"}
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/[0.15] resize-none"
+                rows={2}
+              />
+            </div>
             <button
               onClick={sendMessage}
-              disabled={!input.trim() || isLoading}
+              disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
               className="self-end px-4 py-3 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-400 text-sm font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Send

@@ -5,7 +5,7 @@ import { CLAUDE_MODELS } from "@/config/constants";
 export async function POST(request: NextRequest) {
   try {
     const { messages, systemContext } = await request.json() as {
-      messages: { role: "user" | "assistant"; content: string }[];
+      messages: { role: "user" | "assistant"; content: string | unknown[] }[];
       systemContext: string;
     };
 
@@ -27,7 +27,8 @@ RULES:
 - Keep responses concise. The user is brainstorming, not reading essays.
 - If the user shares a winning hook or angle, build on it with variations.
 - Never use therapy vocabulary, staccato fragments, or copywriter language.`,
-      messages,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      messages: messages as any,
       temperature: 0.5,
     });
 
